@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { GuideModal } from "../components/GuideModal";
+import { api } from "../lib/api";
 
 interface Message {
   id: string;
@@ -55,13 +56,10 @@ export function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content }),
-      });
-
-      const data = await res.json();
+      const data = await api.post<{ response: string; guides?: GuideResult[] }>(
+        "/api/chat",
+        { message: userMessage.content }
+      );
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -109,13 +107,10 @@ export function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content }),
-      });
-
-      const data = await res.json();
+      const data = await api.post<{ response: string; guides?: GuideResult[] }>(
+        "/api/chat",
+        { message: userMessage.content }
+      );
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -125,7 +120,7 @@ export function ChatPage() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

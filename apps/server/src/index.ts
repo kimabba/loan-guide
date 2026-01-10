@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -68,6 +69,9 @@ console.log(`Server starting on port ${port}`);
 serve({
   fetch: app.fetch,
   port,
+  hostname: "0.0.0.0",
 });
+
+console.log("=== Server started ===");
 
 export default app;

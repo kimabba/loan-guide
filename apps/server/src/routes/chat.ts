@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { validateMessage } from "../middleware/security";
 import { GoogleGenAI } from "@google/genai";
+import { CHATBOT_CONFIG } from "../config/chatbot";
 
 // 로컬 데이터 (폴백용)
 import loanGuides from "../../../../loan_guides.json";
@@ -27,16 +28,8 @@ async function generateGeminiResponse(
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: `당신은 대출 상담 전문 AI 어시스턴트입니다.
-
-응답 규칙:
-1. 사용자 질문에 맞는 대출 상품을 찾아 안내하세요
-2. 금융사명, 상품유형, 대상, 한도, 금리 등 핵심 정보를 포함하세요
-3. 여러 상품이 해당되면 최대 3개까지 비교 안내하세요
-4. 한국어로 친절하게 답변하세요
-5. 정확한 정보만 전달하고, 모르면 모른다고 하세요
-6. 마지막에 "더 자세한 조건이 궁금하시면 금융사명을 말씀해주세요"를 추가하세요
+    model: CHATBOT_CONFIG.model,
+    contents: `${CHATBOT_CONFIG.systemPrompt}
 
 사용자 질문: ${userMessage}`,
     config: {
@@ -125,7 +118,7 @@ function fallbackSearch(message: string): { response: string; guides: any[] } {
 
   if (guides.length === 0) {
     return {
-      response: `"${message}"에 대한 관련 가이드를 찾지 못했습니다. 다른 키워드로 검색해보세요.\n\n예시: "OK저축은행 신용대출", "4대가입 조건", "햇살론"`,
+      response: CHATBOT_CONFIG.noResultMessage,
       guides: [],
     };
   }
@@ -153,7 +146,7 @@ chatRoutes.get("/debug", async (c) => {
     try {
       const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: CHATBOT_CONFIG.model,
         contents: "테스트",
         config: {
           tools: [{ fileSearch: { fileSearchStoreNames: [FILE_SEARCH_STORE_NAME] } }]

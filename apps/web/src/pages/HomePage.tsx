@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../lib/api";
 
 interface HealthStatus {
   name: string;
@@ -75,9 +76,9 @@ export function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/").then((res) => res.json()),
-      fetch("/api/guides").then((res) => res.json()),
-      fetch("/api/announcements?important=true").then((res) => res.json()),
+      api.get<HealthStatus>("/api/"),
+      api.get<{ total: number }>("/api/guides"),
+      api.get<{ announcements: Announcement[] }>("/api/announcements?important=true"),
     ])
       .then(([status, guides, announcementsData]) => {
         setApiStatus(status);
