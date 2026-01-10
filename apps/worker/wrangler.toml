@@ -3,6 +3,10 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Smart Placement - Gemini API 지원 지역으로 라우팅
+[placement]
+mode = "smart"
+
 # Static assets configuration
 assets = { directory = "./public", binding = "ASSETS" }
 

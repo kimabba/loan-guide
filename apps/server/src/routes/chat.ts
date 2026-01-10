@@ -1,32 +1,34 @@
 import { Hono } from "hono";
-import type { Env } from "../index";
 import { validateMessage } from "../middleware/security";
-
-// Gemini SDK (File Search API)
 import { GoogleGenAI } from "@google/genai";
 
 // 로컬 데이터 (폴백용)
 import loanGuides from "../../../../loan_guides.json";
 
-export const chatRoutes = new Hono<{ Bindings: Env }>();
+export const chatRoutes = new Hono();
 
 interface ChatRequest {
   message: string;
   sessionId?: string;
 }
 
+// 환경변수
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const FILE_SEARCH_STORE_NAME = process.env.FILE_SEARCH_STORE_NAME;
+
 // Gemini File Search로 응답 생성
 async function generateGeminiResponse(
-  apiKey: string,
-  userMessage: string,
-  fileSearchStoreName: string
+  userMessage: string
 ): Promise<{ response: string; guides: any[] }> {
-  const ai = new GoogleGenAI({ apiKey });
+  if (!GEMINI_API_KEY || !FILE_SEARCH_STORE_NAME) {
+    throw new Error("Gemini configuration missing");
+  }
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `당신은 대출 상담 전문 AI 어시스턴트입니다.
+  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: `당신은 대출 상담 전문 AI 어시스턴트입니다.
 
 응답 규칙:
 1. 사용자 질문에 맞는 대출 상품을 찾아 안내하세요
@@ -37,30 +39,21 @@ async function generateGeminiResponse(
 6. 마지막에 "더 자세한 조건이 궁금하시면 금융사명을 말씀해주세요"를 추가하세요
 
 사용자 질문: ${userMessage}`,
-      config: {
-        tools: [
-          {
-            fileSearch: {
-              fileSearchStoreNames: [fileSearchStoreName]
-            }
+    config: {
+      tools: [
+        {
+          fileSearch: {
+            fileSearchStoreNames: [FILE_SEARCH_STORE_NAME]
           }
-        ]
-      }
-    });
+        }
+      ]
+    }
+  });
 
-    const responseText = response.text || "";
+  const responseText = response.text || "";
+  const guides = extractMentionedGuides(responseText);
 
-    // 응답에서 언급된 가이드 추출 (간단한 매칭)
-    const guides = extractMentionedGuides(responseText);
-
-    return {
-      response: responseText,
-      guides,
-    };
-  } catch (error: any) {
-    console.error("Gemini generation error:", error);
-    throw error;
-  }
+  return { response: responseText, guides };
 }
 
 // 응답에서 언급된 가이드 추출
@@ -68,7 +61,6 @@ function extractMentionedGuides(response: string): any[] {
   const guides: any[] = [];
   const mentionedCompanies: string[] = [];
 
-  // 금융사명 추출
   for (const guide of loanGuides as any[]) {
     if (guide.pfi_name && response.includes(guide.pfi_name)) {
       if (!mentionedCompanies.includes(guide.pfi_name)) {
@@ -148,27 +140,23 @@ function fallbackSearch(message: string): { response: string; guides: any[] } {
   return { response, guides };
 }
 
-// 디버그 엔드포인트 (환경 설정 확인)
+// 디버그 엔드포인트
 chatRoutes.get("/debug", async (c) => {
-  const apiKey = c.env?.GEMINI_API_KEY;
-  const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
-
   const config = {
-    hasApiKey: !!apiKey,
-    apiKeyPrefix: apiKey?.slice(0, 10) + "...",
-    hasFileSearchStore: !!fileSearchStoreName,
-    fileSearchStore: fileSearchStoreName,
+    hasApiKey: !!GEMINI_API_KEY,
+    apiKeyPrefix: GEMINI_API_KEY?.slice(0, 10) + "...",
+    hasFileSearchStore: !!FILE_SEARCH_STORE_NAME,
+    fileSearchStore: FILE_SEARCH_STORE_NAME,
   };
 
-  // Gemini 테스트
-  if (apiKey && fileSearchStoreName) {
+  if (GEMINI_API_KEY && FILE_SEARCH_STORE_NAME) {
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: "테스트",
         config: {
-          tools: [{ fileSearch: { fileSearchStoreNames: [fileSearchStoreName] } }]
+          tools: [{ fileSearch: { fileSearchStoreNames: [FILE_SEARCH_STORE_NAME] } }]
         }
       });
       return c.json({ ...config, geminiTest: "success", response: response.text?.slice(0, 100) });
@@ -185,26 +173,17 @@ chatRoutes.post("/", async (c) => {
   try {
     const body = await c.req.json<ChatRequest>();
 
-    // 입력 검증
     const validation = validateMessage(body.message);
     if (!validation.valid) {
       return c.json({ error: validation.error }, 400);
     }
 
     const message = validation.sanitized!;
-    const apiKey = c.env?.GEMINI_API_KEY;
-    const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
 
-    // Gemini File Search API 사용 가능 여부 확인
-    if (apiKey && fileSearchStoreName) {
+    // Gemini File Search API 시도
+    if (GEMINI_API_KEY && FILE_SEARCH_STORE_NAME) {
       try {
-        // Gemini File Search로 응답 생성
-        const { response, guides } = await generateGeminiResponse(
-          apiKey,
-          message,
-          fileSearchStoreName
-        );
-
+        const { response, guides } = await generateGeminiResponse(message);
         return c.json({
           query: message,
           response,
@@ -212,20 +191,12 @@ chatRoutes.post("/", async (c) => {
           source: "gemini",
         });
       } catch (error: any) {
-        // 상세 에러 로깅
-        console.error("Gemini error details:", {
-          message: error?.message,
-          name: error?.name,
-          stack: error?.stack?.slice(0, 500),
-        });
+        console.error("Gemini error:", error.message);
       }
-    } else {
-      console.log("Gemini config missing:", { hasApiKey: !!apiKey, hasStore: !!fileSearchStoreName });
     }
 
     // 폴백: 키워드 검색
     const { response, guides } = fallbackSearch(message);
-
     return c.json({
       query: message,
       response,
