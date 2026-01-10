@@ -1,0 +1,16 @@
+{
+  "name": "loan-guide-chatbot",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "dev:api": "bun run --filter api dev",
+    "dev:web": "bun run --filter web dev",
+    "build": "bun run --filter '*' build",
+    "lint": "bun run --filter '*' lint",
+    "clean": "rm -rf apps/*/dist apps/*/.wrangler packages/*/dist node_modules"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
