@@ -17,9 +17,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8787",
+        target: "http://localhost:8080",
         changeOrigin: true,
-        // Worker에서 /api prefix 사용하므로 rewrite 제거
       },
     },
   },
