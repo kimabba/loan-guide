@@ -21,7 +21,8 @@ export type Env = {
   ENVIRONMENT: string;
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
-  OPENAI_API_KEY?: string;
+  GEMINI_API_KEY?: string;
+  FILE_SEARCH_STORE_NAME?: string;
 };
 
 const app = new Hono<{ Bindings: Env }>();
