@@ -9,13 +9,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    outDir: "../worker/public",
+    emptyOutDir: true,
+  },
   server: {
     port: 5173,
     proxy: {
       "/api": {
         target: "http://localhost:8787",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        // Worker에서 /api prefix 사용하므로 rewrite 제거
       },
     },
   },

@@ -6,12 +6,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --filter '*' dev",
-    "dev:api": "bun run --filter api dev",
+    "dev": "bun run dev:worker",
+    "dev:worker": "bun run --filter worker dev",
     "dev:web": "bun run --filter web dev",
-    "build": "bun run --filter '*' build",
+    "build": "bun run build:web && bun run build:worker",
+    "build:web": "bun run --filter web build",
+    "build:worker": "bun run --filter worker build",
+    "deploy": "bun run build:web && bun run --filter worker deploy",
     "lint": "bun run --filter '*' lint",
-    "clean": "rm -rf apps/*/dist apps/*/.wrangler packages/*/dist node_modules"
+    "clean": "rm -rf apps/*/dist apps/*/.wrangler apps/worker/public packages/*/dist node_modules"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

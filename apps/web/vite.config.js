@@ -1,0 +1,25 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+export default defineConfig({
+    plugins: [react()],
+    resolve: {
+        alias: {
+            "@": path.resolve(__dirname, "./src"),
+        },
+    },
+    build: {
+        outDir: "../worker/public",
+        emptyOutDir: true,
+    },
+    server: {
+        port: 5173,
+        proxy: {
+            "/api": {
+                target: "http://localhost:8787",
+                changeOrigin: true,
+                // Worker에서 /api prefix 사용하므로 rewrite 제거
+            },
+        },
+    },
+});

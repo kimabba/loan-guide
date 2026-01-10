@@ -7,6 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 ENVIRONMENT = "development"
 
 # Production secrets (set via wrangler secret put)
+# GEMINI_API_KEY = ""
+# FILE_SEARCH_STORE_NAME = ""
 # SUPABASE_URL = ""
 # SUPABASE_ANON_KEY = ""
-# GEMINI_API_KEY = ""

@@ -78,7 +78,8 @@ export function AnnouncementsPage() {
     ? announcements
     : announcements.filter((a) => a.type === filterType);
 
-  const selectedAnnouncement = announcements.find((a) => a.id === selectedId);
+  // selectedId는 향후 상세보기 모달용 (현재 미사용)
+  void selectedId;
 
   if (loading) {
     return (

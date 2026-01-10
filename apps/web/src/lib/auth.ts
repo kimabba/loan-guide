@@ -61,7 +61,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
-      partialize: (state) => ({
+      partialize: (_state) => ({
         // 세션은 Supabase가 관리하므로 저장하지 않음
       }),
     }
