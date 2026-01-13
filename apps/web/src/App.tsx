@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { HomePage } from "./pages/HomePage";
 import { ChatPage } from "./pages/ChatPage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { MatchPage } from "./pages/MatchPage";
 import { ReportPage } from "./pages/ReportPage";
 import { AnnouncementsPage } from "./pages/AnnouncementsPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/match" element={<MatchPage />} />
         <Route path="/report" element={<ReportPage />} />
         <Route path="/announcements" element={<AnnouncementsPage />} />
         <Route path="/login" element={<LoginPage />} />
