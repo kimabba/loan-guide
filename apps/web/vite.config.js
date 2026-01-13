@@ -9,16 +9,21 @@ export default defineConfig({
         },
     },
     build: {
-        outDir: "../worker/public",
+        outDir: "dist",
         emptyOutDir: true,
     },
     server: {
         port: 5173,
+        host: true,
         proxy: {
             "/api": {
-                target: "http://localhost:8787",
+                target: "http://127.0.0.1:8080",
                 changeOrigin: true,
-                // Worker에서 /api prefix 사용하므로 rewrite 제거
+                configure: function (proxy) {
+                    proxy.on("error", function (err) {
+                        console.log("Proxy error:", err);
+                    });
+                },
             },
         },
     },

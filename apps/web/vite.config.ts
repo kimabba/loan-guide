@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../worker/public",
+    outDir: "dist",
     emptyOutDir: true,
   },
   server: {

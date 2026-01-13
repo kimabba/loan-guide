@@ -1,5 +1,5 @@
 name = "loan-guide"
-main = "src/index.ts"
+pages_build_output_dir = "dist"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
@@ -7,18 +7,17 @@ compatibility_flags = ["nodejs_compat"]
 [placement]
 mode = "smart"
 
-# Static assets configuration
-assets = { directory = "./public", binding = "ASSETS" }
-
 [vars]
 ENVIRONMENT = "production"
 
-# Production secrets (set via wrangler secret put)
+# Production secrets (set via Cloudflare Dashboard or wrangler pages secret put)
 # GEMINI_API_KEY = ""
 # FILE_SEARCH_STORE_NAME = ""
 # SUPABASE_URL = ""
 # SUPABASE_ANON_KEY = ""
 
-[env.dev]
-name = "loan-guide-dev"
-vars = { ENVIRONMENT = "development" }
+[env.preview]
+vars = { ENVIRONMENT = "preview" }
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
