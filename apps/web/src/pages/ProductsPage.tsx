@@ -53,7 +53,22 @@ export function ProductsPage() {
         return res.json();
       })
       .then((data) => {
-        setProducts(Array.isArray(data) ? data : []);
+        // API 응답이 { total, guides } 형식인 경우 처리
+        if (data && data.guides && Array.isArray(data.guides)) {
+          // API 응답 필드명 변환: company -> pfi_name, category -> depth1, product_type -> depth2, memo -> fi_memo
+          const mapped = data.guides.map((g: any) => ({
+            item_cd: g.item_cd,
+            pfi_name: g.company || g.pfi_name,
+            depth1: g.category || g.depth1,
+            depth2: g.product_type || g.depth2,
+            fi_memo: g.memo || g.fi_memo,
+          }));
+          setProducts(mapped);
+        } else if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          setProducts([]);
+        }
         setLoading(false);
       })
       .catch(() => {
