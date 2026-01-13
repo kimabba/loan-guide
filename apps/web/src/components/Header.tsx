@@ -87,6 +87,16 @@ export function Header() {
               챗봇
             </Link>
             <Link
+              to="/products"
+              className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
+                location.pathname === "/products"
+                  ? "bg-muted font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              상품탐색
+            </Link>
+            <Link
               to="/report"
               className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
                 location.pathname === "/report"
