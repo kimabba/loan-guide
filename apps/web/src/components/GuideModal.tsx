@@ -38,16 +38,30 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
 
     fetch(`/api/guides/${itemCd}`)
       .then((res) => {
-        if (!res.ok) throw new Error("가이드를 찾을 수 없습니다");
+        if (!res.ok) throw new Error("API failed");
         return res.json();
       })
       .then((data) => {
         setGuide(data);
         setLoading(false);
       })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
+      .catch(() => {
+        // API가 없으면 로컬 JSON 파일에서 찾기
+        fetch("/loan_guides.json")
+          .then((res) => res.json())
+          .then((data: GuideDetail[]) => {
+            const found = data.find((g) => g.item_cd === itemCd);
+            if (found) {
+              setGuide(found);
+            } else {
+              setError("가이드를 찾을 수 없습니다");
+            }
+            setLoading(false);
+          })
+          .catch(() => {
+            setError("가이드를 찾을 수 없습니다");
+            setLoading(false);
+          });
       });
   }, [itemCd]);
 
