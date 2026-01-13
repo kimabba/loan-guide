@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface GuideModalProps {
   itemCd: string | null;
@@ -25,16 +25,20 @@ interface Field {
   detail: string;
 }
 
+const MAX_OPEN_SECTIONS = 2;
+
 export function GuideModal({ itemCd, onClose }: GuideModalProps) {
   const [guide, setGuide] = useState<GuideDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openSections, setOpenSections] = useState<number[]>([0]); // 첫 번째 섹션만 기본 열림
 
   useEffect(() => {
     if (!itemCd) return;
 
     setLoading(true);
     setError(null);
+    setOpenSections([0]); // 새 가이드 로드 시 초기화
 
     fetch(`/api/guides/${itemCd}`)
       .then((res) => {
@@ -46,7 +50,6 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
         setLoading(false);
       })
       .catch(() => {
-        // API가 없으면 로컬 JSON 파일에서 찾기
         fetch("/loan_guides.json")
           .then((res) => res.json())
           .then((data: GuideDetail[]) => {
@@ -65,6 +68,50 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
       });
   }, [itemCd]);
 
+  // 아코디언 토글 - 최대 2개만 열림
+  const toggleSection = useCallback((idx: number) => {
+    setOpenSections((prev) => {
+      if (prev.includes(idx)) {
+        // 이미 열려있으면 닫기
+        return prev.filter((i) => i !== idx);
+      } else {
+        // 새로 열기 - 최대 개수 초과 시 가장 오래된 것 닫기
+        const newOpen = [...prev, idx];
+        if (newOpen.length > MAX_OPEN_SECTIONS) {
+          return newOpen.slice(-MAX_OPEN_SECTIONS);
+        }
+        return newOpen;
+      }
+    });
+  }, []);
+
+  // 복사 방지 핸들러들
+  const preventCopy = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    alert("복사가 제한되어 있습니다.");
+  }, []);
+
+  const preventContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const preventDragStart = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const preventKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Ctrl+C, Ctrl+A, Ctrl+P 방지
+    if (e.ctrlKey || e.metaKey) {
+      if (["c", "a", "p", "s"].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    }
+    // PrintScreen 방지 (제한적)
+    if (e.key === "PrintScreen") {
+      e.preventDefault();
+    }
+  }, []);
+
   if (!itemCd) return null;
 
   return (
@@ -75,6 +122,12 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
       <div
         className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-lg bg-background shadow-xl"
         onClick={(e) => e.stopPropagation()}
+        onCopy={preventCopy}
+        onContextMenu={preventContextMenu}
+        onDragStart={preventDragStart}
+        onKeyDown={preventKeyDown}
+        tabIndex={0}
+        style={{ userSelect: "none", WebkitUserSelect: "none" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
@@ -87,7 +140,9 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
                 </p>
               </>
             )}
-            {loading && <div className="h-6 w-48 animate-pulse rounded bg-muted" />}
+            {loading && (
+              <div className="h-6 w-48 animate-pulse rounded bg-muted" />
+            )}
           </div>
           <button
             onClick={onClose}
@@ -127,7 +182,7 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
           )}
 
           {guide && (
-            <div className="space-y-6">
+            <div className="space-y-3">
               {/* 메모 */}
               {guide.fi_memo && (
                 <div className="rounded-lg bg-primary/5 p-4">
@@ -135,46 +190,106 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
                 </div>
               )}
 
-              {/* 섹션들 */}
-              {guide.depth3?.map((section, idx) => (
-                <div key={idx} className="space-y-3">
-                  <h3 className="font-semibold text-primary">
-                    {section.depth3_name}
-                  </h3>
-                  <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                      <tbody>
-                        {section.depth4_key?.map((field, fieldIdx) => (
-                          <tr
-                            key={fieldIdx}
-                            className={fieldIdx % 2 === 0 ? "bg-muted/30" : ""}
-                          >
-                            <td className="w-1/4 border-r px-3 py-2 font-medium">
-                              {field.depth4_name}
-                            </td>
-                            <td className="px-3 py-2">
-                              <div className="whitespace-pre-wrap">
-                                {field.detail}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+              {/* 안내 메시지 */}
+              <p className="text-xs text-muted-foreground">
+                * 최대 {MAX_OPEN_SECTIONS}개 섹션만 동시에 열 수 있습니다
+              </p>
+
+              {/* 아코디언 섹션들 */}
+              {guide.depth3?.map((section, idx) => {
+                const isOpen = openSections.includes(idx);
+                return (
+                  <div
+                    key={idx}
+                    className="overflow-hidden rounded-lg border"
+                  >
+                    {/* 아코디언 헤더 */}
+                    <button
+                      onClick={() => toggleSection(idx)}
+                      className="flex w-full items-center justify-between bg-muted/30 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                    >
+                      <span className="font-semibold text-primary">
+                        {section.depth3_name}
+                      </span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={`transition-transform duration-200 ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+
+                    {/* 아코디언 내용 */}
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ${
+                        isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+                      }`}
+                    >
+                      <table className="w-full text-sm">
+                        <tbody>
+                          {section.depth4_key?.map((field, fieldIdx) => (
+                            <tr
+                              key={fieldIdx}
+                              className={fieldIdx % 2 === 0 ? "bg-muted/20" : ""}
+                            >
+                              <td className="w-1/4 border-r border-t px-3 py-2 font-medium">
+                                {field.depth4_name}
+                              </td>
+                              <td className="border-t px-3 py-2">
+                                <div className="whitespace-pre-wrap">
+                                  {field.detail}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* 수정일 */}
               {guide.updated_dt && (
-                <div className="text-right text-xs text-muted-foreground">
+                <div className="pt-2 text-right text-xs text-muted-foreground">
                   최종 수정: {guide.updated_dt.slice(0, 10)}
                 </div>
               )}
             </div>
           )}
         </div>
+
+        {/* 복사 방지 안내 */}
+        <div className="border-t px-6 py-2 text-center text-xs text-muted-foreground">
+          본 자료는 저작권 보호를 받습니다. 무단 복제 및 배포를 금합니다.
+        </div>
       </div>
+
+      {/* 프린트 방지 CSS */}
+      <style>{`
+        @media print {
+          body * {
+            display: none !important;
+          }
+          body::after {
+            content: "프린트가 제한되어 있습니다.";
+            display: block;
+            font-size: 24px;
+            text-align: center;
+            padding: 50px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
