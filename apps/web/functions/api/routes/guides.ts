@@ -7,20 +7,10 @@ import loanGuides from "../../../../loan_guides.json";
 
 export const guidesRoutes = new Hono<{ Bindings: Env }>();
 
-// 전체 가이드 목록 (요약)
+// 전체 가이드 목록 (원본 형식 유지)
 guidesRoutes.get("/", (c) => {
-  const guides = (loanGuides as any[]).map((g) => ({
-    item_cd: g.item_cd,
-    company: g.pfi_name,
-    category: g.depth1,
-    product_type: g.depth2,
-    memo: g.fi_memo?.slice(0, 100) + "...",
-  }));
-
-  return c.json({
-    total: guides.length,
-    guides,
-  });
+  // ProductsPage에서 사용하는 필드: item_cd, pfi_name, depth1, depth2, fi_memo
+  return c.json(loanGuides);
 });
 
 // 특정 가이드 상세
