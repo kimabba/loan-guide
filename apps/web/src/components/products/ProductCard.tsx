@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useFavoritesStore } from "../../lib/favorites";
 import { useCompareStore } from "../../lib/compare";
 
@@ -24,6 +25,15 @@ export function ProductCard({
 
   const favorite = isFavorite(itemCd);
   const inCompare = isInCompare(itemCd);
+  const [showPulse, setShowPulse] = useState(false);
+
+  // 첫 방문 시 비교 버튼에 펄스 애니메이션
+  useEffect(() => {
+    const seen = localStorage.getItem("compare-tooltip-seen");
+    if (!seen) {
+      setShowPulse(true);
+    }
+  }, []);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,7 +91,7 @@ export function ProductCard({
             inCompare
               ? "bg-primary text-primary-foreground"
               : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
-          }`}
+          } ${showPulse && !inCompare ? "animate-pulse-slow" : ""}`}
           title={inCompare ? "비교에서 제거" : "비교하기"}
         >
           <svg
