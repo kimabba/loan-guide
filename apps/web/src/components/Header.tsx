@@ -37,23 +37,7 @@ const MoonIcon = () => (
   </svg>
 );
 
-const MonitorIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="2" y="3" width="20" height="14" rx="2" />
-    <line x1="8" x2="16" y1="21" y2="21" />
-    <line x1="12" x2="12" y1="17" y2="21" />
-  </svg>
-);
+
 
 const SparklesIcon = () => (
   <svg
@@ -86,25 +70,16 @@ export function Header() {
     applyTheme(theme);
   }, [theme]);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      if (theme === "system") applyTheme("system");
-    };
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, [theme]);
+
 
   const toggleTheme = () => {
-    const next =
-      theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+    const next = theme === "light" ? "dark" : "light";
     setTheme(next);
   };
 
   const themeIcon = {
     light: <SunIcon />,
     dark: <MoonIcon />,
-    system: <MonitorIcon />,
   };
 
   const navItems = [
@@ -158,7 +133,7 @@ export function Header() {
           <button
             onClick={toggleTheme}
             className="linear-btn-ghost h-9 w-9 p-0"
-            title={`테마: ${theme === "light" ? "라이트" : theme === "dark" ? "다크" : "시스템"}`}
+            title={`테마: ${theme === "light" ? "라이트" : "다크"}`}
           >
             {themeIcon[theme]}
           </button>

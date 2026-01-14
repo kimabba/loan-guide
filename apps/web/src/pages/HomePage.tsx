@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
+import { ProductCard } from "../components/products/ProductCard";
+import { GuideModal } from "../components/GuideModal";
 
 interface HealthStatus {
   name: string;
@@ -18,6 +20,14 @@ interface Announcement {
   title: string;
   important: boolean;
   createdAt: string;
+}
+
+interface Product {
+  item_cd: string;
+  pfi_name: string;
+  depth1: string;
+  depth2: string;
+  fi_memo: string;
 }
 
 const popularSearches = [
@@ -72,21 +82,58 @@ export function HomePage() {
   const [apiStatus, setApiStatus] = useState<HealthStatus | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
       api.get<HealthStatus>("/api/"),
-      api.get<{ total: number }>("/api/guides"),
+      api.get<{ total: number; guides: any[] }>("/api/guides"),
       api.get<{ announcements: Announcement[] }>("/api/announcements?important=true"),
     ])
-      .then(([status, guides, announcementsData]) => {
+      .then(([status, guidesData, announcementsData]) => {
         setApiStatus(status);
-        setStats({ total: guides.total });
+        setStats({ total: guidesData.total });
         setAnnouncements(announcementsData.announcements?.slice(0, 2) || []);
+
+        // Sample products for home page (first 6)
+        if (guidesData.guides && Array.isArray(guidesData.guides)) {
+          const mapped = guidesData.guides.slice(0, 6).map((g: any) => ({
+            item_cd: g.item_cd,
+            pfi_name: g.company || g.pfi_name,
+            depth1: g.category || g.depth1,
+            depth2: g.product_type || g.depth2,
+            fi_memo: g.memo || g.fi_memo,
+          }));
+          setProducts(mapped);
+        } else if (Array.isArray(guidesData)) {
+           // Handle direct array response
+           const mapped = (guidesData as any).slice(0, 6).map((g: any) => ({
+            item_cd: g.item_cd,
+            pfi_name: g.pfi_name,
+            depth1: g.depth1,
+            depth2: g.depth2,
+            fi_memo: g.fi_memo,
+          }));
+          setProducts(mapped);
+          setStats({ total: (guidesData as any).length });
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        // Fallback for local dev
+        fetch("/loan_guides.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const list = Array.isArray(data) ? data : [];
+            setProducts(list.slice(0, 6));
+            setStats({ total: list.length });
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
+      });
   }, []);
 
   return (
@@ -215,6 +262,55 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Featured Products */}
+      <section className="py-16 px-4">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold sm:text-3xl">상품 목록</h2>
+              <p className="mt-2 text-muted-foreground">
+                가이드에서 제공하는 대표적인 대출 상품들입니다
+              </p>
+            </div>
+            <Link
+              to="/products"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              전체 보기 →
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {loading ? (
+              [...Array(6)].map((_, i) => (
+                <div key={i} className="h-48 animate-pulse rounded-lg bg-muted" />
+              ))
+            ) : products.length > 0 ? (
+              products.map((product) => (
+                <ProductCard
+                  key={product.item_cd}
+                  itemCd={product.item_cd}
+                  company={product.pfi_name}
+                  category={product.depth1}
+                  productType={product.depth2}
+                  summary={product.fi_memo || ""}
+                  onClick={() => setSelectedGuide(product.item_cd)}
+                />
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center text-muted-foreground">
+                상품 정보를 불러올 수 없습니다.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <GuideModal
+        itemCd={selectedGuide}
+        onClose={() => setSelectedGuide(null)}
+      />
 
       {/* Features */}
       <section className="py-16 px-4">
