@@ -54,33 +54,33 @@ export function ReportPage() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center px-4 py-20">
-        <div className="w-full max-w-md text-center space-y-6">
-          <div className="mx-auto h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center px-5 py-16 sm:px-6 sm:py-20">
+        <div className="w-full max-w-md text-center space-y-5 sm:space-y-6">
+          <div className="mx-auto h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
+              width="28"
+              height="28"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-green-600 dark:text-green-400"
+              className="text-green-600 dark:text-green-400 sm:w-8 sm:h-8"
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold">제출 완료!</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold">제출 완료!</h1>
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             소중한 의견 감사합니다.<br />
             검토 후 빠르게 반영하겠습니다.
           </p>
-          <div className="flex gap-3 justify-center pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 sm:pt-4">
             <Link
               to="/chat"
-              className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+              className="rounded-xl bg-primary px-5 py-2.5 sm:px-4 sm:py-2 text-primary-foreground hover:bg-primary/90"
             >
               챗봇으로 돌아가기
             </Link>
@@ -91,7 +91,7 @@ export function ReportPage() {
                 setDescription("");
                 setGuideId("");
               }}
-              className="rounded-lg border px-4 py-2 hover:bg-muted"
+              className="rounded-xl border px-5 py-2.5 sm:px-4 sm:py-2 hover:bg-muted"
             >
               추가 제출
             </button>
@@ -102,33 +102,33 @@ export function ReportPage() {
   }
 
   return (
-    <div className="flex flex-col items-center px-4 py-8">
-      <div className="w-full max-w-2xl space-y-8">
+    <div className="flex flex-col items-center px-5 py-6 sm:px-6 sm:py-8">
+      <div className="w-full max-w-2xl space-y-6 sm:space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">버그 리포트 / 피드백</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold">버그 리포트 / 피드백</h1>
+          <p className="mt-1.5 sm:mt-1 text-sm sm:text-base text-muted-foreground leading-relaxed">
             문제가 있거나 개선할 점이 있다면 알려주세요
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {/* Report Type */}
           <div className="space-y-3">
             <label className="text-sm font-medium">신고 유형</label>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2.5 sm:gap-3 grid-cols-2">
               {reportTypes.map((rt) => (
                 <button
                   key={rt.value}
                   type="button"
                   onClick={() => setType(rt.value)}
-                  className={`rounded-lg border p-4 text-left transition-colors ${
+                  className={`rounded-xl border p-3 sm:p-4 text-left transition-colors ${
                     type === rt.value
                       ? "border-primary bg-primary/5"
                       : "hover:border-muted-foreground/50"
                   }`}
                 >
-                  <div className="font-medium">{rt.label}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="font-medium text-sm sm:text-base">{rt.label}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-0.5 leading-relaxed">
                     {rt.description}
                   </div>
                 </button>
@@ -148,7 +148,7 @@ export function ReportPage() {
                 value={guideId}
                 onChange={(e) => setGuideId(e.target.value)}
                 placeholder="예: 7 (OK저축은행 신용대출)"
-                className="w-full rounded-lg border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-xl border bg-background px-4 py-2.5 sm:py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           )}
@@ -165,7 +165,7 @@ export function ReportPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="간단히 요약해주세요"
               required
-              className="w-full rounded-lg border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-xl border bg-background px-4 py-2.5 sm:py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -181,7 +181,7 @@ export function ReportPage() {
               placeholder="문제 상황이나 제안 내용을 자세히 설명해주세요"
               required
               rows={5}
-              className="w-full rounded-lg border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              className="w-full rounded-xl border bg-background px-4 py-2.5 sm:py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
           </div>
 
@@ -196,16 +196,16 @@ export function ReportPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="답변 받으실 이메일"
-              className="w-full rounded-lg border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-xl border bg-background px-4 py-2.5 sm:py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               이메일을 남기시면 처리 결과를 안내해드립니다
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -214,7 +214,7 @@ export function ReportPage() {
           <button
             type="submit"
             disabled={submitting || !title || !description}
-            className="w-full rounded-lg bg-primary py-3 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            className="w-full rounded-xl bg-primary py-3.5 sm:py-3 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {submitting ? "제출 중..." : "제출하기"}
           </button>
