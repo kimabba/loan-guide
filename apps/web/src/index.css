@@ -280,4 +280,20 @@
       box-shadow: 0 0 0 12px hsl(var(--primary) / 0);
     }
   }
+
+  /* 분석하기 버튼 부드러운 펄스 애니메이션 */
+  .animate-pulse-gentle {
+    animation: pulseGentle 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulseGentle {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 10px 25px -5px hsl(var(--primary) / 0.3);
+    }
+    50% {
+      transform: scale(1.02);
+      box-shadow: 0 15px 35px -5px hsl(var(--primary) / 0.4);
+    }
+  }
 }
