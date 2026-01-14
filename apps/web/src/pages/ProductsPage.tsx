@@ -5,6 +5,7 @@ import { ProductFilter } from "../components/products/ProductFilter";
 import { CompareBar } from "../components/products/CompareBar";
 import { CompareModal } from "../components/products/CompareModal";
 import { FloatingCompareButton } from "../components/products/FloatingCompareButton";
+import { PasteAnalyzer } from "../components/products/PasteAnalyzer";
 import { GuideModal } from "../components/GuideModal";
 import { useFavoritesStore } from "../lib/favorites";
 import { useCompareStore } from "../lib/compare";
@@ -320,6 +321,17 @@ export function ProductsPage() {
                 : "선택 없음"}
             </span>
           </button>
+
+          {/* 복붙 검색 영역 */}
+          <div className="mt-4">
+            <PasteAnalyzer
+              onFilterProducts={(filters) => {
+                if (filters.productTypes?.length) {
+                  setSelectedProductTypes(filters.productTypes);
+                }
+              }}
+            />
+          </div>
 
           {/* 필터 영역 */}
           <div className={`mt-4 ${filterOpen ? "block" : "hidden"} sm:block`}>
