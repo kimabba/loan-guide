@@ -2,3 +2,10 @@ name = "loan-guide"
 pages_build_output_dir = "apps/web/dist"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
+
+# Smart Placement - Gemini API 지원 지역으로 라우팅
+[placement]
+mode = "smart"
+
+[vars]
+ENVIRONMENT = "production"
