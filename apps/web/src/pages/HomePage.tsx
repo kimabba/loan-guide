@@ -94,9 +94,9 @@ export function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/5 to-background">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-        <div className="relative mx-auto max-w-5xl px-4 py-16 sm:py-24">
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+        <div className="relative mx-auto max-w-5xl px-5 py-12 sm:px-6 sm:py-20 lg:py-24">
+          <div className="text-center space-y-5 sm:space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium text-primary">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -104,22 +104,24 @@ export function HomePage() {
               {stats?.total || 163}개 상품 검색 가능
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl xl:text-6xl">
               대출 가이드를
               <br />
               <span className="text-primary">쉽고 빠르게</span>
             </h1>
 
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
-              저축은행, 캐피탈, 대부업체의 대출 상품 정보를
+            <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl leading-relaxed px-2">
+              저축은행, 캐피탈, 대부업체의
+              <br className="sm:hidden" />
+              {" "}대출 상품 정보를
               <br className="hidden sm:block" />
               자연어로 검색하고 비교해보세요
             </p>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4">
+            <div className="flex flex-col gap-3 pt-2 sm:pt-4 sm:flex-row sm:justify-center">
               <Link
                 to="/chat"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3.5 font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 sm:px-8 font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -128,7 +130,7 @@ export function HomePage() {
               </Link>
               <Link
                 to="/products"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border px-8 py-3.5 font-medium hover:bg-muted transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border px-6 py-3.5 sm:px-8 font-medium hover:bg-muted transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="7" height="7"/>
@@ -169,26 +171,26 @@ export function HomePage() {
       )}
 
       {/* How it works */}
-      <section className="py-16 px-4">
+      <section className="py-12 px-5 sm:py-16 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold sm:text-3xl">이용 방법</h2>
-            <p className="mt-2 text-muted-foreground">
+          <div className="text-center mb-10 sm:mb-12">
+            <h2 className="text-xl font-bold sm:text-2xl lg:text-3xl">이용 방법</h2>
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               3단계로 간편하게 대출 정보를 검색하세요
             </p>
           </div>
 
           <div className="grid gap-8 sm:grid-cols-3">
             {steps.map((item) => (
-              <div key={item.step} className="relative text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <div key={item.step} className="relative text-center px-2">
+                <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   {item.icon}
                 </div>
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-lg">{item.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <h3 className="font-semibold text-base sm:text-lg">{item.title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
                   {item.description}
                 </p>
               </div>
@@ -198,21 +200,21 @@ export function HomePage() {
       </section>
 
       {/* Popular Searches */}
-      <section className="py-16 px-4 bg-muted/30">
+      <section className="py-12 px-5 sm:py-16 sm:px-6 bg-muted/30">
         <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold sm:text-3xl">인기 검색어</h2>
-            <p className="mt-2 text-muted-foreground">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-xl font-bold sm:text-2xl lg:text-3xl">인기 검색어</h2>
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               클릭하면 바로 검색할 수 있어요
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
             {popularSearches.map((item) => (
               <Link
                 key={item.keyword}
                 to={`/chat?q=${encodeURIComponent(item.keyword)}`}
-                className="inline-flex items-center gap-2 rounded-full border bg-background px-5 py-2.5 text-sm font-medium hover:border-primary hover:bg-primary/5 transition-colors"
+                className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border bg-background px-4 py-2 sm:px-5 sm:py-2.5 text-sm font-medium hover:border-primary hover:bg-primary/5 transition-colors"
               >
                 <span>{item.icon}</span>
                 {item.keyword}
@@ -223,61 +225,61 @@ export function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="py-16 px-4">
+      <section className="py-12 px-5 sm:py-16 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold sm:text-3xl">주요 기능</h2>
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-xl font-bold sm:text-2xl lg:text-3xl">주요 기능</h2>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-2 sm:space-y-3">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/>
                   <path d="m21 21-4.3-4.3"/>
                 </svg>
               </div>
-              <h3 className="font-semibold">자연어 검색</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm sm:text-base">자연어 검색</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 복잡한 조건 없이 말하듯이 검색
               </p>
             </div>
 
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-2 sm:space-y-3">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
               </div>
-              <h3 className="font-semibold">{stats?.total || 163}개 상품</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm sm:text-base">{stats?.total || 163}개 상품</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 다양한 금융사의 상품 정보
               </p>
             </div>
 
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-2 sm:space-y-3">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect width="18" height="18" x="3" y="3" rx="2"/>
                   <path d="M3 9h18"/>
                   <path d="M9 21V9"/>
                 </svg>
               </div>
-              <h3 className="font-semibold">상세 비교</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm sm:text-base">상세 비교</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 금리, 한도, 조건 한눈에 비교
               </p>
             </div>
 
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-2 sm:space-y-3">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
                 </svg>
               </div>
-              <h3 className="font-semibold">정확한 정보</h3>
-              <p className="text-sm text-muted-foreground">
-                실제 가이드 기반 신뢰할 수 있는 데이터
+              <h3 className="font-semibold text-sm sm:text-base">정확한 정보</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                실제 가이드 기반 데이터
               </p>
             </div>
           </div>
@@ -285,17 +287,17 @@ export function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-4 bg-primary text-primary-foreground">
+      <section className="py-12 px-5 sm:py-16 sm:px-6 bg-primary text-primary-foreground">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-2xl font-bold sm:text-3xl">
+          <h2 className="text-xl font-bold sm:text-2xl lg:text-3xl">
             지금 바로 시작하세요
           </h2>
-          <p className="mt-3 text-primary-foreground/80">
+          <p className="mt-2 sm:mt-3 text-sm sm:text-base text-primary-foreground/80">
             복잡한 대출 조건, 챗봇에게 물어보세요
           </p>
           <Link
             to="/chat"
-            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-background px-8 py-3.5 font-medium text-foreground hover:bg-background/90 transition-colors"
+            className="mt-6 sm:mt-8 inline-flex items-center gap-2 rounded-xl bg-background px-6 py-3 sm:px-8 sm:py-3.5 font-medium text-foreground hover:bg-background/90 transition-colors"
           >
             무료로 시작하기
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -307,9 +309,9 @@ export function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8 px-4">
+      <footer className="border-t py-8 px-5 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between sm:gap-4">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
                 G
@@ -317,7 +319,7 @@ export function HomePage() {
               <span className="font-semibold">대출 가이드</span>
             </div>
 
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
               <Link to="/announcements" className="hover:text-foreground">공지사항</Link>
               <Link to="/report" className="hover:text-foreground">버그신고</Link>
               <a href="#" className="hover:text-foreground">이용약관</a>
@@ -336,8 +338,8 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className="mt-6 text-center text-xs text-muted-foreground">
-            &copy; 2025 대출 가이드. 본 서비스는 정보 제공 목적이며, 실제 대출 조건은 금융사에 문의하세요.
+          <div className="mt-6 text-center text-xs text-muted-foreground leading-relaxed px-2">
+            &copy; 2025 대출 가이드. 본 서비스는 정보 제공 목적이며,<br className="sm:hidden" /> 실제 대출 조건은 금융사에 문의하세요.
           </div>
         </div>
       </footer>
