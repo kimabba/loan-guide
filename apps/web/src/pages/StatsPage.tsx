@@ -135,10 +135,53 @@ function StatCard({
   );
 }
 
+// 빈 대시보드 데이터
+const emptyDashboard: DashboardData = {
+  overview: {
+    totalTokens: 0,
+    totalCost: 0,
+    totalCostKrw: 0,
+    totalChats: 0,
+    totalApiCalls: 0,
+    todayTokens: 0,
+    todayCost: 0,
+    todayChats: 0,
+    todayActiveUsers: 0,
+  },
+  trends: {
+    last7Days: Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return { date: date.toISOString().split("T")[0], tokens: 0, cost: 0, chats: 0 };
+    }),
+  },
+  topGuides: [],
+  topSearches: [],
+  lastUpdated: new Date().toISOString(),
+};
+
+const emptyDailyStats: DailyStatsResponse = {
+  days: 30,
+  stats: Array.from({ length: 30 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (29 - i));
+    return {
+      date: date.toISOString().split("T")[0],
+      chatCount: 0,
+      messageCount: 0,
+      apiCallCount: 0,
+      totalTokens: 0,
+      totalCostUsd: 0,
+      activeUsers: 0,
+    };
+  }),
+};
+
 export function StatsPage() {
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [dailyStats, setDailyStats] = useState<DailyStatsResponse | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardData>(emptyDashboard);
+  const [dailyStats, setDailyStats] = useState<DailyStatsResponse>(emptyDailyStats);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "usage" | "products" | "plans">(
     "overview"
   );
@@ -153,8 +196,9 @@ export function StatsPage() {
         setDailyStats(dailyData);
         setLoading(false);
       })
-      .catch((error) => {
-        console.error("Failed to load stats:", error);
+      .catch((err) => {
+        console.error("Failed to load stats:", err);
+        setError("통계 데이터를 불러올 수 없습니다. 아직 데이터가 없거나 API가 배포 중입니다.");
         setLoading(false);
       });
   }, []);
@@ -178,7 +222,12 @@ export function StatsPage() {
         <p className="mt-2 text-muted-foreground">
           토큰 사용량, 비용, 사용 패턴을 확인하세요
         </p>
-        {dashboard?.lastUpdated && (
+        {error && (
+          <div className="mt-4 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200 text-sm">
+            {error}
+          </div>
+        )}
+        {dashboard.lastUpdated && !error && (
           <p className="mt-1 text-xs text-muted-foreground">
             마지막 업데이트:{" "}
             {new Date(dashboard.lastUpdated).toLocaleString("ko-KR")}
@@ -211,7 +260,7 @@ export function StatsPage() {
       </div>
 
       {/* Overview Tab */}
-      {activeTab === "overview" && dashboard && (
+      {activeTab === "overview" && (
         <div className="space-y-8">
           {/* Summary Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -380,7 +429,7 @@ export function StatsPage() {
       )}
 
       {/* Usage Tab */}
-      {activeTab === "usage" && dailyStats && (
+      {activeTab === "usage" && (
         <div className="space-y-6">
           <div className="rounded-xl border bg-card p-6">
             <h2 className="text-lg font-semibold mb-4">일별 사용량 (최근 30일)</h2>
@@ -422,7 +471,7 @@ export function StatsPage() {
       )}
 
       {/* Products Tab */}
-      {activeTab === "products" && dashboard && (
+      {activeTab === "products" && (
         <div className="space-y-6">
           <div className="rounded-xl border bg-card p-6">
             <h2 className="text-lg font-semibold mb-4">인기 상품 TOP 10</h2>
