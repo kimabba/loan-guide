@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "bun run pages:dev",
     "dev:web": "bun run --filter web dev",
-    "build": "rm -rf node_modules package-lock.json && npm install && cd apps/web && npm run build",
+    "build": "rm -rf node_modules package-lock.json && npm install && cd apps/web && npm run build && cp -r dist ../../dist",
     "build:web": "cd apps/web && npm run build",
     "deploy": "bun run deploy:pages",
     "deploy:pages": "bun run build:web && bun run --filter web pages:deploy",
