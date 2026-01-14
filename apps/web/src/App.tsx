@@ -5,6 +5,7 @@ import { ChatPage } from "./pages/ChatPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { ReportPage } from "./pages/ReportPage";
 import { AnnouncementsPage } from "./pages/AnnouncementsPage";
+import { StatsPage } from "./pages/StatsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { Header } from "./components/Header";
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/stats" element={<StatsPage />} />
         <Route path="/report" element={<ReportPage />} />
         <Route path="/announcements" element={<AnnouncementsPage />} />
         <Route path="/login" element={<LoginPage />} />
