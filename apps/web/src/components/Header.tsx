@@ -111,7 +111,6 @@ export function Header() {
     { path: "/", label: "홈" },
     { path: "/chat", label: "챗봇" },
     { path: "/products", label: "상품목록" },
-    { path: "/match", label: "상품매칭" },
     { path: "/report", label: "버그신고" },
     { path: "/announcements", label: "공지" },
   ];

@@ -7,6 +7,7 @@ interface ProductCardProps {
   category: string;
   productType: string;
   summary: string;
+  matchScore?: number;
   onClick: () => void;
 }
 
@@ -16,6 +17,7 @@ export function ProductCard({
   category,
   productType,
   summary,
+  matchScore,
   onClick,
 }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -103,11 +105,35 @@ export function ProductCard({
         </button>
       </div>
 
-      {/* 카테고리 뱃지 */}
-      <div className="mb-2">
+      {/* 카테고리 뱃지 & 매칭 점수 */}
+      <div className="mb-2 flex items-center gap-2">
         <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
           {category}
         </span>
+        {matchScore !== undefined && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+              matchScore >= 80
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : matchScore >= 60
+                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+            }`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            {matchScore}%
+          </span>
+        )}
       </div>
 
       {/* 금융사명 */}
