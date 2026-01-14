@@ -35,18 +35,38 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
     if (!isOpen || compareList.length === 0) return;
 
     setLoading(true);
-    Promise.all(
-      compareList.map((itemCd) =>
-        fetch(`/api/guides/${itemCd}`).then((res) => res.json())
-      )
-    )
-      .then((data) => {
-        setGuides(data);
+
+    // API 시도 후 실패하면 로컬 JSON에서 로드
+    const fetchGuides = async () => {
+      try {
+        // 먼저 API 시도
+        const apiResults = await Promise.all(
+          compareList.map((itemCd) =>
+            fetch(`/api/guides/${itemCd}`).then((res) => {
+              if (!res.ok) throw new Error("API failed");
+              return res.json();
+            })
+          )
+        );
+        setGuides(apiResults);
+      } catch {
+        // API 실패 시 로컬 JSON에서 로드
+        try {
+          const res = await fetch("/loan_guides.json");
+          const allGuides = await res.json();
+          const filteredGuides = compareList
+            .map((itemCd) => allGuides.find((g: GuideDetail) => g.item_cd === itemCd))
+            .filter(Boolean);
+          setGuides(filteredGuides);
+        } catch {
+          setGuides([]);
+        }
+      } finally {
         setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchGuides();
   }, [isOpen, compareList]);
 
   if (!isOpen) return null;

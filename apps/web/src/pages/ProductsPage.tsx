@@ -4,6 +4,7 @@ import { ProductCard } from "../components/products/ProductCard";
 import { ProductFilter } from "../components/products/ProductFilter";
 import { CompareBar } from "../components/products/CompareBar";
 import { CompareModal } from "../components/products/CompareModal";
+import { FloatingCompareButton } from "../components/products/FloatingCompareButton";
 import { GuideModal } from "../components/GuideModal";
 import { PasteSearch } from "../components/products/PasteSearch";
 import { useFavoritesStore } from "../lib/favorites";
@@ -493,6 +494,9 @@ export function ProductsPage() {
           </div>
         )}
       </div>
+
+      {/* 플로팅 비교 버튼 (비교 목록이 비어있을 때만 표시) */}
+      <FloatingCompareButton onCompare={() => setCompareModalOpen(true)} />
 
       {/* 비교 바 */}
       <CompareBar

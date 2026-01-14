@@ -4,53 +4,84 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * ============================================
+ * DESIGN SYSTEM - 3-COLOR RULE
+ * ============================================
+ *
+ * 핵심 색상 (3가지만 사용):
+ *
+ * 1. PRIMARY (Violet/Purple) - 브랜드 & 액션
+ *    - HSL: 245° (violet-indigo 계열)
+ *    - 용도: CTA 버튼, 링크, 강조, 브랜드 요소
+ *
+ * 2. NEUTRAL (Gray) - 배경 & 텍스트
+ *    - HSL: 220-232° (cool gray 계열)
+ *    - 용도: 배경, 텍스트, 보더, 카드
+ *
+ * 3. DESTRUCTIVE (Red) - 에러 & 경고 (제한적 사용)
+ *    - HSL: 0° (red 계열)
+ *    - 용도: 에러 메시지, 삭제 버튼 (최소한으로 사용)
+ *
+ * ⚠️ 금지 사항:
+ * - 임의의 색상 추가 금지 (green, orange, yellow, blue 등)
+ * - 그라데이션은 PRIMARY 계열 내에서만 허용
+ * - success/warning 색상 사용 금지 (neutral로 대체)
+ *
+ * ============================================
+ */
+
 @layer base {
   :root {
-    /* Linear-inspired Light Mode */
+    /* Light Mode - 3 Color System */
     --background: 0 0% 100%;
     --foreground: 226 57% 11%;
+
+    /* PRIMARY: Violet (브랜드 컬러) */
     --primary: 245 58% 51%;
     --primary-foreground: 0 0% 100%;
+
+    /* NEUTRAL: Cool Gray (배경/텍스트) */
     --secondary: 220 14% 96%;
     --secondary-foreground: 226 57% 11%;
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
-    --accent: 245 58% 51%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 220 14% 92%;
+    --accent-foreground: 226 57% 11%;
+
+    /* DESTRUCTIVE: Red (에러 전용 - 제한적 사용) */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
+
+    /* UI Elements */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 245 58% 51%;
     --radius: 0.5rem;
-
-    /* Linear-specific colors */
-    --linear-bg: 232 33% 10%;
-    --linear-surface: 232 26% 14%;
-    --linear-surface-elevated: 232 22% 18%;
-    --linear-border: 232 15% 22%;
-    --linear-text: 220 20% 97%;
-    --linear-text-secondary: 220 10% 60%;
-    --linear-accent: 245 80% 67%;
-    --linear-accent-hover: 245 80% 72%;
-    --linear-success: 142 76% 46%;
-    --linear-warning: 38 92% 50%;
   }
 
   .dark {
-    /* Linear Dark Mode (Default) */
+    /* Dark Mode - 3 Color System */
     --background: 232 33% 10%;
     --foreground: 220 20% 97%;
+
+    /* PRIMARY: Violet (브랜드 컬러) */
     --primary: 245 80% 67%;
     --primary-foreground: 0 0% 100%;
+
+    /* NEUTRAL: Cool Gray (배경/텍스트) */
     --secondary: 232 22% 18%;
     --secondary-foreground: 220 20% 97%;
     --muted: 232 26% 14%;
     --muted-foreground: 220 10% 60%;
-    --accent: 245 80% 67%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 232 20% 22%;
+    --accent-foreground: 220 20% 97%;
+
+    /* DESTRUCTIVE: Red (에러 전용 - 제한적 사용) */
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
+
+    /* UI Elements */
     --border: 232 15% 22%;
     --input: 232 22% 18%;
     --ring: 245 80% 67%;
@@ -87,9 +118,9 @@
     box-shadow: 0 0 10px -3px hsl(var(--primary) / 0.2);
   }
 
-  /* Linear-style gradient text */
+  /* Gradient text - PRIMARY 계열만 사용 (3-color rule 준수) */
   .gradient-text {
-    @apply bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-violet-500 to-violet-400 bg-clip-text text-transparent;
   }
 
   /* Linear-style card */
@@ -218,6 +249,35 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  /* Floating button animations */
+  .animate-fade-in {
+    animation: fadeInUp 0.3s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulseSlow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseSlow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 12px hsl(var(--primary) / 0);
     }
   }
 }

@@ -184,6 +184,9 @@ app.get("/guides/:id", (c) => {
     return c.json({ error: "Guide not found" }, 404);
   }
 
+  // 상품 조회 기록
+  recordGuideView(rawId);
+
   return c.json(guide);
 });
 
@@ -221,11 +224,21 @@ interface ChatRequest {
   sessionId?: string;
 }
 
+interface GeminiResult {
+  response: string;
+  guides: any[];
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+  };
+}
+
 async function generateGeminiResponse(
   apiKey: string,
   userMessage: string,
   fileSearchStoreName: string
-): Promise<{ response: string; guides: any[] }> {
+): Promise<GeminiResult> {
   const ai = new GoogleGenAI({ apiKey });
 
   try {
@@ -256,7 +269,17 @@ async function generateGeminiResponse(
     const responseText = response.text || "";
     const guides = extractMentionedGuides(responseText);
 
-    return { response: responseText, guides };
+    // 토큰 사용량 추출 (Gemini API 응답에서)
+    const usageMetadata = (response as any).usageMetadata;
+    const usage = usageMetadata
+      ? {
+          inputTokens: usageMetadata.promptTokenCount || 0,
+          outputTokens: usageMetadata.candidatesTokenCount || 0,
+          totalTokens: usageMetadata.totalTokenCount || 0,
+        }
+      : undefined;
+
+    return { response: responseText, guides, usage };
   } catch (error: any) {
     console.error("Gemini generation error:", error);
     throw error;
@@ -390,14 +413,34 @@ app.post("/chat", async (c) => {
     const apiKey = c.env?.GEMINI_API_KEY;
     const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
 
+    // 검색어 기록
+    recordSearch(message);
+
     if (apiKey && fileSearchStoreName) {
       try {
-        const { response, guides } = await generateGeminiResponse(
+        const { response, guides, usage } = await generateGeminiResponse(
           apiKey,
           message,
           fileSearchStoreName
         );
-        return c.json({ query: message, response, guides, source: "gemini" });
+
+        // 토큰 사용량 기록
+        if (usage) {
+          recordTokenUsage(
+            "chat",
+            "gemini-2.5-flash",
+            usage.inputTokens,
+            usage.outputTokens
+          );
+        }
+
+        return c.json({
+          query: message,
+          response,
+          guides,
+          source: "gemini",
+          usage,
+        });
       } catch (error: any) {
         console.error("Gemini error details:", {
           message: error?.message,
@@ -407,7 +450,10 @@ app.post("/chat", async (c) => {
       }
     }
 
+    // Fallback: 키워드 검색 (토큰 사용 없음)
     const { response, guides } = fallbackSearch(message);
+    recordTokenUsage("keyword_search", "none", 0, 0);
+
     return c.json({ query: message, response, guides, source: "keyword" });
   } catch (error) {
     console.error("Chat error:", error);
@@ -572,6 +618,336 @@ app.get("/announcements/:id", (c) => {
   }
 
   return c.json(announcement);
+});
+
+// ============================================
+// Statistics Routes
+// ============================================
+
+// 통계 데이터 저장소 (인메모리 - 실제 운영 시 DB 사용)
+interface TokenUsageRecord {
+  branchId?: string;
+  userId?: string;
+  sessionId?: string;
+  requestType: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  costUsd: number;
+  createdAt: string;
+}
+
+interface DailyStats {
+  date: string;
+  chatCount: number;
+  messageCount: number;
+  apiCallCount: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCostUsd: number;
+  activeUsers: Set<string>;
+}
+
+const tokenUsageRecords: TokenUsageRecord[] = [];
+const dailyStatsMap = new Map<string, DailyStats>();
+const guideViewCounts = new Map<string, number>();
+const searchQueries: { query: string; count: number; createdAt: string }[] = [];
+
+// 토큰 비용 계산 (Gemini 2.5 Flash 기준)
+const TOKEN_COSTS = {
+  "gemini-2.5-flash": {
+    input: 0.000075 / 1000,  // $0.075 per 1M input tokens
+    output: 0.0003 / 1000,   // $0.30 per 1M output tokens
+  },
+};
+
+function calculateCost(model: string, inputTokens: number, outputTokens: number): number {
+  const costs = TOKEN_COSTS[model as keyof typeof TOKEN_COSTS] || TOKEN_COSTS["gemini-2.5-flash"];
+  return inputTokens * costs.input + outputTokens * costs.output;
+}
+
+function getTodayKey(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getOrCreateDailyStats(date: string): DailyStats {
+  if (!dailyStatsMap.has(date)) {
+    dailyStatsMap.set(date, {
+      date,
+      chatCount: 0,
+      messageCount: 0,
+      apiCallCount: 0,
+      totalInputTokens: 0,
+      totalOutputTokens: 0,
+      totalCostUsd: 0,
+      activeUsers: new Set(),
+    });
+  }
+  return dailyStatsMap.get(date)!;
+}
+
+// 토큰 사용량 기록 함수
+function recordTokenUsage(
+  requestType: string,
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+  branchId?: string,
+  userId?: string,
+  sessionId?: string
+) {
+  const costUsd = calculateCost(model, inputTokens, outputTokens);
+  const now = new Date().toISOString();
+  const today = getTodayKey();
+
+  tokenUsageRecords.push({
+    branchId,
+    userId,
+    sessionId,
+    requestType,
+    model,
+    inputTokens,
+    outputTokens,
+    costUsd,
+    createdAt: now,
+  });
+
+  // 일별 통계 업데이트
+  const dailyStats = getOrCreateDailyStats(today);
+  dailyStats.chatCount += requestType === "chat" ? 1 : 0;
+  dailyStats.messageCount += 1;
+  dailyStats.apiCallCount += 1;
+  dailyStats.totalInputTokens += inputTokens;
+  dailyStats.totalOutputTokens += outputTokens;
+  dailyStats.totalCostUsd += costUsd;
+  if (userId) dailyStats.activeUsers.add(userId);
+
+  // 오래된 레코드 정리 (최대 1000개 유지)
+  if (tokenUsageRecords.length > 1000) {
+    tokenUsageRecords.splice(0, 100);
+  }
+}
+
+// 상품 조회 기록
+function recordGuideView(guideId: string) {
+  const current = guideViewCounts.get(guideId) || 0;
+  guideViewCounts.set(guideId, current + 1);
+}
+
+// 검색 기록
+function recordSearch(query: string) {
+  const existing = searchQueries.find((q) => q.query.toLowerCase() === query.toLowerCase());
+  if (existing) {
+    existing.count += 1;
+  } else {
+    searchQueries.push({ query, count: 1, createdAt: new Date().toISOString() });
+  }
+  // 오래된 검색어 정리
+  if (searchQueries.length > 500) {
+    searchQueries.splice(0, 100);
+  }
+}
+
+// 통계 대시보드 데이터
+app.get("/stats/dashboard", (c) => {
+  const today = getTodayKey();
+  const todayStats = dailyStatsMap.get(today);
+
+  // 최근 7일 데이터
+  const last7Days: { date: string; tokens: number; cost: number; chats: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateKey = date.toISOString().split("T")[0];
+    const stats = dailyStatsMap.get(dateKey);
+    last7Days.push({
+      date: dateKey,
+      tokens: stats ? stats.totalInputTokens + stats.totalOutputTokens : 0,
+      cost: stats ? stats.totalCostUsd : 0,
+      chats: stats ? stats.chatCount : 0,
+    });
+  }
+
+  // 인기 상품 TOP 10
+  const topGuides = Array.from(guideViewCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([guideId, views]) => {
+      const guide = (loanGuides as any[]).find((g) => g.item_cd === guideId);
+      return {
+        guideId,
+        company: guide?.pfi_name || "Unknown",
+        productType: guide?.depth2 || "Unknown",
+        views,
+      };
+    });
+
+  // 인기 검색어 TOP 10
+  const topSearches = [...searchQueries]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  // 전체 통계 계산
+  const totalTokens = tokenUsageRecords.reduce(
+    (sum, r) => sum + r.inputTokens + r.outputTokens,
+    0
+  );
+  const totalCost = tokenUsageRecords.reduce((sum, r) => sum + r.costUsd, 0);
+  const totalChats = tokenUsageRecords.filter((r) => r.requestType === "chat").length;
+
+  return c.json({
+    overview: {
+      totalTokens,
+      totalCost: Math.round(totalCost * 1000000) / 1000000,
+      totalCostKrw: Math.round(totalCost * 1450), // USD to KRW (approximate)
+      totalChats,
+      totalApiCalls: tokenUsageRecords.length,
+      todayTokens: todayStats
+        ? todayStats.totalInputTokens + todayStats.totalOutputTokens
+        : 0,
+      todayCost: todayStats ? Math.round(todayStats.totalCostUsd * 1000000) / 1000000 : 0,
+      todayChats: todayStats?.chatCount || 0,
+      todayActiveUsers: todayStats?.activeUsers.size || 0,
+    },
+    trends: {
+      last7Days,
+    },
+    topGuides,
+    topSearches,
+    lastUpdated: new Date().toISOString(),
+  });
+});
+
+// 토큰 사용량 상세
+app.get("/stats/tokens", (c) => {
+  const limit = Math.min(parseInt(c.req.query("limit") || "100"), 500);
+  const offset = parseInt(c.req.query("offset") || "0");
+  const requestType = c.req.query("type");
+
+  let filtered = [...tokenUsageRecords];
+  if (requestType) {
+    filtered = filtered.filter((r) => r.requestType === requestType);
+  }
+
+  const total = filtered.length;
+  const records = filtered
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(offset, offset + limit);
+
+  return c.json({
+    total,
+    limit,
+    offset,
+    records,
+  });
+});
+
+// 일별 통계
+app.get("/stats/daily", (c) => {
+  const days = Math.min(parseInt(c.req.query("days") || "30"), 90);
+  const stats: {
+    date: string;
+    chatCount: number;
+    messageCount: number;
+    apiCallCount: number;
+    totalTokens: number;
+    totalCostUsd: number;
+    activeUsers: number;
+  }[] = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateKey = date.toISOString().split("T")[0];
+    const dayStats = dailyStatsMap.get(dateKey);
+
+    stats.push({
+      date: dateKey,
+      chatCount: dayStats?.chatCount || 0,
+      messageCount: dayStats?.messageCount || 0,
+      apiCallCount: dayStats?.apiCallCount || 0,
+      totalTokens: dayStats
+        ? dayStats.totalInputTokens + dayStats.totalOutputTokens
+        : 0,
+      totalCostUsd: dayStats?.totalCostUsd || 0,
+      activeUsers: dayStats?.activeUsers.size || 0,
+    });
+  }
+
+  return c.json({ days, stats });
+});
+
+// 상품 조회 통계
+app.get("/stats/guides", (c) => {
+  const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
+
+  const guideStats = Array.from(guideViewCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([guideId, views]) => {
+      const guide = (loanGuides as any[]).find((g) => g.item_cd === guideId);
+      return {
+        guideId,
+        company: guide?.pfi_name || "Unknown",
+        category: guide?.depth1 || "Unknown",
+        productType: guide?.depth2 || "Unknown",
+        views,
+      };
+    });
+
+  return c.json({
+    total: guideViewCounts.size,
+    guides: guideStats,
+  });
+});
+
+// 검색어 통계
+app.get("/stats/searches", (c) => {
+  const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
+
+  const searches = [...searchQueries]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+
+  return c.json({
+    total: searchQueries.length,
+    searches,
+  });
+});
+
+// 플랜 정보
+app.get("/stats/plans", (c) => {
+  const plans = [
+    {
+      name: "free",
+      displayName: "무료",
+      monthlyTokenLimit: 50000,
+      monthlyChatLimit: 100,
+      maxUsers: 5,
+      priceKrw: 0,
+      features: ["기본 채팅", "상품 검색"],
+    },
+    {
+      name: "basic",
+      displayName: "베이직",
+      monthlyTokenLimit: 500000,
+      monthlyChatLimit: 1000,
+      maxUsers: 20,
+      priceKrw: 49000,
+      features: ["기본 채팅", "상품 검색", "내보내기", "우선 응답"],
+    },
+    {
+      name: "pro",
+      displayName: "프로",
+      monthlyTokenLimit: 5000000,
+      monthlyChatLimit: null, // 무제한
+      maxUsers: 100,
+      priceKrw: 199000,
+      features: ["기본 채팅", "상품 검색", "내보내기", "우선 응답", "API 접근", "전담 지원"],
+    },
+  ];
+
+  return c.json({ plans });
 });
 
 // 404 Handler
