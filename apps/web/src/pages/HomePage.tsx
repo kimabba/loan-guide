@@ -31,12 +31,12 @@ interface Product {
 }
 
 const popularSearches = [
-  { keyword: "신용대출", icon: "💳" },
-  { keyword: "OK저축은행", icon: "🏦" },
-  { keyword: "무직자대출", icon: "📋" },
-  { keyword: "비대면", icon: "📱" },
-  { keyword: "저금리", icon: "📉" },
-  { keyword: "급전", icon: "⚡" },
+  { keyword: "신용대출" },
+  { keyword: "OK저축은행" },
+  { keyword: "무직자대출" },
+  { keyword: "비대면" },
+  { keyword: "저금리" },
+  { keyword: "급전" },
 ];
 
 const steps = [
@@ -221,15 +221,12 @@ export function HomePage() {
 
           <div className="grid gap-8 sm:grid-cols-3">
             {steps.map((item) => (
-              <div key={item.step} className="relative text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  {item.icon}
-                </div>
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+              <div key={item.step} className="relative text-center p-6 rounded-xl border bg-card">
+                <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {item.step}
                 </div>
                 <h3 className="font-semibold text-lg">{item.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground">
                   {item.description}
                 </p>
               </div>
@@ -255,7 +252,6 @@ export function HomePage() {
                 to={`/chat?q=${encodeURIComponent(item.keyword)}`}
                 className="inline-flex items-center gap-2 rounded-full border bg-background px-5 py-2.5 text-sm font-medium hover:border-primary hover:bg-primary/5 transition-colors"
               >
-                <span>{item.icon}</span>
                 {item.keyword}
               </Link>
             ))}
@@ -320,52 +316,29 @@ export function HomePage() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"/>
-                  <path d="m21 21-4.3-4.3"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold">자연어 검색</h3>
+            <div className="rounded-xl border bg-card p-5 space-y-2">
+              <h3 className="font-semibold text-primary">자연어 검색</h3>
               <p className="text-sm text-muted-foreground">
                 복잡한 조건 없이 말하듯이 검색
               </p>
             </div>
 
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold">{stats?.total || 163}개 상품</h3>
+            <div className="rounded-xl border bg-card p-5 space-y-2">
+              <h3 className="font-semibold text-primary">{stats?.total || 163}개 상품</h3>
               <p className="text-sm text-muted-foreground">
                 다양한 금융사의 상품 정보
               </p>
             </div>
 
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="18" height="18" x="3" y="3" rx="2"/>
-                  <path d="M3 9h18"/>
-                  <path d="M9 21V9"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold">상세 비교</h3>
+            <div className="rounded-xl border bg-card p-5 space-y-2">
+              <h3 className="font-semibold text-primary">상세 비교</h3>
               <p className="text-sm text-muted-foreground">
                 금리, 한도, 조건 한눈에 비교
               </p>
             </div>
 
-            <div className="rounded-xl border bg-card p-5 space-y-3">
-              <div className="h-10 w-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold">정확한 정보</h3>
+            <div className="rounded-xl border bg-card p-5 space-y-2">
+              <h3 className="font-semibold text-primary">정확한 정보</h3>
               <p className="text-sm text-muted-foreground">
                 실제 가이드 기반 신뢰할 수 있는 데이터
               </p>
