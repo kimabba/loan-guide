@@ -35,15 +35,6 @@ interface DailyStatsResponse {
   }[];
 }
 
-interface Plan {
-  name: string;
-  displayName: string;
-  monthlyTokenLimit: number;
-  monthlyChatLimit: number | null;
-  maxUsers: number;
-  priceKrw: number;
-  features: string[];
-}
 
 // Utility functions
 function formatNumber(num: number): string {
@@ -147,7 +138,6 @@ function StatCard({
 export function StatsPage() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [dailyStats, setDailyStats] = useState<DailyStatsResponse | null>(null);
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "usage" | "products" | "plans">(
     "overview"
@@ -157,12 +147,10 @@ export function StatsPage() {
     Promise.all([
       api.get<DashboardData>("/api/stats/dashboard"),
       api.get<DailyStatsResponse>("/api/stats/daily?days=30"),
-      api.get<{ plans: Plan[] }>("/api/stats/plans"),
     ])
-      .then(([dashboardData, dailyData, plansData]) => {
+      .then(([dashboardData, dailyData]) => {
         setDashboard(dashboardData);
         setDailyStats(dailyData);
-        setPlans(plansData.plans);
         setLoading(false);
       })
       .catch((error) => {
@@ -205,7 +193,7 @@ export function StatsPage() {
             { id: "overview", label: "개요" },
             { id: "usage", label: "사용량 추이" },
             { id: "products", label: "인기 상품" },
-            { id: "plans", label: "요금제" },
+            { id: "plans", label: "비용" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -470,102 +458,14 @@ export function StatsPage() {
         </div>
       )}
 
-      {/* Plans Tab */}
+      {/* Cost Tab */}
       {activeTab === "plans" && (
         <div className="space-y-6">
-          <div className="grid gap-6 sm:grid-cols-3">
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-xl border p-6 space-y-4 ${
-                  plan.name === "basic" ? "border-primary ring-2 ring-primary/20" : ""
-                }`}
-              >
-                {plan.name === "basic" && (
-                  <div className="inline-block rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                    추천
-                  </div>
-                )}
-                <div>
-                  <h3 className="text-xl font-bold">{plan.displayName}</h3>
-                  <div className="mt-2">
-                    <span className="text-3xl font-bold">
-                      {plan.priceKrw === 0 ? "무료" : `₩${plan.priceKrw.toLocaleString()}`}
-                    </span>
-                    {plan.priceKrw > 0 && (
-                      <span className="text-muted-foreground">/월</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">월 토큰</span>
-                    <span className="font-medium">
-                      {formatNumber(plan.monthlyTokenLimit)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">월 채팅</span>
-                    <span className="font-medium">
-                      {plan.monthlyChatLimit === null
-                        ? "무제한"
-                        : plan.monthlyChatLimit.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">최대 사용자</span>
-                    <span className="font-medium">{plan.maxUsers}명</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-sm font-medium">포함 기능</div>
-                  <ul className="space-y-1">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center gap-2 text-sm text-muted-foreground"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-green-500"
-                        >
-                          <path d="M20 6 9 17l-5-5" />
-                        </svg>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <button
-                  className={`w-full py-2.5 rounded-lg font-medium transition-colors ${
-                    plan.name === "basic"
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "border hover:bg-muted"
-                  }`}
-                >
-                  {plan.priceKrw === 0 ? "현재 플랜" : "업그레이드"}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Cost Calculator */}
           <div className="rounded-xl border bg-card p-6">
-            <h2 className="text-lg font-semibold mb-4">비용 계산기</h2>
+            <h2 className="text-lg font-semibold mb-4">Gemini 2.5 Flash 요금</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="p-4 rounded-lg bg-muted/50">
-                <h3 className="font-medium mb-2">Gemini 2.5 Flash 요금</h3>
+                <h3 className="font-medium mb-2">토큰 단가</h3>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <div className="flex justify-between">
                     <span>입력 토큰</span>
