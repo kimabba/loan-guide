@@ -33,11 +33,9 @@ const MoonIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    <path d="M12 3a6 6 0 0 0 9 9 9 0 1 1-9-9Z" />
   </svg>
 );
-
-
 
 const MenuIcon = () => (
   <svg
@@ -82,8 +80,8 @@ export function Header() {
         setMenuOpen(false);
       }
     };
-    document.addEventListener(\"mousedown\", handleClickOutside);
-    return () => document.removeEventListener(\"mousedown\", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Close menu on route change
@@ -92,7 +90,7 @@ export function Header() {
   }, [location]);
 
   const toggleTheme = () => {
-    const next = theme === \"light\" ? \"dark\" : \"light\";
+    const next = theme === "light" ? "dark" : "light";
     setTheme(next);
   };
 
@@ -102,52 +100,52 @@ export function Header() {
   };
 
   const navItems = [
-    { path: \"/\", label: \"홈\" },
-    { path: \"/chat\", label: \"챗봇\" },
-    { path: \"/products\", label: \"상품목록\" },
-    { path: \"/report\", label: \"버그신고\" },
-    { path: \"/announcements\", label: \"공지\" },
+    { path: "/", label: "홈" },
+    { path: "/chat", label: "챗봇" },
+    { path: "/products", label: "상품목록" },
+    { path: "/report", label: "버그신고" },
+    { path: "/announcements", label: "공지" },
   ];
 
   return (
-    <header className=\"sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl\">
-      <div className=\"flex h-14 items-center justify-between px-4\">
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+      <div className="flex h-14 items-center justify-between px-4">
         {/* Logo */}
-        <div className=\"flex items-center gap-6\">
-          <Link to=\"/\" className=\"flex items-center gap-2.5 group\">
-            <div className=\"flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105\">
-              <span className=\"text-xs font-bold\">G</span>
+        <div className="flex items-center min-w-0">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
+              <span className="text-xs font-bold">G</span>
             </div>
-            <span className=\"font-semibold gradient-text\">
+            <span className="font-semibold gradient-text truncate hidden sm:inline-block">
               대출 가이드
             </span>
           </Link>
         </div>
 
         {/* Actions & Consolidated Menu */}
-        <div className=\"flex items-center gap-2\" ref={menuRef}>
+        <div className="flex items-center gap-1 sm:gap-2" ref={menuRef}>
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className=\"linear-btn-ghost h-9 w-9 p-0\"
-            title={`테마: ${theme === \"light\" ? \"라이트\" : \"다크\"}`}
+            className="linear-btn-ghost h-9 w-9 p-0"
+            title={`테마: ${theme === "light" ? "라이트" : "다크"}`}
           >
             {themeIcon[theme]}
           </button>
 
           {/* Consolidated Menu Button */}
-          <div className=\"relative\">
+          <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`linear-btn-ghost flex items-center gap-2 px-3 py-1.5 text-sm font-medium ${menuOpen ? \"bg-secondary text-foreground\" : \"\"}`}
+              className={`linear-btn-ghost flex items-center gap-2 h-9 w-9 sm:w-auto sm:px-3 sm:py-1.5 text-sm font-medium ${menuOpen ? "bg-secondary text-foreground" : ""}`}
             >
               <MenuIcon />
-              <span className=\"hidden sm:inline\">메뉴</span>
+              <span className="hidden md:inline">메뉴</span>
             </button>
 
             {menuOpen && (
-              <div className=\"absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-border/50 bg-background/95 p-2 shadow-xl backdrop-blur-xl fade-in\">
-                <div className=\"space-y-1\">
+              <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-border/50 bg-background/95 p-2 shadow-xl backdrop-blur-xl fade-in">
+                <div className="space-y-1">
                   {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
@@ -156,8 +154,8 @@ export function Header() {
                         to={item.path}
                         className={`block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                           isActive
-                            ? \"bg-primary/10 text-primary\"
-                            : \"text-muted-foreground hover:bg-secondary hover:text-foreground\"
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                         }`}
                       >
                         {item.label}
@@ -166,23 +164,23 @@ export function Header() {
                   })}
                 </div>
 
-                <div className=\"mt-2 border-t border-border/50 pt-2\">
+                <div className="mt-2 border-t border-border/50 pt-2">
                   {user ? (
-                    <div className=\"space-y-1\">
-                      <div className=\"px-3 py-2 text-xs text-muted-foreground truncate\">
+                    <div className="space-y-1">
+                      <div className="px-3 py-2 text-xs text-muted-foreground truncate">
                         {user.email}
                       </div>
                       <button
                         onClick={handleSignOut}
-                        className=\"w-full flex items-center rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors\"
+                        className="w-full flex items-center rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                       >
                         로그아웃
                       </button>
                     </div>
                   ) : (
                     <Link
-                      to=\"/login\"
-                      className=\"block rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors\"
+                      to="/login"
+                      className="block rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
                     >
                       로그인
                     </Link>
