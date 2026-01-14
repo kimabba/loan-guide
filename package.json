@@ -8,8 +8,8 @@
   "scripts": {
     "dev": "bun run pages:dev",
     "dev:web": "bun run --filter web dev",
-    "build": "bun run build:web",
-    "build:web": "bun run --filter web build",
+    "build": "npm run build:web",
+    "build:web": "cd apps/web && npm run build",
     "deploy": "bun run deploy:pages",
     "deploy:pages": "bun run build:web && bun run --filter web pages:deploy",
     "pages:dev": "bun run build:web && bun run --filter web pages:dev",
