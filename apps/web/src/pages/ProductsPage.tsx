@@ -6,8 +6,10 @@ import { CompareBar } from "../components/products/CompareBar";
 import { CompareModal } from "../components/products/CompareModal";
 import { FloatingCompareButton } from "../components/products/FloatingCompareButton";
 import { GuideModal } from "../components/GuideModal";
+import { PasteSearch } from "../components/products/PasteSearch";
 import { useFavoritesStore } from "../lib/favorites";
 import { useCompareStore } from "../lib/compare";
+import { MatchResult } from "../lib/conditionParser";
 
 interface Product {
   item_cd: string;
@@ -39,6 +41,8 @@ export function ProductsPage() {
   const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null);
+  const [fullProducts, setFullProducts] = useState<any[]>([]); // depth3 포함 전체 데이터
 
   const { favorites } = useFavoritesStore();
   const { compareList } = useCompareStore();
@@ -54,7 +58,25 @@ export function ProductsPage() {
         return res.json();
       })
       .then((data) => {
-        setProducts(Array.isArray(data) ? data : []);
+        // API 응답이 { total, guides } 형식인 경우 처리
+        if (data && data.guides && Array.isArray(data.guides)) {
+          // API 응답 필드명 변환: company -> pfi_name, category -> depth1, product_type -> depth2, memo -> fi_memo
+          const mapped = data.guides.map((g: any) => ({
+            item_cd: g.item_cd,
+            pfi_name: g.company || g.pfi_name,
+            depth1: g.category || g.depth1,
+            depth2: g.product_type || g.depth2,
+            fi_memo: g.memo || g.fi_memo,
+          }));
+          setProducts(mapped);
+          setFullProducts(data.guides); // 전체 데이터 저장 (depth3 포함)
+        } else if (Array.isArray(data)) {
+          setProducts(data);
+          setFullProducts(data);
+        } else {
+          setProducts([]);
+          setFullProducts([]);
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -63,7 +85,9 @@ export function ProductsPage() {
         fetch("/loan_guides.json")
           .then((res) => res.json())
           .then((data) => {
-            setProducts(Array.isArray(data) ? data : []);
+            const arr = Array.isArray(data) ? data : [];
+            setProducts(arr);
+            setFullProducts(arr);
             setLoading(false);
           })
           .catch((err) => {
@@ -120,9 +144,31 @@ export function ProductsPage() {
     };
   }, [products]);
 
+  // 매칭 점수 맵 생성
+  const matchScoreMap = useMemo(() => {
+    const map = new Map<string, number>();
+    if (matchResults) {
+      matchResults.forEach((r) => map.set(r.item_cd, r.score));
+    }
+    return map;
+  }, [matchResults]);
+
   // 필터링된 상품 목록
   const filteredProducts = useMemo(() => {
     let result = products;
+
+    // 복붙 검색 결과가 있으면 해당 상품만 표시
+    if (matchResults && matchResults.length > 0) {
+      const matchedIds = new Set(matchResults.map((r) => r.item_cd));
+      result = result.filter((p) => matchedIds.has(p.item_cd));
+      // 점수순 정렬
+      result = result.sort((a, b) => {
+        const scoreA = matchScoreMap.get(a.item_cd) || 0;
+        const scoreB = matchScoreMap.get(b.item_cd) || 0;
+        return scoreB - scoreA;
+      });
+      return result;
+    }
 
     // 즐겨찾기 모드
     if (viewMode === "favorites") {
@@ -165,6 +211,8 @@ export function ProductsPage() {
     selectedCategories,
     selectedProductTypes,
     selectedCompanies,
+    matchResults,
+    matchScoreMap,
   ]);
 
   const handleCategoryChange = (category: string) => {
@@ -339,6 +387,49 @@ export function ProductsPage() {
         </div>
       </div>
 
+      {/* 복붙 검색 아코디언 */}
+      <div className="mx-auto max-w-7xl px-4 pt-4">
+        <PasteSearch
+          products={fullProducts}
+          onMatchResults={setMatchResults}
+        />
+
+        {/* 매칭 결과 헤더 */}
+        {matchResults && matchResults.length > 0 && (
+          <div className="mt-4 flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-green-600 dark:text-green-400"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <span className="font-medium text-green-700 dark:text-green-300">
+                {matchResults.length}개 적합 상품 발견
+              </span>
+              <span className="text-sm text-green-600 dark:text-green-400">
+                (적합도순 정렬)
+              </span>
+            </div>
+            <button
+              onClick={() => setMatchResults(null)}
+              className="text-sm text-green-600 dark:text-green-400 hover:underline"
+            >
+              전체 상품 보기
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* 상품 목록 */}
       <div className="mx-auto max-w-7xl px-4 py-6">
         {loading ? (
@@ -396,6 +487,7 @@ export function ProductsPage() {
                 category={product.depth1}
                 productType={product.depth2}
                 summary={product.fi_memo || ""}
+                matchScore={matchScoreMap.get(product.item_cd)}
                 onClick={() => setSelectedGuide(product.item_cd)}
               />
             ))}
