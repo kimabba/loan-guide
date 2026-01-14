@@ -1,0 +1,1928 @@
+### Page state
+- Page URL: http://localhost:5173/products
+- Page Title: 대출 가이드 챗봇
+- Page Snapshot:
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - link "G 대출 가이드" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: G
+          - generic [ref=e9]: 대출 가이드
+        - navigation [ref=e10]:
+          - link "홈" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "챗봇" [ref=e12] [cursor=pointer]:
+            - /url: /chat
+          - link "상품탐색" [active] [ref=e13] [cursor=pointer]:
+            - /url: /products
+          - link "버그신고" [ref=e14] [cursor=pointer]:
+            - /url: /report
+          - link "공지" [ref=e15] [cursor=pointer]:
+            - /url: /announcements
+      - generic [ref=e16]:
+        - 'button "테마: 시스템" [ref=e17] [cursor=pointer]':
+          - img [ref=e18]
+        - link "로그인" [ref=e20] [cursor=pointer]:
+          - /url: /login
+  - generic [ref=e3035]:
+    - generic [ref=e3037]:
+      - generic [ref=e3038]:
+        - generic [ref=e3039]:
+          - heading "대출 상품 탐색" [level=1] [ref=e3040]
+          - paragraph [ref=e3041]: 163개 상품
+        - generic [ref=e3042]:
+          - button "전체 상품" [ref=e3043] [cursor=pointer]
+          - button "즐겨찾기 (0)" [ref=e3044] [cursor=pointer]:
+            - img [ref=e3045]
+            - text: 즐겨찾기 (0)
+      - generic [ref=e3048]:
+        - textbox "금융사명, 상품명, 키워드 검색..." [ref=e3049]
+        - img [ref=e3050]
+      - generic [ref=e3054]:
+        - generic [ref=e3055]:
+          - heading "카테고리" [level=4] [ref=e3056]
+          - generic [ref=e3057]:
+            - button "저축은행 (100)" [ref=e3058] [cursor=pointer]:
+              - text: 저축은행
+              - generic [ref=e3059]: (100)
+            - button "캐피탈 (51)" [ref=e3060] [cursor=pointer]:
+              - text: 캐피탈
+              - generic [ref=e3061]: (51)
+            - button "대부 (10)" [ref=e3062] [cursor=pointer]:
+              - text: 대부
+              - generic [ref=e3063]: (10)
+            - button "금융백과 (2)" [ref=e3064] [cursor=pointer]:
+              - text: 금융백과
+              - generic [ref=e3065]: (2)
+        - generic [ref=e3066]:
+          - heading "상품 유형" [level=4] [ref=e3067]
+          - generic [ref=e3068]:
+            - button "신용대출(4대가입) (27)" [ref=e3069] [cursor=pointer]:
+              - text: 신용대출(4대가입)
+              - generic [ref=e3070]: (27)
+            - button "오토론 (26)" [ref=e3071] [cursor=pointer]:
+              - text: 오토론
+              - generic [ref=e3072]: (26)
+            - button "햇살론(4대가입) (14)" [ref=e3073] [cursor=pointer]:
+              - text: 햇살론(4대가입)
+              - generic [ref=e3074]: (14)
+            - button "신용대출(프리랜서) (12)" [ref=e3075] [cursor=pointer]:
+              - text: 신용대출(프리랜서)
+              - generic [ref=e3076]: (12)
+            - button "하우스론(본인명의) (9)" [ref=e3077] [cursor=pointer]:
+              - text: 하우스론(본인명의)
+              - generic [ref=e3078]: (9)
+            - button "신용대출(개인사업자) (8)" [ref=e3079] [cursor=pointer]:
+              - text: 신용대출(개인사업자)
+              - generic [ref=e3080]: (8)
+            - button "사잇돌(4대가입) (8)" [ref=e3081] [cursor=pointer]:
+              - text: 사잇돌(4대가입)
+              - generic [ref=e3082]: (8)
+            - button "신용대출(미가입) (7)" [ref=e3083] [cursor=pointer]:
+              - text: 신용대출(미가입)
+              - generic [ref=e3084]: (7)
+            - button "신용대출(개인회생) (5)" [ref=e3085] [cursor=pointer]:
+              - text: 신용대출(개인회생)
+              - generic [ref=e3086]: (5)
+            - button "신용대출(주부론) (4)" [ref=e3087] [cursor=pointer]:
+              - text: 신용대출(주부론)
+              - generic [ref=e3088]: (4)
+            - generic [ref=e3089]: +22개 더
+        - generic [ref=e3090]:
+          - heading "금융사" [level=4] [ref=e3091]
+          - generic [ref=e3092]:
+            - button "SBI저축은행 (13)" [ref=e3093] [cursor=pointer]:
+              - text: SBI저축은행
+              - generic [ref=e3094]: (13)
+            - button "OK저축은행 (8)" [ref=e3095] [cursor=pointer]:
+              - text: OK저축은행
+              - generic [ref=e3096]: (8)
+            - button "롯데캐피탈 (8)" [ref=e3097] [cursor=pointer]:
+              - text: 롯데캐피탈
+              - generic [ref=e3098]: (8)
+            - button "우리금융캐피탈 (7)" [ref=e3099] [cursor=pointer]:
+              - text: 우리금융캐피탈
+              - generic [ref=e3100]: (7)
+            - button "KB캐피탈 (7)" [ref=e3101] [cursor=pointer]:
+              - text: KB캐피탈
+              - generic [ref=e3102]: (7)
+            - button "다올저축은행 (7)" [ref=e3103] [cursor=pointer]:
+              - text: 다올저축은행
+              - generic [ref=e3104]: (7)
+            - button "예가람저축은행 (7)" [ref=e3105] [cursor=pointer]:
+              - text: 예가람저축은행
+              - generic [ref=e3106]: (7)
+            - button "키움저축은행 (6)" [ref=e3107] [cursor=pointer]:
+              - text: 키움저축은행
+              - generic [ref=e3108]: (6)
+            - button "웰컴저축은행 (6)" [ref=e3109] [cursor=pointer]:
+              - text: 웰컴저축은행
+              - generic [ref=e3110]: (6)
+            - button "BNK캐피탈 (5)" [ref=e3111] [cursor=pointer]:
+              - text: BNK캐피탈
+              - generic [ref=e3112]: (5)
+            - button "친애저축은행 (5)" [ref=e3113] [cursor=pointer]:
+              - text: 친애저축은행
+              - generic [ref=e3114]: (5)
+            - button "모아상호저축은행 (5)" [ref=e3115] [cursor=pointer]:
+              - text: 모아상호저축은행
+              - generic [ref=e3116]: (5)
+            - generic [ref=e3117]: +38개 더
+    - generic [ref=e3119]:
+      - generic [ref=e3120] [cursor=pointer]:
+        - generic [ref=e3121]:
+          - button "즐겨찾기 추가" [ref=e3122]:
+            - img [ref=e3123]
+          - button "비교하기" [ref=e3125]:
+            - img [ref=e3126]
+        - generic [ref=e3132]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e3133]
+        - paragraph [ref=e3134]: 신용대출(4대가입)
+        - paragraph [ref=e3135]: 4대가입 직장인, 법인대표 접수 가능 (불가 직군 없는 금융사 / 만기일시 진행시 중수료 면제)
+        - generic [ref=e3137]: 상세보기 →
+      - generic [ref=e3138] [cursor=pointer]:
+        - generic [ref=e3139]:
+          - button "즐겨찾기 추가" [ref=e3140]:
+            - img [ref=e3141]
+          - button "비교하기" [ref=e3143]:
+            - img [ref=e3144]
+        - generic [ref=e3150]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e3151]
+        - paragraph [ref=e3152]: 신용대출(미가입)
+        - paragraph [ref=e3153]: 3개월 이상 통장에 소득 확인되는 미가입 직장인 (불가 직군 없는 금융사 / 만기일시 진행시 중수료 면제)
+        - generic [ref=e3155]: 상세보기 →
+      - generic [ref=e3156] [cursor=pointer]:
+        - generic [ref=e3157]:
+          - button "즐겨찾기 추가" [ref=e3158]:
+            - img [ref=e3159]
+          - button "비교하기" [ref=e3161]:
+            - img [ref=e3162]
+        - generic [ref=e3168]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e3169]
+        - paragraph [ref=e3170]: 신용대출(프리랜서)
+        - paragraph [ref=e3171]: 6개월 이상 통장에 소득 확인되는 3.3% 소득 공제 프리랜서 (월급, 주급, 일급 인정되고, 불가 직군 없는 금융사 / 만기일시 진행시 중수료 면제)
+        - generic [ref=e3173]: 상세보기 →
+      - generic [ref=e3174] [cursor=pointer]:
+        - generic [ref=e3175]:
+          - button "즐겨찾기 추가" [ref=e3176]:
+            - img [ref=e3177]
+          - button "비교하기" [ref=e3179]:
+            - img [ref=e3180]
+        - generic [ref=e3186]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e3187]
+        - paragraph [ref=e3188]: 신용대출(개인사업자)
+        - paragraph [ref=e3189]: 개인사업자, 공동사업자 진행가능 (소득 1가지라도 확인시 진행 가능/ 공동 사업자 경우 지분율 상관없이 진행 차주 서류로만 진행)
+        - generic [ref=e3191]: 상세보기 →
+      - generic [ref=e3192] [cursor=pointer]:
+        - generic [ref=e3193]:
+          - button "즐겨찾기 추가" [ref=e3194]:
+            - img [ref=e3195]
+          - button "비교하기" [ref=e3197]:
+            - img [ref=e3198]
+        - generic [ref=e3204]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e3205]
+        - paragraph [ref=e3206]: 햇살론(4대가입)
+        - paragraph [ref=e3207]: 4대보험 가입자만 진행가능 (※통장진행불가)
+        - generic [ref=e3209]: 상세보기 →
+      - generic [ref=e3210] [cursor=pointer]:
+        - generic [ref=e3211]:
+          - button "즐겨찾기 추가" [ref=e3212]:
+            - img [ref=e3213]
+          - button "비교하기" [ref=e3215]:
+            - img [ref=e3216]
+        - generic [ref=e3222]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e3223]
+        - paragraph [ref=e3224]: 하우스론(본인명의)
+        - paragraph [ref=e3225]: 아파트 소유중인 4대가입, 법인대표 진행가능 개인설정 있어도 진행가능
+        - generic [ref=e3227]: 상세보기 →
+      - generic [ref=e3228] [cursor=pointer]:
+        - generic [ref=e3229]:
+          - button "즐겨찾기 추가" [ref=e3230]:
+            - img [ref=e3231]
+          - button "비교하기" [ref=e3233]:
+            - img [ref=e3234]
+        - generic [ref=e3240]: 저축은행
+        - heading "애큐온저축은행" [level=3] [ref=e3241]
+        - paragraph [ref=e3242]: 신용대출(4대가입)
+        - paragraph [ref=e3243]: 4대가입 직장인 , 법인대표 진행가능 (* DSR오바 되더라도 신규or대환 한도 발생만 되면 중 한가지 상품으로 자동 진행 가능)
+        - generic [ref=e3245]: 상세보기 →
+      - generic [ref=e3246] [cursor=pointer]:
+        - generic [ref=e3247]:
+          - button "즐겨찾기 추가" [ref=e3248]:
+            - img [ref=e3249]
+          - button "비교하기" [ref=e3251]:
+            - img [ref=e3252]
+        - generic [ref=e3258]: 저축은행
+        - heading "JT저축은행" [level=3] [ref=e3259]
+        - paragraph [ref=e3260]: 신용대출(4대가입)
+        - paragraph [ref=e3261]: 4대가입자만 가능 (신용대출 평균 금리 12~15%대로 이자율을 타사대비 저렴한편, 단 한도면에서는 조금 부족한편임)
+        - generic [ref=e3263]: 상세보기 →
+      - generic [ref=e3264] [cursor=pointer]:
+        - generic [ref=e3265]:
+          - button "즐겨찾기 추가" [ref=e3266]:
+            - img [ref=e3267]
+          - button "비교하기" [ref=e3269]:
+            - img [ref=e3270]
+        - generic [ref=e3276]: 저축은행
+        - heading "OSB저축은행" [level=3] [ref=e3277]
+        - paragraph [ref=e3278]: 신용대출(4대가입)
+        - paragraph [ref=e3279]: 4대가입 직장인, 법인대표, 본인사업장에 4대가입한 사업자
+        - generic [ref=e3281]: 상세보기 →
+      - generic [ref=e3282] [cursor=pointer]:
+        - generic [ref=e3283]:
+          - button "즐겨찾기 추가" [ref=e3284]:
+            - img [ref=e3285]
+          - button "비교하기" [ref=e3287]:
+            - img [ref=e3288]
+        - generic [ref=e3294]: 캐피탈
+        - heading "BNK캐피탈" [level=3] [ref=e3295]
+        - paragraph [ref=e3296]: 신용대출(4대가입)
+        - paragraph [ref=e3297]: 4대가입 직장인, 법인대표 가능 / 일용직 가능 (단, 최대한도 1000만 제한) ★고지 1회만 되어도 진행 가능
+        - generic [ref=e3299]: 상세보기 →
+      - generic [ref=e3300] [cursor=pointer]:
+        - generic [ref=e3301]:
+          - button "즐겨찾기 추가" [ref=e3302]:
+            - img [ref=e3303]
+          - button "비교하기" [ref=e3305]:
+            - img [ref=e3306]
+        - generic [ref=e3312]: 저축은행
+        - heading "친애저축은행" [level=3] [ref=e3313]
+        - paragraph [ref=e3314]: 신용대출(4대가입)
+        - paragraph [ref=e3315]: 4대가입 직장인, 법인대표 진행 가능 (채무통합론 한도 발생시, 대환 금융사 전달시 한도 증액 가능)
+        - generic [ref=e3317]: 상세보기 →
+      - generic [ref=e3318] [cursor=pointer]:
+        - generic [ref=e3319]:
+          - button "즐겨찾기 추가" [ref=e3320]:
+            - img [ref=e3321]
+          - button "비교하기" [ref=e3323]:
+            - img [ref=e3324]
+        - generic [ref=e3330]: 캐피탈
+        - heading "BNK캐피탈" [level=3] [ref=e3331]
+        - paragraph [ref=e3332]: 신용대출(프리랜서)
+        - paragraph
+        - generic [ref=e3334]: 상세보기 →
+      - generic [ref=e3335] [cursor=pointer]:
+        - generic [ref=e3336]:
+          - button "즐겨찾기 추가" [ref=e3337]:
+            - img [ref=e3338]
+          - button "비교하기" [ref=e3340]:
+            - img [ref=e3341]
+        - generic [ref=e3347]: 캐피탈
+        - heading "BNK캐피탈" [level=3] [ref=e3348]
+        - paragraph [ref=e3349]: 신용대출(개인사업자)
+        - paragraph [ref=e3350]: 오토론만가능
+        - generic [ref=e3352]: 상세보기 →
+      - generic [ref=e3353] [cursor=pointer]:
+        - generic [ref=e3354]:
+          - button "즐겨찾기 추가" [ref=e3355]:
+            - img [ref=e3356]
+          - button "비교하기" [ref=e3358]:
+            - img [ref=e3359]
+        - generic [ref=e3365]: 캐피탈
+        - heading "BNK캐피탈" [level=3] [ref=e3366]
+        - paragraph [ref=e3367]: 오토론
+        - paragraph [ref=e3368]: 당사 오토론 대출 받으면 시세or대출실행금액중 작음금액을 설정함
+        - generic [ref=e3370]: 상세보기 →
+      - generic [ref=e3371] [cursor=pointer]:
+        - generic [ref=e3372]:
+          - button "즐겨찾기 추가" [ref=e3373]:
+            - img [ref=e3374]
+          - button "비교하기" [ref=e3376]:
+            - img [ref=e3377]
+        - generic [ref=e3383]: 캐피탈
+        - heading "BNK캐피탈" [level=3] [ref=e3384]
+        - paragraph [ref=e3385]: 신용대출(신카론)
+        - paragraph [ref=e3386]: 피부양자or 지역가입자 여성(신용카드 1년 이상 월평균 50만원 이상 사용) 사업자일 경우에 오픈시 진행불가!!
+        - generic [ref=e3388]: 상세보기 →
+      - generic [ref=e3389] [cursor=pointer]:
+        - generic [ref=e3390]:
+          - button "즐겨찾기 추가" [ref=e3391]:
+            - img [ref=e3392]
+          - button "비교하기" [ref=e3394]:
+            - img [ref=e3395]
+        - generic [ref=e3401]: 저축은행
+        - heading "삼일저축은행" [level=3] [ref=e3402]
+        - paragraph [ref=e3403]: 햇살론(미가입)
+        - paragraph [ref=e3404]: 4대보험 미가입 직장인 (소득 신고 안들어가는 고정급 받는 고객) ※ 강원 / 경부 / 대구 거주자 및 재직자만 진행가능
+        - generic [ref=e3406]: 상세보기 →
+      - generic [ref=e3407] [cursor=pointer]:
+        - generic [ref=e3408]:
+          - button "즐겨찾기 추가" [ref=e3409]:
+            - img [ref=e3410]
+          - button "비교하기" [ref=e3412]:
+            - img [ref=e3413]
+        - generic [ref=e3419]: 저축은행
+        - heading "모아상호저축은행" [level=3] [ref=e3420]
+        - paragraph [ref=e3421]: 신용대출(4대가입)
+        - paragraph
+        - generic [ref=e3423]: 상세보기 →
+      - generic [ref=e3424] [cursor=pointer]:
+        - generic [ref=e3425]:
+          - button "즐겨찾기 추가" [ref=e3426]:
+            - img [ref=e3427]
+          - button "비교하기" [ref=e3429]:
+            - img [ref=e3430]
+        - generic [ref=e3436]: 저축은행
+        - heading "모아상호저축은행" [level=3] [ref=e3437]
+        - paragraph [ref=e3438]: 신용대출(미가입)
+        - paragraph
+        - generic [ref=e3440]: 상세보기 →
+      - generic [ref=e3441] [cursor=pointer]:
+        - generic [ref=e3442]:
+          - button "즐겨찾기 추가" [ref=e3443]:
+            - img [ref=e3444]
+          - button "비교하기" [ref=e3446]:
+            - img [ref=e3447]
+        - generic [ref=e3453]: 저축은행
+        - heading "모아상호저축은행" [level=3] [ref=e3454]
+        - paragraph [ref=e3455]: 신용대출(프리랜서)
+        - paragraph
+        - generic [ref=e3457]: 상세보기 →
+      - generic [ref=e3458] [cursor=pointer]:
+        - generic [ref=e3459]:
+          - button "즐겨찾기 추가" [ref=e3460]:
+            - img [ref=e3461]
+          - button "비교하기" [ref=e3463]:
+            - img [ref=e3464]
+        - generic [ref=e3470]: 저축은행
+        - heading "모아상호저축은행" [level=3] [ref=e3471]
+        - paragraph [ref=e3472]: 신용대출(주부론)
+        - paragraph [ref=e3473]: 신용상 문제는 없지만! 다른상품의 조건이 맞지 않아 접수할 상품이 없는 주부! (대출과다, 연체, 최근대출 이런사람은 한도 안나옴)
+        - generic [ref=e3475]: 상세보기 →
+      - generic [ref=e3476] [cursor=pointer]:
+        - generic [ref=e3477]:
+          - button "즐겨찾기 추가" [ref=e3478]:
+            - img [ref=e3479]
+          - button "비교하기" [ref=e3481]:
+            - img [ref=e3482]
+        - generic [ref=e3488]: 저축은행
+        - heading "모아상호저축은행" [level=3] [ref=e3489]
+        - paragraph [ref=e3490]: 햇살론(4대가입)
+        - paragraph
+        - generic [ref=e3492]: 상세보기 →
+      - generic [ref=e3493] [cursor=pointer]:
+        - generic [ref=e3494]:
+          - button "즐겨찾기 추가" [ref=e3495]:
+            - img [ref=e3496]
+          - button "비교하기" [ref=e3498]:
+            - img [ref=e3499]
+        - generic [ref=e3505]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3506]
+        - paragraph [ref=e3507]: 햇살론(4대가입)
+        - paragraph [ref=e3508]: 4대가입 직장인만 접수 가능 (전직인정 가능, 최저 연소득 제한없이 매달 급여확인시 진행가능 - 3고지 2납부 통장 3회 진행)
+        - generic [ref=e3510]: 상세보기 →
+      - generic [ref=e3511] [cursor=pointer]:
+        - generic [ref=e3512]:
+          - button "즐겨찾기 추가" [ref=e3513]:
+            - img [ref=e3514]
+          - button "비교하기" [ref=e3516]:
+            - img [ref=e3517]
+        - generic [ref=e3523]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3524]
+        - paragraph [ref=e3525]: 햇살론(프리랜서)
+        - paragraph [ref=e3526]: 가조회시 가능 여부 확인 > 고객 진행 요청 이후 심사자 서류 안내1~2일 소요 > 고객 서류 준비하여 지점 방문 > 심사하여 한도와 이자율 확인 가능 > 총 소요 시간 2~4주 가량 걸림
+        - generic [ref=e3528]: 상세보기 →
+      - generic [ref=e3529] [cursor=pointer]:
+        - generic [ref=e3530]:
+          - button "즐겨찾기 추가" [ref=e3531]:
+            - img [ref=e3532]
+          - button "비교하기" [ref=e3534]:
+            - img [ref=e3535]
+        - generic [ref=e3541]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3542]
+        - paragraph [ref=e3543]: 햇살론(개인사업자)
+        - paragraph [ref=e3544]: 가조회시 가능 여부 확인 > 고객 진행 요청 이후 심사자 서류 안내1~2일 소요 > 고객 서류 준비하여 지점 방문 > 심사하여 한도와 이자율 확인 가능 > 총 소요 시간 2~4주 가량 걸림
+        - generic [ref=e3546]: 상세보기 →
+      - generic [ref=e3547] [cursor=pointer]:
+        - generic [ref=e3548]:
+          - button "즐겨찾기 추가" [ref=e3549]:
+            - img [ref=e3550]
+          - button "비교하기" [ref=e3552]:
+            - img [ref=e3553]
+        - generic [ref=e3559]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3560]
+        - paragraph [ref=e3561]: 사잇돌(4대가입)
+        - paragraph [ref=e3562]: 4대가입 직장인, 법인대표, 본인 사업장 사대 가입 개인 사업자 진행 가능 (전직 인정 가능, 불가 직군 거의 없음, 5고지4납 -급여 5회 수령시 가능)
+        - generic [ref=e3564]: 상세보기 →
+      - generic [ref=e3565] [cursor=pointer]:
+        - generic [ref=e3566]:
+          - button "즐겨찾기 추가" [ref=e3567]:
+            - img [ref=e3568]
+          - button "비교하기" [ref=e3570]:
+            - img [ref=e3571]
+        - generic [ref=e3577]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3578]
+        - paragraph [ref=e3579]: 사잇돌(미가입)
+        - paragraph [ref=e3580]: 4대보험 미가입 직장인 (소득 신고 안들어가는 고정급 받는 고객)
+        - generic [ref=e3582]: 상세보기 →
+      - generic [ref=e3583] [cursor=pointer]:
+        - generic [ref=e3584]:
+          - button "즐겨찾기 추가" [ref=e3585]:
+            - img [ref=e3586]
+          - button "비교하기" [ref=e3588]:
+            - img [ref=e3589]
+        - generic [ref=e3595]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3596]
+        - paragraph [ref=e3597]: 사잇돌(프리랜서)
+        - paragraph [ref=e3598]: 3.3% 소득 공제 프리랜서 (통장 인정 불가 / 연금이나 소금원으로만 진행 가능)
+        - generic [ref=e3600]: 상세보기 →
+      - generic [ref=e3601] [cursor=pointer]:
+        - generic [ref=e3602]:
+          - button "즐겨찾기 추가" [ref=e3603]:
+            - img [ref=e3604]
+          - button "비교하기" [ref=e3606]:
+            - img [ref=e3607]
+        - generic [ref=e3613]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3614]
+        - paragraph [ref=e3615]: 사잇돌(개인사업자)
+        - paragraph [ref=e3616]: 개인사업자, 공동사업자 진행가능 (공동사업자 경우 지분율 확인 후 심사진행 가능 / 재직확인 필수 아니며, 심사부 판단하에 재직확인 함)
+        - generic [ref=e3618]: 상세보기 →
+      - generic [ref=e3619] [cursor=pointer]:
+        - generic [ref=e3620]:
+          - button "즐겨찾기 추가" [ref=e3621]:
+            - img [ref=e3622]
+          - button "비교하기" [ref=e3624]:
+            - img [ref=e3625]
+        - generic [ref=e3631]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3632]
+        - paragraph [ref=e3633]: 사잇돌(연금수령)
+        - paragraph [ref=e3634]: 연금 수령 1회 이상자 진행가능 (군인연금, 사학연금, 군인연금, 공무원연금만 인정)
+        - generic [ref=e3636]: 상세보기 →
+      - generic [ref=e3637] [cursor=pointer]:
+        - generic [ref=e3638]:
+          - button "즐겨찾기 추가" [ref=e3639]:
+            - img [ref=e3640]
+          - button "비교하기" [ref=e3642]:
+            - img [ref=e3643]
+        - generic [ref=e3649]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3650]
+        - paragraph [ref=e3651]: 신용대출(4대가입)
+        - paragraph [ref=e3652]: 4대가입 직장인, 법인대표 접수 가능 (한도증액, 금리인하 1% 가능, 전직인정 가능 - 대환의 경우 같은 직장만 인정가능, 납부 미납 일시 통장 보완 진행 가능)
+        - generic [ref=e3654]: 상세보기 →
+      - generic [ref=e3655] [cursor=pointer]:
+        - generic [ref=e3656]:
+          - button "즐겨찾기 추가" [ref=e3657]:
+            - img [ref=e3658]
+          - button "비교하기" [ref=e3660]:
+            - img [ref=e3661]
+        - generic [ref=e3667]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3668]
+        - paragraph [ref=e3669]: 신용대출(미가입)
+        - paragraph [ref=e3670]: 4대보험 미가입 직장인 (소득 신고 안들어가는 고정급 받는 고객) (한도 증액, 금리 인하 1% 가능)
+        - generic [ref=e3672]: 상세보기 →
+      - generic [ref=e3673] [cursor=pointer]:
+        - generic [ref=e3674]:
+          - button "즐겨찾기 추가" [ref=e3675]:
+            - img [ref=e3676]
+          - button "비교하기" [ref=e3678]:
+            - img [ref=e3679]
+        - generic [ref=e3685]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3686]
+        - paragraph [ref=e3687]: 신용대출(프리랜서)
+        - paragraph [ref=e3688]: 3.3% 소득 공제 프리랜서 (한도증액, 금리인하 1% 가능) (원천징수 60% 소득인정 - 단, 보험설계사 미용실 등은 통장소득 인정 불가)
+        - generic [ref=e3690]: 상세보기 →
+      - generic [ref=e3691] [cursor=pointer]:
+        - generic [ref=e3692]:
+          - button "즐겨찾기 추가" [ref=e3693]:
+            - img [ref=e3694]
+          - button "비교하기" [ref=e3696]:
+            - img [ref=e3697]
+        - generic [ref=e3703]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e3704]
+        - paragraph [ref=e3705]: 신용대출(무직론)
+        - paragraph [ref=e3706]: 신용상 문제는 없지만! 다른상품의 조건이 맞지 않아 접수할 상품이 없는 무직! (대출과다, 연체, 최근대출 이런사람은 한도 안나옴) 사업자는 불가직군으로, 진행시 단도리 필수!
+        - generic [ref=e3708]: 상세보기 →
+      - generic [ref=e3709] [cursor=pointer]:
+        - generic [ref=e3710]:
+          - button "즐겨찾기 추가" [ref=e3711]:
+            - img [ref=e3712]
+          - button "비교하기" [ref=e3714]:
+            - img [ref=e3715]
+        - generic [ref=e3721]: 저축은행
+        - heading "동양저축은행" [level=3] [ref=e3722]
+        - paragraph [ref=e3723]: 신용대출(개인회생)
+        - paragraph [ref=e3724]: 4대보험 가입자 상품
+        - generic [ref=e3726]: 상세보기 →
+      - generic [ref=e3727] [cursor=pointer]:
+        - generic [ref=e3728]:
+          - button "즐겨찾기 추가" [ref=e3729]:
+            - img [ref=e3730]
+          - button "비교하기" [ref=e3732]:
+            - img [ref=e3733]
+        - generic [ref=e3739]: 저축은행
+        - heading "키움저축은행" [level=3] [ref=e3740]
+        - paragraph [ref=e3741]: 신용대출(4대가입)
+        - paragraph [ref=e3742]: 사업자보유 혹은 사업자대출 보유시 진행 불가 (2025.11.24 현시간부로 적용)
+        - generic [ref=e3744]: 상세보기 →
+      - generic [ref=e3745] [cursor=pointer]:
+        - generic [ref=e3746]:
+          - button "즐겨찾기 추가" [ref=e3747]:
+            - img [ref=e3748]
+          - button "비교하기" [ref=e3750]:
+            - img [ref=e3751]
+        - generic [ref=e3757]: 저축은행
+        - heading "키움저축은행" [level=3] [ref=e3758]
+        - paragraph [ref=e3759]: 오토론
+        - paragraph [ref=e3760]: 오토플러스(4대가입 직장인만 진행가능)
+        - generic [ref=e3762]: 상세보기 →
+      - generic [ref=e3763] [cursor=pointer]:
+        - generic [ref=e3764]:
+          - button "즐겨찾기 추가" [ref=e3765]:
+            - img [ref=e3766]
+          - button "비교하기" [ref=e3768]:
+            - img [ref=e3769]
+        - generic [ref=e3775]: 저축은행
+        - heading "키움저축은행" [level=3] [ref=e3776]
+        - paragraph [ref=e3777]: 사잇돌(4대가입)
+        - paragraph [ref=e3778]: 4대가입 직장인, 법인대표 진행 가능 (사업자 보유시에도 진행 가능)
+        - generic [ref=e3780]: 상세보기 →
+      - generic [ref=e3781] [cursor=pointer]:
+        - generic [ref=e3782]:
+          - button "즐겨찾기 추가" [ref=e3783]:
+            - img [ref=e3784]
+          - button "비교하기" [ref=e3786]:
+            - img [ref=e3787]
+        - generic [ref=e3793]: 저축은행
+        - heading "키움저축은행" [level=3] [ref=e3794]
+        - paragraph [ref=e3795]: 햇살론(4대가입)
+        - paragraph [ref=e3796]: 4대가입 직장인만 진행 가능 (전직 인정 가능, 일용직 전직 인정 가능)
+        - generic [ref=e3798]: 상세보기 →
+      - generic [ref=e3799] [cursor=pointer]:
+        - generic [ref=e3800]:
+          - button "즐겨찾기 추가" [ref=e3801]:
+            - img [ref=e3802]
+          - button "비교하기" [ref=e3804]:
+            - img [ref=e3805]
+        - generic [ref=e3811]: 캐피탈
+        - heading "IM캐피탈" [level=3] [ref=e3812]
+        - paragraph [ref=e3813]: 하우스론(배우자명의)
+        - paragraph
+        - generic [ref=e3815]: 상세보기 →
+      - generic [ref=e3816] [cursor=pointer]:
+        - generic [ref=e3817]:
+          - button "즐겨찾기 추가" [ref=e3818]:
+            - img [ref=e3819]
+          - button "비교하기" [ref=e3821]:
+            - img [ref=e3822]
+        - generic [ref=e3828]: 캐피탈
+        - heading "IM캐피탈" [level=3] [ref=e3829]
+        - paragraph [ref=e3830]: 하우스론(본인명의)
+        - paragraph [ref=e3831]: 무직 포함 모든 직군 진행가능 ( 즉발 사업자도 진행가능) 본인명의, 배우자 공동명의, 타인공동명의 본인지분 50% 이상자!!
+        - generic [ref=e3833]: 상세보기 →
+      - generic [ref=e3834] [cursor=pointer]:
+        - generic [ref=e3835]:
+          - button "즐겨찾기 추가" [ref=e3836]:
+            - img [ref=e3837]
+          - button "비교하기" [ref=e3839]:
+            - img [ref=e3840]
+        - generic [ref=e3846]: 캐피탈
+        - heading "IM캐피탈" [level=3] [ref=e3847]
+        - paragraph [ref=e3848]: 하우스론(유담보)
+        - paragraph [ref=e3849]: 자가 소유 중인 본인, 배우자 사업자 보유시 진행 가능하고, 공동 사업자는 진행 불가 집에 근저당 설정되는 담보대출성 상품임(담보대출는 LTV계산이 약간 다름)
+        - generic [ref=e3851]: 상세보기 →
+      - generic [ref=e3852] [cursor=pointer]:
+        - generic [ref=e3853]:
+          - button "즐겨찾기 추가" [ref=e3854]:
+            - img [ref=e3855]
+          - button "비교하기" [ref=e3857]:
+            - img [ref=e3858]
+        - generic [ref=e3864]: 캐피탈
+        - heading "한국캐피탈" [level=3] [ref=e3865]
+        - paragraph [ref=e3866]: 하우스론(유담보)
+        - paragraph [ref=e3867]: 본인 or 배우자 사업자 보유시 진행 가능 (차주가 아닌 배우자가 사업자일시 배우자 동의 필수!)
+        - generic [ref=e3869]: 상세보기 →
+      - generic [ref=e3870] [cursor=pointer]:
+        - generic [ref=e3871]:
+          - button "즐겨찾기 추가" [ref=e3872]:
+            - img [ref=e3873]
+          - button "비교하기" [ref=e3875]:
+            - img [ref=e3876]
+        - generic [ref=e3882]: 캐피탈
+        - heading "한국캐피탈" [level=3] [ref=e3883]
+        - paragraph [ref=e3884]: 오토론
+        - paragraph [ref=e3885]: 상품명 - 오토담보, 오토우대, 오토세이빙, 오토에너지, 오토에너지플러스, 오토후순위
+        - generic [ref=e3887]: 상세보기 →
+      - generic [ref=e3888] [cursor=pointer]:
+        - generic [ref=e3889]:
+          - button "즐겨찾기 추가" [ref=e3890]:
+            - img [ref=e3891]
+          - button "비교하기" [ref=e3893]:
+            - img [ref=e3894]
+        - generic [ref=e3900]: 캐피탈
+        - heading "한국캐피탈" [level=3] [ref=e3901]
+        - paragraph [ref=e3902]: 신용대출(신카론)
+        - paragraph
+        - generic [ref=e3904]: 상세보기 →
+      - generic [ref=e3905] [cursor=pointer]:
+        - generic [ref=e3906]:
+          - button "즐겨찾기 추가" [ref=e3907]:
+            - img [ref=e3908]
+          - button "비교하기" [ref=e3910]:
+            - img [ref=e3911]
+        - generic [ref=e3917]: 캐피탈
+        - heading "한국캐피탈" [level=3] [ref=e3918]
+        - paragraph [ref=e3919]: 신용대출(레이디론)
+        - paragraph [ref=e3920]: 사대가입 6개월 이상, 사업자 12개월 이상 여성 / 주부 가능 (피부양자, 지역세대원 6개월 이상자)
+        - generic [ref=e3922]: 상세보기 →
+      - generic [ref=e3923] [cursor=pointer]:
+        - generic [ref=e3924]:
+          - button "즐겨찾기 추가" [ref=e3925]:
+            - img [ref=e3926]
+          - button "비교하기" [ref=e3928]:
+            - img [ref=e3929]
+        - generic [ref=e3935]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e3936]
+        - paragraph [ref=e3937]: 신용대출(4대가입)
+        - paragraph [ref=e3938]: 4대가입 직장인, 법인대표 진행가능 (불가 직군 크게 없고, 최소 연소득 제한 없음)
+        - generic [ref=e3940]: 상세보기 →
+      - generic [ref=e3941] [cursor=pointer]:
+        - generic [ref=e3942]:
+          - button "즐겨찾기 추가" [ref=e3943]:
+            - img [ref=e3944]
+          - button "비교하기" [ref=e3946]:
+            - img [ref=e3947]
+        - generic [ref=e3953]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e3954]
+        - paragraph [ref=e3955]: 신용대출(프리랜서)
+        - paragraph [ref=e3956]: 대기업 소속 3.3% 소득 공제 프리랜서 (우량 프리랜서만 진행 / 보험설계사, 학습지 등)
+        - generic [ref=e3958]: 상세보기 →
+      - generic [ref=e3959] [cursor=pointer]:
+        - generic [ref=e3960]:
+          - button "즐겨찾기 추가" [ref=e3961]:
+            - img [ref=e3962]
+          - button "비교하기" [ref=e3964]:
+            - img [ref=e3965]
+        - generic [ref=e3971]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e3972]
+        - paragraph [ref=e3973]: 신용대출(개인사업자)
+        - paragraph [ref=e3974]: 소득 증빙 가능한 개인사업자 진행 가능 (자산 있을 경우 진행가능)
+        - generic [ref=e3976]: 상세보기 →
+      - generic [ref=e3977] [cursor=pointer]:
+        - generic [ref=e3978]:
+          - button "즐겨찾기 추가" [ref=e3979]:
+            - img [ref=e3980]
+          - button "비교하기" [ref=e3982]:
+            - img [ref=e3983]
+        - generic [ref=e3989]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e3990]
+        - paragraph [ref=e3991]: 하우스론(본인명의)
+        - paragraph [ref=e3992]: 무직 포함 모든 직군 진행 가능 (신분증 제외 고객 준비 서류 없어서 간단하게 진행)
+        - generic [ref=e3994]: 상세보기 →
+      - generic [ref=e3995] [cursor=pointer]:
+        - generic [ref=e3996]:
+          - button "즐겨찾기 추가" [ref=e3997]:
+            - img [ref=e3998]
+          - button "비교하기" [ref=e4000]:
+            - img [ref=e4001]
+        - generic [ref=e4007]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e4008]
+        - paragraph [ref=e4009]: 하우스론(배우자명의)
+        - paragraph [ref=e4010]: 무직 포함 모든 직군 진행 가능 (신분증 제외 고객준비 서류 없어서 간단하게 진행)
+        - generic [ref=e4012]: 상세보기 →
+      - generic [ref=e4013] [cursor=pointer]:
+        - generic [ref=e4014]:
+          - button "즐겨찾기 추가" [ref=e4015]:
+            - img [ref=e4016]
+          - button "비교하기" [ref=e4018]:
+            - img [ref=e4019]
+        - generic [ref=e4025]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e4026]
+        - paragraph [ref=e4027]: 하우스론(전월세)
+        - paragraph [ref=e4028]: 무직 포함 모든 직군 진행 가능 (전세 계약서 확인 및 확정 일자 필수!!)
+        - generic [ref=e4030]: 상세보기 →
+      - generic [ref=e4031] [cursor=pointer]:
+        - generic [ref=e4032]:
+          - button "즐겨찾기 추가" [ref=e4033]:
+            - img [ref=e4034]
+          - button "비교하기" [ref=e4036]:
+            - img [ref=e4037]
+        - generic [ref=e4043]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e4044]
+        - paragraph [ref=e4045]: 신용대출(신카론)
+        - paragraph [ref=e4046]: 무직 포함 모든 직군 진행가능 (카드 단독으로 진행) 자산 있을시 추가 한도 가능!
+        - generic [ref=e4048]: 상세보기 →
+      - generic [ref=e4049] [cursor=pointer]:
+        - generic [ref=e4050]:
+          - button "즐겨찾기 추가" [ref=e4051]:
+            - img [ref=e4052]
+          - button "비교하기" [ref=e4054]:
+            - img [ref=e4055]
+        - generic [ref=e4061]: 저축은행
+        - heading "한국투자저축은행" [level=3] [ref=e4062]
+        - paragraph [ref=e4063]: 신용대출(4대가입)
+        - paragraph [ref=e4064]: 4대가입 직장인, 사업자 진행 가능 (사업자 경우 비대면으로만 가능) 단기 재직자 진행 가능( 고지 / 납부 없어도 가능 - 1개월 재직 + 급여 통장 1회)
+        - generic [ref=e4066]: 상세보기 →
+      - generic [ref=e4067] [cursor=pointer]:
+        - generic [ref=e4068]:
+          - button "즐겨찾기 추가" [ref=e4069]:
+            - img [ref=e4070]
+          - button "비교하기" [ref=e4072]:
+            - img [ref=e4073]
+        - generic [ref=e4079]: 저축은행
+        - heading "한국투자저축은행" [level=3] [ref=e4080]
+        - paragraph [ref=e4081]: 신용대출(미가입)
+        - paragraph [ref=e4082]: 4대보험 미가입 직장인 (소득 신고 안들어가는 고정급 받는 고객) 단기 재직자 진행 가능 (30일 이상 근무자 최대한도 2000만원), 자가 소유시 대환 협의 가능
+        - generic [ref=e4084]: 상세보기 →
+      - generic [ref=e4085] [cursor=pointer]:
+        - generic [ref=e4086]:
+          - button "즐겨찾기 추가" [ref=e4087]:
+            - img [ref=e4088]
+          - button "비교하기" [ref=e4090]:
+            - img [ref=e4091]
+        - generic [ref=e4097]: 저축은행
+        - heading "IBK저축은행" [level=3] [ref=e4098]
+        - paragraph [ref=e4099]: 신용대출(4대가입)
+        - paragraph [ref=e4100]: 4대가입 직장인 진행 가능 ( 온라인 대출 신청이라 재직 전화 대부분 면제로 재직 확인 불편한 고객들 접수시 간단하게 진행가능)
+        - generic [ref=e4102]: 상세보기 →
+      - generic [ref=e4103] [cursor=pointer]:
+        - generic [ref=e4104]:
+          - button "즐겨찾기 추가" [ref=e4105]:
+            - img [ref=e4106]
+          - button "비교하기" [ref=e4108]:
+            - img [ref=e4109]
+        - generic [ref=e4115]: 저축은행
+        - heading "IBK저축은행" [level=3] [ref=e4116]
+        - paragraph [ref=e4117]: 햇살론(4대가입)
+        - paragraph [ref=e4118]: "* 온라인햇살론으로 타사대비 금리평균 1%정도 저렴! 빠르고 진행간단함"
+        - generic [ref=e4120]: 상세보기 →
+      - generic [ref=e4121] [cursor=pointer]:
+        - generic [ref=e4122]:
+          - button "즐겨찾기 추가" [ref=e4123]:
+            - img [ref=e4124]
+          - button "비교하기" [ref=e4126]:
+            - img [ref=e4127]
+        - generic [ref=e4133]: 저축은행
+        - heading "고려저축은행" [level=3] [ref=e4134]
+        - paragraph [ref=e4135]: 신용대출(4대가입)
+        - paragraph [ref=e4136]: 4대가입 직장인 진행가능 (불가 직군 크게 없음)
+        - generic [ref=e4138]: 상세보기 →
+      - generic [ref=e4139] [cursor=pointer]:
+        - generic [ref=e4140]:
+          - button "즐겨찾기 추가" [ref=e4141]:
+            - img [ref=e4142]
+          - button "비교하기" [ref=e4144]:
+            - img [ref=e4145]
+        - generic [ref=e4151]: 저축은행
+        - heading "고려저축은행" [level=3] [ref=e4152]
+        - paragraph [ref=e4153]: 햇살론(4대가입)
+        - paragraph [ref=e4154]: 4대가입 직장인만 진행가능 (통장소득 필수 확인 / 납부상 문제있을 경우 대체 서류 연금서류만 가능)
+        - generic [ref=e4156]: 상세보기 →
+      - generic [ref=e4157] [cursor=pointer]:
+        - generic [ref=e4158]:
+          - button "즐겨찾기 추가" [ref=e4159]:
+            - img [ref=e4160]
+          - button "비교하기" [ref=e4162]:
+            - img [ref=e4163]
+        - generic [ref=e4169]: 저축은행
+        - heading "고려저축은행" [level=3] [ref=e4170]
+        - paragraph [ref=e4171]: 신용대출(개인사업자)
+        - paragraph [ref=e4172]: 개인사업자, 공동사업자 진행가능 (공동 사업자 경우 차주앞으로 사업소득 통장 확인시 지분율 상관없이 진행가능) / 대부사용시 진행 불가
+        - generic [ref=e4174]: 상세보기 →
+      - generic [ref=e4175] [cursor=pointer]:
+        - generic [ref=e4176]:
+          - button "즐겨찾기 추가" [ref=e4177]:
+            - img [ref=e4178]
+          - button "비교하기" [ref=e4180]:
+            - img [ref=e4181]
+        - generic [ref=e4187]: 저축은행
+        - heading "고려저축은행" [level=3] [ref=e4188]
+        - paragraph [ref=e4189]: 신용대출(프리랜서)
+        - paragraph [ref=e4190]: 3.3% 소득 공제 프리랜서 진행 가능 (대환 진행시 월별 원천징수 영수증 필수 첨부) /
+        - generic [ref=e4192]: 상세보기 →
+      - generic [ref=e4193] [cursor=pointer]:
+        - generic [ref=e4194]:
+          - button "즐겨찾기 추가" [ref=e4195]:
+            - img [ref=e4196]
+          - button "비교하기" [ref=e4198]:
+            - img [ref=e4199]
+        - generic [ref=e4205]: 저축은행
+        - heading "우리금융저축은행" [level=3] [ref=e4206]
+        - paragraph [ref=e4207]: 햇살론(4대가입)
+        - paragraph [ref=e4208]: 4대가입 직장인만 진행 가능 (전자 서명이 간단해서, 인증서 사용 어려운 고객들 진행 용이 / 단, 수당율 낮아서 필요시에만 진행 요망)
+        - generic [ref=e4210]: 상세보기 →
+      - generic [ref=e4211] [cursor=pointer]:
+        - generic [ref=e4212]:
+          - button "즐겨찾기 추가" [ref=e4213]:
+            - img [ref=e4214]
+          - button "비교하기" [ref=e4216]:
+            - img [ref=e4217]
+        - generic [ref=e4223]: 저축은행
+        - heading "유안타저축은행" [level=3] [ref=e4224]
+        - paragraph [ref=e4225]: 햇살론(4대가입)
+        - paragraph
+        - generic [ref=e4227]: 상세보기 →
+      - generic [ref=e4228] [cursor=pointer]:
+        - generic [ref=e4229]:
+          - button "즐겨찾기 추가" [ref=e4230]:
+            - img [ref=e4231]
+          - button "비교하기" [ref=e4233]:
+            - img [ref=e4234]
+        - generic [ref=e4240]: 저축은행
+        - heading "융창저축은행" [level=3] [ref=e4241]
+        - paragraph [ref=e4242]: 햇살론(4대가입)
+        - paragraph [ref=e4243]: 4대가입 직장인만 진행 가능 (급여 통장 진행시, 급여 편차 30만원 이상일시 진행 불가)
+        - generic [ref=e4245]: 상세보기 →
+      - generic [ref=e4246] [cursor=pointer]:
+        - generic [ref=e4247]:
+          - button "즐겨찾기 추가" [ref=e4248]:
+            - img [ref=e4249]
+          - button "비교하기" [ref=e4251]:
+            - img [ref=e4252]
+        - generic [ref=e4258]: 캐피탈
+        - heading "NH농협캐피탈" [level=3] [ref=e4259]
+        - paragraph [ref=e4260]: 신용대출(4대가입)
+        - paragraph [ref=e4261]: 4대가입 직장인 (납부상 문제 있는 모든 경우 통장 원본 등기 발송시 진행 가능) ※ 군미필 진행가능
+        - generic [ref=e4263]: 상세보기 →
+      - generic [ref=e4264] [cursor=pointer]:
+        - generic [ref=e4265]:
+          - button "즐겨찾기 추가" [ref=e4266]:
+            - img [ref=e4267]
+          - button "비교하기" [ref=e4269]:
+            - img [ref=e4270]
+        - generic [ref=e4276]: 캐피탈
+        - heading "NH농협캐피탈" [level=3] [ref=e4277]
+        - paragraph [ref=e4278]: 신용대출(프리랜서)
+        - paragraph [ref=e4279]: 법인 회사 이상의 3.3% 소득 공제 프리랜서 (통장 소득 6개월로 진행되나, 원본 등기 발송 필수)
+        - generic [ref=e4281]: 상세보기 →
+      - generic [ref=e4282] [cursor=pointer]:
+        - generic [ref=e4283]:
+          - button "즐겨찾기 추가" [ref=e4284]:
+            - img [ref=e4285]
+          - button "비교하기" [ref=e4287]:
+            - img [ref=e4288]
+        - generic [ref=e4294]: 캐피탈
+        - heading "NH농협캐피탈" [level=3] [ref=e4295]
+        - paragraph [ref=e4296]: 하우스론(본인명의)
+        - paragraph [ref=e4297]: 무직 포함 모든 직군 가능 (물건지 관련 설정율, 시세 확인 안 함) (등기부 등본 필수 서류 아님 - 등기상 문제가 있더라도 접수해서 심사 가능)
+        - generic [ref=e4299]: 상세보기 →
+      - generic [ref=e4300] [cursor=pointer]:
+        - generic [ref=e4301]:
+          - button "즐겨찾기 추가" [ref=e4302]:
+            - img [ref=e4303]
+          - button "비교하기" [ref=e4305]:
+            - img [ref=e4306]
+        - generic [ref=e4312]: 캐피탈
+        - heading "우리금융캐피탈" [level=3] [ref=e4313]
+        - paragraph [ref=e4314]: 하우스론(본인명의)
+        - paragraph [ref=e4315]: 무직 포함 모든 직군 진행 가능 ( 추정 소득으로 진행되고, 실소득이 높을 경우 보완해서 진행 가능)
+        - generic [ref=e4317]: 상세보기 →
+      - generic [ref=e4318] [cursor=pointer]:
+        - generic [ref=e4319]:
+          - button "즐겨찾기 추가" [ref=e4320]:
+            - img [ref=e4321]
+          - button "비교하기" [ref=e4323]:
+            - img [ref=e4324]
+        - generic [ref=e4330]: 캐피탈
+        - heading "우리금융캐피탈" [level=3] [ref=e4331]
+        - paragraph [ref=e4332]: 하우스론(사업자자산론)
+        - paragraph [ref=e4333]: 개업기간 6개월 이상 경과한 개인 사업자(공동사업자 가능) 중 본인명의, 부부 공동명의, 배우자명의 주택 보유자!! 카드 유무 상관없이 진행가능, 물건지 제한없음
+        - generic [ref=e4335]: 상세보기 →
+      - generic [ref=e4336] [cursor=pointer]:
+        - generic [ref=e4337]:
+          - button "즐겨찾기 추가" [ref=e4338]:
+            - img [ref=e4339]
+          - button "비교하기" [ref=e4341]:
+            - img [ref=e4342]
+        - generic [ref=e4348]: 캐피탈
+        - heading "우리금융캐피탈" [level=3] [ref=e4349]
+        - paragraph [ref=e4350]: 하우스론(분양론)
+        - paragraph [ref=e4351]: 24년 1월 부터 뉴주택(분양권) 상품 폐지 무직 포함 모든 직군 가능 ( 추정소득으로 진행되고, 실소득이 높을 경우 보완해서 진행가능)
+        - generic [ref=e4353]: 상세보기 →
+      - generic [ref=e4354] [cursor=pointer]:
+        - generic [ref=e4355]:
+          - button "즐겨찾기 추가" [ref=e4356]:
+            - img [ref=e4357]
+          - button "비교하기" [ref=e4359]:
+            - img [ref=e4360]
+        - generic [ref=e4366]: 캐피탈
+        - heading "우리금융캐피탈" [level=3] [ref=e4367]
+        - paragraph [ref=e4368]: 하우스론(배우자명의)
+        - paragraph [ref=e4369]: 무직 포함 전직군 진행 가능 (최근 6개월 이상 카드 이용 고객 중 주택 보유자 (주택 형태 무관)) 카드 단독 불가!! (카드+하우스 상품)
+        - generic [ref=e4371]: 상세보기 →
+      - generic [ref=e4372] [cursor=pointer]:
+        - generic [ref=e4373]:
+          - button "즐겨찾기 추가" [ref=e4374]:
+            - img [ref=e4375]
+          - button "비교하기" [ref=e4377]:
+            - img [ref=e4378]
+        - generic [ref=e4384]: 캐피탈
+        - heading "우리금융캐피탈" [level=3] [ref=e4385]
+        - paragraph [ref=e4386]: 하우스론(전월세)
+        - paragraph [ref=e4387]: 모직 포함 모든 직군 가능 ( 추정 소득으로 진행되고, 실소득이 높을 경우 보완해서 진행 가능)
+        - generic [ref=e4389]: 상세보기 →
+      - generic [ref=e4390] [cursor=pointer]:
+        - generic [ref=e4391]:
+          - button "즐겨찾기 추가" [ref=e4392]:
+            - img [ref=e4393]
+          - button "비교하기" [ref=e4395]:
+            - img [ref=e4396]
+        - generic [ref=e4402]: 캐피탈
+        - heading "우리금융캐피탈" [level=3] [ref=e4403]
+        - paragraph [ref=e4404]: 오토론
+        - paragraph [ref=e4405]: 무직 포함 모든 직군 가능 ( 추정 소득으로 진행되고, 실소득이 높을 경우 보완해서 진행 가능)
+        - generic [ref=e4407]: 상세보기 →
+      - generic [ref=e4408] [cursor=pointer]:
+        - generic [ref=e4409]:
+          - button "즐겨찾기 추가" [ref=e4410]:
+            - img [ref=e4411]
+          - button "비교하기" [ref=e4413]:
+            - img [ref=e4414]
+        - generic [ref=e4420]: 캐피탈
+        - heading "우리금융캐피탈" [level=3] [ref=e4421]
+        - paragraph [ref=e4422]: 신용대출(4대가입)
+        - paragraph [ref=e4423]: 4대가입 직장인만 진행가능 몇일 전 최근 대출 발생 건이 있더라도 CB만 깔끔하면 한도 산출이 잘됨 (우량 CB위주!)
+        - generic [ref=e4425]: 상세보기 →
+      - generic [ref=e4426] [cursor=pointer]:
+        - generic [ref=e4427]:
+          - button "즐겨찾기 추가" [ref=e4428]:
+            - img [ref=e4429]
+          - button "비교하기" [ref=e4431]:
+            - img [ref=e4432]
+        - generic [ref=e4438]: 캐피탈
+        - heading "하나캐피탈" [level=3] [ref=e4439]
+        - paragraph [ref=e4440]: 신용대출(4대가입)
+        - paragraph [ref=e4441]: "* 직장인 신용대출도 활용추천!"
+        - generic [ref=e4443]: 상세보기 →
+      - generic [ref=e4444] [cursor=pointer]:
+        - generic [ref=e4445]:
+          - button "즐겨찾기 추가" [ref=e4446]:
+            - img [ref=e4447]
+          - button "비교하기" [ref=e4449]:
+            - img [ref=e4450]
+        - generic [ref=e4456]: 캐피탈
+        - heading "하나캐피탈" [level=3] [ref=e4457]
+        - paragraph [ref=e4458]: 하우스론(본인명의)
+        - paragraph [ref=e4459]: 사대가입 직장인 or 개인사업자 3개월 이상 (공동 사업자 가능) or 법인대표 (업력 2년 이상 ,1년 이상 근무자) 진행 가능 (kb시세 확인가능한 아파트나 오피스텔만 진행가능!!)
+        - generic [ref=e4461]: 상세보기 →
+      - generic [ref=e4462] [cursor=pointer]:
+        - generic [ref=e4463]:
+          - button "즐겨찾기 추가" [ref=e4464]:
+            - img [ref=e4465]
+          - button "비교하기" [ref=e4467]:
+            - img [ref=e4468]
+        - generic [ref=e4474]: 캐피탈
+        - heading "하나캐피탈" [level=3] [ref=e4475]
+        - paragraph [ref=e4476]: 오토론
+        - paragraph [ref=e4477]: "3개월 이상 4대가입 직장인, 사업자 : 차량가액 + 신용한도"
+        - generic [ref=e4479]: 상세보기 →
+      - generic [ref=e4480] [cursor=pointer]:
+        - generic [ref=e4481]:
+          - button "즐겨찾기 추가" [ref=e4482]:
+            - img [ref=e4483]
+          - button "비교하기" [ref=e4485]:
+            - img [ref=e4486]
+        - generic [ref=e4492]: 저축은행
+        - heading "키움YES저축은행" [level=3] [ref=e4493]
+        - paragraph [ref=e4494]: 신용대출(4대가입)
+        - paragraph [ref=e4495]: 4대가입 직장인만 진행 가능 (금리 인하, 한도 증액 관련해서 예외 신청 가능 - 굿포인트 있고, 진행 의사 있는 분만 요청)
+        - generic [ref=e4497]: 상세보기 →
+      - generic [ref=e4498] [cursor=pointer]:
+        - generic [ref=e4499]:
+          - button "즐겨찾기 추가" [ref=e4500]:
+            - img [ref=e4501]
+          - button "비교하기" [ref=e4503]:
+            - img [ref=e4504]
+        - generic [ref=e4510]: 저축은행
+        - heading "키움YES저축은행" [level=3] [ref=e4511]
+        - paragraph [ref=e4512]: 사잇돌(4대가입)
+        - paragraph [ref=e4513]: 4대가입 직장인, 법인대표 진행 가능 (전직 인정 가능, 5고지 5납부만 진행 가능, 통장 보완 불가)
+        - generic [ref=e4515]: 상세보기 →
+      - generic [ref=e4516] [cursor=pointer]:
+        - generic [ref=e4517]:
+          - button "즐겨찾기 추가" [ref=e4518]:
+            - img [ref=e4519]
+          - button "비교하기" [ref=e4521]:
+            - img [ref=e4522]
+        - generic [ref=e4528]: 저축은행
+        - heading "키움YES저축은행" [level=3] [ref=e4529]
+        - paragraph [ref=e4530]: 햇살론(4대가입)
+        - paragraph [ref=e4531]: 4대가입 직장인만 진행가능 (3고지 3납부 진행가능 - 통장 보완 불가)
+        - generic [ref=e4533]: 상세보기 →
+      - generic [ref=e4534] [cursor=pointer]:
+        - generic [ref=e4535]:
+          - button "즐겨찾기 추가" [ref=e4536]:
+            - img [ref=e4537]
+          - button "비교하기" [ref=e4539]:
+            - img [ref=e4540]
+        - generic [ref=e4546]: 저축은행
+        - heading "스마트저축은행" [level=3] [ref=e4547]
+        - paragraph [ref=e4548]: 오토론
+        - paragraph [ref=e4549]: 무직 제외, 모든직군 진행가능 (단, 무직의 경우 프리랜서로 단도리 후 진행 가능) 최근 1년 신용카드, 체크 카드 사용 내역으로 대체 해서 진행 가능!
+        - generic [ref=e4551]: 상세보기 →
+      - generic [ref=e4552] [cursor=pointer]:
+        - generic [ref=e4553]:
+          - button "즐겨찾기 추가" [ref=e4554]:
+            - img [ref=e4555]
+          - button "비교하기" [ref=e4557]:
+            - img [ref=e4558]
+        - generic [ref=e4564]: 저축은행
+        - heading "상상인저축은행" [level=3] [ref=e4565]
+        - paragraph [ref=e4566]: 오토론
+        - paragraph [ref=e4567]: 직장인, 프리랜서만 진행 가능 / 무직, 사업자 진행 불가 (단, 무직과 사업자의 경우 프리랜서로 단도리 후 진행 가능) 최근 1년 신용카드, 체크 카드 사용 내역으로 대체 해서 진행 가능!
+        - generic [ref=e4569]: 상세보기 →
+      - generic [ref=e4570] [cursor=pointer]:
+        - generic [ref=e4571]:
+          - button "즐겨찾기 추가" [ref=e4572]:
+            - img [ref=e4573]
+          - button "비교하기" [ref=e4575]:
+            - img [ref=e4576]
+        - generic [ref=e4582]: 저축은행
+        - heading "상상인플러스" [level=3] [ref=e4583]
+        - paragraph [ref=e4584]: 오토론
+        - paragraph [ref=e4585]: 무직을 제외한 본인 차량 소유중인 모든 직군 (4대가입 직장인, 개인 사업자, 프리랜서) 직장인, 사업자 제외 기타 소득자의 경우 기본 서류 첨부 후 추정 소득으로 진행
+        - generic [ref=e4587]: 상세보기 →
+      - generic [ref=e4588] [cursor=pointer]:
+        - generic [ref=e4589]:
+          - button "즐겨찾기 추가" [ref=e4590]:
+            - img [ref=e4591]
+          - button "비교하기" [ref=e4593]:
+            - img [ref=e4594]
+        - generic [ref=e4600]: 저축은행
+        - heading "삼호저축은행" [level=3] [ref=e4601]
+        - paragraph [ref=e4602]: 오토론
+        - paragraph [ref=e4603]: 무직 제외, 모든 직군 진행 가능 (단, 무직의 경우 프리랜서로 단도리 후 진행 가능) 최근 1년 신용카드, 체크 카드 사용 내역으로 대체 해서 진행 가능!
+        - generic [ref=e4605]: 상세보기 →
+      - generic [ref=e4606] [cursor=pointer]:
+        - generic [ref=e4607]:
+          - button "즐겨찾기 추가" [ref=e4608]:
+            - img [ref=e4609]
+          - button "비교하기" [ref=e4611]:
+            - img [ref=e4612]
+        - generic [ref=e4618]: 저축은행
+        - heading "웰컴저축은행" [level=3] [ref=e4619]
+        - paragraph [ref=e4620]: 오토론
+        - paragraph [ref=e4621]: 무직 제외, 소득확인되는 모든 직군 진행가능 (가입자, 미가입자, 프리랜서, 사업자) 주부 진행가능 (가족관계 증명서, ~의 배우자로 초본에 확인되어야함)
+        - generic [ref=e4623]: 상세보기 →
+      - generic [ref=e4624] [cursor=pointer]:
+        - generic [ref=e4625]:
+          - button "즐겨찾기 추가" [ref=e4626]:
+            - img [ref=e4627]
+          - button "비교하기" [ref=e4629]:
+            - img [ref=e4630]
+        - generic [ref=e4636]: 대부
+        - heading "도이치캐피탈" [level=3] [ref=e4637]
+        - paragraph [ref=e4638]: 오토론
+        - paragraph [ref=e4639]: 무직 포함 모든 직군 진행 가능 (단, 무직의 경우 소득 활동 중으로 현금 수령으로 단도리 후 진행 가능) 최근 1년 신용카드, 체크 카드 사용 내역으로 대체 해서 진행 가능!
+        - generic [ref=e4641]: 상세보기 →
+      - generic [ref=e4642] [cursor=pointer]:
+        - generic [ref=e4643]:
+          - button "즐겨찾기 추가" [ref=e4644]:
+            - img [ref=e4645]
+          - button "비교하기" [ref=e4647]:
+            - img [ref=e4648]
+        - generic [ref=e4654]: 대부
+        - heading "에이원대부" [level=3] [ref=e4655]
+        - paragraph [ref=e4656]: 오토론
+        - paragraph [ref=e4657]: 무직 제외, 소득 확인되는 모든 직군 진행 가능 (무직 일시 최대 300만원 제한! 30세 미만은 300만원도 진행 불가)
+        - generic [ref=e4659]: 상세보기 →
+      - generic [ref=e4660] [cursor=pointer]:
+        - generic [ref=e4661]:
+          - button "즐겨찾기 추가" [ref=e4662]:
+            - img [ref=e4663]
+          - button "비교하기" [ref=e4665]:
+            - img [ref=e4666]
+        - generic [ref=e4672]: 대부
+        - heading "어드밴스/미래대부" [level=3] [ref=e4673]
+        - paragraph [ref=e4674]: 오토론
+        - paragraph [ref=e4675]: 무직 제외, 소득 확인되는 모든 직군 진행 가능 (무직 일시 최대 300만원 제한! 30세 미만은 300만원도 진행 불가)
+        - generic [ref=e4677]: 상세보기 →
+      - generic [ref=e4678] [cursor=pointer]:
+        - generic [ref=e4679]:
+          - button "즐겨찾기 추가" [ref=e4680]:
+            - img [ref=e4681]
+          - button "비교하기" [ref=e4683]:
+            - img [ref=e4684]
+        - generic [ref=e4690]: 캐피탈
+        - heading "KB캐피탈" [level=3] [ref=e4691]
+        - paragraph [ref=e4692]: 신용대출(프리랜서)
+        - paragraph [ref=e4693]: 3.3% 소득공제 되는 프리랜서 접수 (소득자료 꼭 원천징수 아니더라도, 급여통장 6개월로 대체 진행 가능)
+        - generic [ref=e4695]: 상세보기 →
+      - generic [ref=e4696] [cursor=pointer]:
+        - generic [ref=e4697]:
+          - button "즐겨찾기 추가" [ref=e4698]:
+            - img [ref=e4699]
+          - button "비교하기" [ref=e4701]:
+            - img [ref=e4702]
+        - generic [ref=e4708]: 캐피탈
+        - heading "KB캐피탈" [level=3] [ref=e4709]
+        - paragraph [ref=e4710]: 신용대출(4대가입)
+        - paragraph [ref=e4711]: 4대가입 직장인만 접수 가능 (본인 사업장 사대가입 사업자도 직장인 조건으로 진행 가능 함 - 단 스크래핑으로만)
+        - generic [ref=e4713]: 상세보기 →
+      - generic [ref=e4714] [cursor=pointer]:
+        - generic [ref=e4715]:
+          - button "즐겨찾기 추가" [ref=e4716]:
+            - img [ref=e4717]
+          - button "비교하기" [ref=e4719]:
+            - img [ref=e4720]
+        - generic [ref=e4726]: 캐피탈
+        - heading "KB캐피탈" [level=3] [ref=e4727]
+        - paragraph [ref=e4728]: 하우스론(본인명의)
+        - paragraph [ref=e4729]: 무직 포함 모든 직군 가능 (추정소득으로 진행되고, 실소득이 높을 경우 보완해서 진행가능)
+        - generic [ref=e4731]: 상세보기 →
+      - generic [ref=e4732] [cursor=pointer]:
+        - generic [ref=e4733]:
+          - button "즐겨찾기 추가" [ref=e4734]:
+            - img [ref=e4735]
+          - button "비교하기" [ref=e4737]:
+            - img [ref=e4738]
+        - generic [ref=e4744]: 캐피탈
+        - heading "KB캐피탈" [level=3] [ref=e4745]
+        - paragraph [ref=e4746]: 오토론
+        - paragraph [ref=e4747]: 최근 13년 이내차량 진행가능(일수 아니고 월단위로 계산함)
+        - generic [ref=e4749]: 상세보기 →
+      - generic [ref=e4750] [cursor=pointer]:
+        - generic [ref=e4751]:
+          - button "즐겨찾기 추가" [ref=e4752]:
+            - img [ref=e4753]
+          - button "비교하기" [ref=e4755]:
+            - img [ref=e4756]
+        - generic [ref=e4762]: 캐피탈
+        - heading "IM캐피탈" [level=3] [ref=e4763]
+        - paragraph [ref=e4764]: 신용대출(4대가입)
+        - paragraph
+        - generic [ref=e4766]: 상세보기 →
+      - generic [ref=e4767] [cursor=pointer]:
+        - generic [ref=e4768]:
+          - button "즐겨찾기 추가" [ref=e4769]:
+            - img [ref=e4770]
+          - button "비교하기" [ref=e4772]:
+            - img [ref=e4773]
+        - generic [ref=e4779]: 캐피탈
+        - heading "IM캐피탈" [level=3] [ref=e4780]
+        - paragraph [ref=e4781]: 오토론
+        - paragraph [ref=e4782]: 무직 포함 모든 직군 가능 ( 추정소득으로 진행되고, 실소득이 높을 경우 보완해서 진행가능)
+        - generic [ref=e4784]: 상세보기 →
+      - generic [ref=e4785] [cursor=pointer]:
+        - generic [ref=e4786]:
+          - button "즐겨찾기 추가" [ref=e4787]:
+            - img [ref=e4788]
+          - button "비교하기" [ref=e4790]:
+            - img [ref=e4791]
+        - generic [ref=e4797]: 캐피탈
+        - heading "JB우리캐피탈" [level=3] [ref=e4798]
+        - paragraph [ref=e4799]: 하우스론(본인명의)
+        - paragraph [ref=e4800]: 무직 포함 모든 직군 가능 ( 추정소득으로 진행되고, 실소득이 높을 경우 보완해서 진행가능)
+        - generic [ref=e4802]: 상세보기 →
+      - generic [ref=e4803] [cursor=pointer]:
+        - generic [ref=e4804]:
+          - button "즐겨찾기 추가" [ref=e4805]:
+            - img [ref=e4806]
+          - button "비교하기" [ref=e4808]:
+            - img [ref=e4809]
+        - generic [ref=e4815]: 캐피탈
+        - heading "JB우리캐피탈" [level=3] [ref=e4816]
+        - paragraph [ref=e4817]: 오토론
+        - paragraph
+        - generic [ref=e4819]: 상세보기 →
+      - generic [ref=e4820] [cursor=pointer]:
+        - generic [ref=e4821]:
+          - button "즐겨찾기 추가" [ref=e4822]:
+            - img [ref=e4823]
+          - button "비교하기" [ref=e4825]:
+            - img [ref=e4826]
+        - generic [ref=e4832]: 저축은행
+        - heading "다올저축은행" [level=3] [ref=e4833]
+        - paragraph [ref=e4834]: 신용대출(4대가입)
+        - paragraph [ref=e4835]: 4대가입 직장인, 법인대표, 사업자 가능 (사업자의 경우 자동대출 일시만 직장인 조건으로 진행가능)
+        - generic [ref=e4837]: 상세보기 →
+      - generic [ref=e4838] [cursor=pointer]:
+        - generic [ref=e4839]:
+          - button "즐겨찾기 추가" [ref=e4840]:
+            - img [ref=e4841]
+          - button "비교하기" [ref=e4843]:
+            - img [ref=e4844]
+        - generic [ref=e4850]: 저축은행
+        - heading "동양저축은행" [level=3] [ref=e4851]
+        - paragraph [ref=e4852]: 신용대출(4대가입)
+        - paragraph [ref=e4853]: 4대가입 직장인 * 연봉대비 부채비율 150% 이내자만 접수 (당사대출 미포함) , 이상자는 한도미산출
+        - generic [ref=e4855]: 상세보기 →
+      - generic [ref=e4856] [cursor=pointer]:
+        - generic [ref=e4857]:
+          - button "즐겨찾기 추가" [ref=e4858]:
+            - img [ref=e4859]
+          - button "비교하기" [ref=e4861]:
+            - img [ref=e4862]
+        - generic [ref=e4868]: 저축은행
+        - heading "동원제일저축은행" [level=3] [ref=e4869]
+        - paragraph [ref=e4870]: 오토론
+        - paragraph [ref=e4871]: 무직 포함, 모든 직군 가능 (사대가입, 미가입, 프리랜서, 사업자, 무직, 주부) ※ 소득, 재직 미달시 추정 소득으로 진행 가능
+        - generic [ref=e4873]: 상세보기 →
+      - generic [ref=e4874] [cursor=pointer]:
+        - generic [ref=e4875]:
+          - button "즐겨찾기 추가" [ref=e4876]:
+            - img [ref=e4877]
+          - button "비교하기" [ref=e4879]:
+            - img [ref=e4880]
+        - generic [ref=e4886]: 저축은행
+        - heading "삼호저축은행" [level=3] [ref=e4887]
+        - paragraph [ref=e4888]: 신용대출(청년론)
+        - paragraph [ref=e4889]: 군필 / 고등학교 졸업생 / 대학재직자 불가 가직장 재직확인 (휴대폰가능) + 소득확인서로 진행가능
+        - generic [ref=e4891]: 상세보기 →
+      - generic [ref=e4892] [cursor=pointer]:
+        - generic [ref=e4893]:
+          - button "즐겨찾기 추가" [ref=e4894]:
+            - img [ref=e4895]
+          - button "비교하기" [ref=e4897]:
+            - img [ref=e4898]
+        - generic [ref=e4904]: 저축은행
+        - heading "삼일저축은행" [level=3] [ref=e4905]
+        - paragraph [ref=e4906]: 햇살론(4대가입)
+        - paragraph [ref=e4907]: 4대가입 직장인만 진행 가능 (전직 인정 가능 - 단, 전 직장 통장까지 확인 함) ※ 강원 / 경북 / 대구 지역 거주자 및 재직자만 진행가능
+        - generic [ref=e4909]: 상세보기 →
+      - generic [ref=e4910] [cursor=pointer]:
+        - generic [ref=e4911]:
+          - button "즐겨찾기 추가" [ref=e4912]:
+            - img [ref=e4913]
+          - button "비교하기" [ref=e4915]:
+            - img [ref=e4916]
+        - generic [ref=e4922]: 저축은행
+        - heading "웰컴저축은행" [level=3] [ref=e4923]
+        - paragraph [ref=e4924]: 신용대출(4대가입)
+        - paragraph [ref=e4925]: 4대가입 직장인만 진행 가능 (※ 나이, 직군 상관없이 차량소유시에만 신용한도 발생) 재직 기간 1개월만 지나도 가능 (고지 1회, 급여 1회, 급여 통장 ars 1개월 필수)
+        - generic [ref=e4927]: 상세보기 →
+      - generic [ref=e4928] [cursor=pointer]:
+        - generic [ref=e4929]:
+          - button "즐겨찾기 추가" [ref=e4930]:
+            - img [ref=e4931]
+          - button "비교하기" [ref=e4933]:
+            - img [ref=e4934]
+        - generic [ref=e4940]: 저축은행
+        - heading "웰컴저축은행" [level=3] [ref=e4941]
+        - paragraph [ref=e4942]: 햇살론(4대가입)
+        - paragraph [ref=e4943]: 4대가입 직장인만 진행 가능
+        - generic [ref=e4945]: 상세보기 →
+      - generic [ref=e4946] [cursor=pointer]:
+        - generic [ref=e4947]:
+          - button "즐겨찾기 추가" [ref=e4948]:
+            - img [ref=e4949]
+          - button "비교하기" [ref=e4951]:
+            - img [ref=e4952]
+        - generic [ref=e4958]: 금융백과
+        - heading "★금융백과★" [level=3] [ref=e4959]
+        - paragraph [ref=e4960]: 지식창고
+        - paragraph
+        - generic [ref=e4962]: 상세보기 →
+      - generic [ref=e4963] [cursor=pointer]:
+        - generic [ref=e4964]:
+          - button "즐겨찾기 추가" [ref=e4965]:
+            - img [ref=e4966]
+          - button "비교하기" [ref=e4968]:
+            - img [ref=e4969]
+        - generic [ref=e4975]: 캐피탈
+        - heading "JB우리캐피탈" [level=3] [ref=e4976]
+        - paragraph [ref=e4977]: 신용대출(4대가입)
+        - paragraph [ref=e4978]: 4대가입 직장인만 진행가능 (재직전화 아예 안들어감, 재직전화 불편한 고객들 타겟으로 잡으면 좋은 상품)
+        - generic [ref=e4980]: 상세보기 →
+      - generic [ref=e4981] [cursor=pointer]:
+        - generic [ref=e4982]:
+          - button "즐겨찾기 추가" [ref=e4983]:
+            - img [ref=e4984]
+          - button "비교하기" [ref=e4986]:
+            - img [ref=e4987]
+        - generic [ref=e4993]: 저축은행
+        - heading "IBK저축은행" [level=3] [ref=e4994]
+        - paragraph [ref=e4995]: 햇살론(개인사업자)
+        - paragraph [ref=e4996]: 가조회시 가능여부 확인> 고객 진행요청 이후 심사자 서류안내1~2일소요> 고객 서류준비하여 지점방문> 심사하여 한도와 이자율 확인가능> 총 소요시간 2~4주가량 걸림
+        - generic [ref=e4998]: 상세보기 →
+      - generic [ref=e4999] [cursor=pointer]:
+        - generic [ref=e5000]:
+          - button "즐겨찾기 추가" [ref=e5001]:
+            - img [ref=e5002]
+          - button "비교하기" [ref=e5004]:
+            - img [ref=e5005]
+        - generic [ref=e5011]: 저축은행
+        - heading "IBK저축은행" [level=3] [ref=e5012]
+        - paragraph [ref=e5013]: 햇살론(프리랜서)
+        - paragraph [ref=e5014]: 가조회시 가능여부 확인> 고객 진행요청 이후 심사자 서류안내1~2일소요> 고객 서류준비하여 지점방문> 심사하여 한도와 이자율 확인가능> 총 소요시간 2~4주가량 걸림
+        - generic [ref=e5016]: 상세보기 →
+      - generic [ref=e5017] [cursor=pointer]:
+        - generic [ref=e5018]:
+          - button "즐겨찾기 추가" [ref=e5019]:
+            - img [ref=e5020]
+          - button "비교하기" [ref=e5022]:
+            - img [ref=e5023]
+        - generic [ref=e5029]: 저축은행
+        - heading "웰컴저축은행" [level=3] [ref=e5030]
+        - paragraph [ref=e5031]: 신용대출(개인회생)
+        - paragraph [ref=e5032]: 개인회생
+        - generic [ref=e5034]: 상세보기 →
+      - generic [ref=e5035] [cursor=pointer]:
+        - generic [ref=e5036]:
+          - button "즐겨찾기 추가" [ref=e5037]:
+            - img [ref=e5038]
+          - button "비교하기" [ref=e5040]:
+            - img [ref=e5041]
+        - generic [ref=e5047]: 캐피탈
+        - heading "KB캐피탈" [level=3] [ref=e5048]
+        - paragraph [ref=e5049]: 신용대출(개인사업자)
+        - paragraph [ref=e5050]: 개인사업자, 공동사업자 진행 가능 (자산 없는 경우 부가세 4800만 이상, 자산 있는 경우 부가세 1000만 이상 접수 가능)
+        - generic [ref=e5052]: 상세보기 →
+      - generic [ref=e5053] [cursor=pointer]:
+        - generic [ref=e5054]:
+          - button "즐겨찾기 추가" [ref=e5055]:
+            - img [ref=e5056]
+          - button "비교하기" [ref=e5058]:
+            - img [ref=e5059]
+        - generic [ref=e5065]: 저축은행
+        - heading "다올저축은행" [level=3] [ref=e5066]
+        - paragraph [ref=e5067]: 신용대출(미가입)
+        - paragraph [ref=e5068]: 4대보험 미가입 직장인 (소득 신고 안들어가는 고정급 받는 고객)
+        - generic [ref=e5070]: 상세보기 →
+      - generic [ref=e5071] [cursor=pointer]:
+        - generic [ref=e5072]:
+          - button "즐겨찾기 추가" [ref=e5073]:
+            - img [ref=e5074]
+          - button "비교하기" [ref=e5076]:
+            - img [ref=e5077]
+        - generic [ref=e5083]: 저축은행
+        - heading "다올저축은행" [level=3] [ref=e5084]
+        - paragraph [ref=e5085]: 신용대출(프리랜서)
+        - paragraph [ref=e5086]: 3.3% 소득공제 프리랜서 (주급인정, 급여 나눠서 받는거 전부 합산해서 진행가능)
+        - generic [ref=e5088]: 상세보기 →
+      - generic [ref=e5089] [cursor=pointer]:
+        - generic [ref=e5090]:
+          - button "즐겨찾기 추가" [ref=e5091]:
+            - img [ref=e5092]
+          - button "비교하기" [ref=e5094]:
+            - img [ref=e5095]
+        - generic [ref=e5101]: 저축은행
+        - heading "다올저축은행" [level=3] [ref=e5102]
+        - paragraph [ref=e5103]: 신용대출(개인사업자)
+        - paragraph [ref=e5104]: 개인사업자, 공동사업자 가능 (공동 사업자 경우 지분 50% 이상일시 가능, 사업자 통장 3개월 필수)
+        - generic [ref=e5106]: 상세보기 →
+      - generic [ref=e5107] [cursor=pointer]:
+        - generic [ref=e5108]:
+          - button "즐겨찾기 추가" [ref=e5109]:
+            - img [ref=e5110]
+          - button "비교하기" [ref=e5112]:
+            - img [ref=e5113]
+        - generic [ref=e5119]: 저축은행
+        - heading "다올저축은행" [level=3] [ref=e5120]
+        - paragraph [ref=e5121]: 신용대출(주부론)
+        - paragraph [ref=e5122]: 신용상 문제는 없지만! 다른상품의 조건이 맞지 않아 접수할 상품이 없는 주부! (대출과다, 연체, 최근대출 이런사람은 한도 안나옴)
+        - generic [ref=e5124]: 상세보기 →
+      - generic [ref=e5125] [cursor=pointer]:
+        - generic [ref=e5126]:
+          - button "즐겨찾기 추가" [ref=e5127]:
+            - img [ref=e5128]
+          - button "비교하기" [ref=e5130]:
+            - img [ref=e5131]
+        - generic [ref=e5137]: 저축은행
+        - heading "다올저축은행" [level=3] [ref=e5138]
+        - paragraph [ref=e5139]: 사잇돌(4대가입)
+        - paragraph [ref=e5140]: 4대가입 직장인, 법인대표 진행가능
+        - generic [ref=e5142]: 상세보기 →
+      - generic [ref=e5143] [cursor=pointer]:
+        - generic [ref=e5144]:
+          - button "즐겨찾기 추가" [ref=e5145]:
+            - img [ref=e5146]
+          - button "비교하기" [ref=e5148]:
+            - img [ref=e5149]
+        - generic [ref=e5155]: 저축은행
+        - heading "다올저축은행" [level=3] [ref=e5156]
+        - paragraph [ref=e5157]: 사잇돌(미가입)
+        - paragraph [ref=e5158]: 4대보험 미가입 직장인 (소득 신고 안들어가는 고정급 받는 고객)
+        - generic [ref=e5160]: 상세보기 →
+      - generic [ref=e5161] [cursor=pointer]:
+        - generic [ref=e5162]:
+          - button "즐겨찾기 추가" [ref=e5163]:
+            - img [ref=e5164]
+          - button "비교하기" [ref=e5166]:
+            - img [ref=e5167]
+        - generic [ref=e5173]: 저축은행
+        - heading "웰컴저축은행" [level=3] [ref=e5174]
+        - paragraph [ref=e5175]: 신용대출(프리랜서)
+        - paragraph [ref=e5176]: 3.3% 소득 공제 프리랜서 진행 가능 (※ 나이, 직군 상관없이 차량소유시에만 신용한도 발생)
+        - generic [ref=e5178]: 상세보기 →
+      - generic [ref=e5179] [cursor=pointer]:
+        - generic [ref=e5180]:
+          - button "즐겨찾기 추가" [ref=e5181]:
+            - img [ref=e5182]
+          - button "비교하기" [ref=e5184]:
+            - img [ref=e5185]
+        - generic [ref=e5191]: 저축은행
+        - heading "웰컴저축은행" [level=3] [ref=e5192]
+        - paragraph [ref=e5193]: 사잇돌(4대가입)
+        - paragraph [ref=e5194]: 4대가입 직장인만 진행 가능
+        - generic [ref=e5196]: 상세보기 →
+      - generic [ref=e5197] [cursor=pointer]:
+        - generic [ref=e5198]:
+          - button "즐겨찾기 추가" [ref=e5199]:
+            - img [ref=e5200]
+          - button "비교하기" [ref=e5202]:
+            - img [ref=e5203]
+        - generic [ref=e5209]: 저축은행
+        - heading "고려저축은행" [level=3] [ref=e5210]
+        - paragraph [ref=e5211]: 신용대출(미가입)
+        - paragraph
+        - generic [ref=e5213]: 상세보기 →
+      - generic [ref=e5214] [cursor=pointer]:
+        - generic [ref=e5215]:
+          - button "즐겨찾기 추가" [ref=e5216]:
+            - img [ref=e5217]
+          - button "비교하기" [ref=e5219]:
+            - img [ref=e5220]
+        - generic [ref=e5226]: 저축은행
+        - heading "한국투자저축은행" [level=3] [ref=e5227]
+        - paragraph [ref=e5228]: 신용대출(프리랜서)
+        - paragraph [ref=e5229]: 3.3% 소득 공제 프리랜서 진행 가능 단기 재직자 진행 가능 (30일 이상 근무자 최대한도 2000만원), 자가 소유시 대환 협의 가능
+        - generic [ref=e5231]: 상세보기 →
+      - generic [ref=e5232] [cursor=pointer]:
+        - generic [ref=e5233]:
+          - button "즐겨찾기 추가" [ref=e5234]:
+            - img [ref=e5235]
+          - button "비교하기" [ref=e5237]:
+            - img [ref=e5238]
+        - generic [ref=e5244]: 저축은행
+        - heading "키움YES저축은행" [level=3] [ref=e5245]
+        - paragraph [ref=e5246]: 신용대출(라이더론)
+        - paragraph [ref=e5247]: 1개월 이상 정산 받은 내역 통장으로 확인되는 라이더 진행 상품 배달대행 근무자 접수!
+        - generic [ref=e5249]: 상세보기 →
+      - generic [ref=e5250] [cursor=pointer]:
+        - generic [ref=e5251]:
+          - button "즐겨찾기 추가" [ref=e5252]:
+            - img [ref=e5253]
+          - button "비교하기" [ref=e5255]:
+            - img [ref=e5256]
+        - generic [ref=e5262]: 저축은행
+        - heading "상상인플러스" [level=3] [ref=e5263]
+        - paragraph [ref=e5264]: 신용대출(청년론)
+        - paragraph [ref=e5265]: 군필 / 고등학교 졸업생 / 대학재직자 불가 가직장 재직확인 (휴대폰가능) + 소득확인서로 진행가능
+        - generic [ref=e5267]: 상세보기 →
+      - generic [ref=e5268] [cursor=pointer]:
+        - generic [ref=e5269]:
+          - button "즐겨찾기 추가" [ref=e5270]:
+            - img [ref=e5271]
+          - button "비교하기" [ref=e5273]:
+            - img [ref=e5274]
+        - generic [ref=e5280]: 저축은행
+        - heading "한성저축은행" [level=3] [ref=e5281]
+        - paragraph [ref=e5282]: 신용대출(청년론)
+        - paragraph [ref=e5283]: 군필 / 졸업증명서 미첨부로 중졸, 대학교 재학생도 말안하면 진행가능 가직장 재직확인 (휴대폰가능) + 소득확인서로 진행가능
+        - generic [ref=e5285]: 상세보기 →
+      - generic [ref=e5286] [cursor=pointer]:
+        - generic [ref=e5287]:
+          - button "즐겨찾기 추가" [ref=e5288]:
+            - img [ref=e5289]
+          - button "비교하기" [ref=e5291]:
+            - img [ref=e5292]
+        - generic [ref=e5298]: 저축은행
+        - heading "청주저축은행" [level=3] [ref=e5299]
+        - paragraph [ref=e5300]: 신용대출(청년론)
+        - paragraph [ref=e5301]: 군미필 가능!!!! / 졸업증명서 미첨부로 중졸, 대학교 재학생도 말안하면 진행가능 가직장 재직확인 (휴대폰가능) + 소득확인서로 진행가능
+        - generic [ref=e5303]: 상세보기 →
+      - generic [ref=e5304] [cursor=pointer]:
+        - generic [ref=e5305]:
+          - button "즐겨찾기 추가" [ref=e5306]:
+            - img [ref=e5307]
+          - button "비교하기" [ref=e5309]:
+            - img [ref=e5310]
+        - generic [ref=e5316]: 대부
+        - heading "드림앤캐쉬대부" [level=3] [ref=e5317]
+        - paragraph [ref=e5318]: 오토론
+        - paragraph [ref=e5319]: 무직 제외 소득 확인되는 모든 직군 진행 가능(무직 일시 최대 300만원 제한!)
+        - generic [ref=e5321]: 상세보기 →
+      - generic [ref=e5322] [cursor=pointer]:
+        - generic [ref=e5323]:
+          - button "즐겨찾기 추가" [ref=e5324]:
+            - img [ref=e5325]
+          - button "비교하기" [ref=e5327]:
+            - img [ref=e5328]
+        - generic [ref=e5334]: 캐피탈
+        - heading "KB캐피탈" [level=3] [ref=e5335]
+        - paragraph [ref=e5336]: 하우스론(분양론)
+        - paragraph [ref=e5337]: 무직 포함 모든 직군 가능 (추정소득으로 진행되고, 실소득이 높을 경우 보완해서 진행가능)
+        - generic [ref=e5339]: 상세보기 →
+      - generic [ref=e5340] [cursor=pointer]:
+        - generic [ref=e5341]:
+          - button "즐겨찾기 추가" [ref=e5342]:
+            - img [ref=e5343]
+          - button "비교하기" [ref=e5345]:
+            - img [ref=e5346]
+        - generic [ref=e5352]: 캐피탈
+        - heading "KB캐피탈" [level=3] [ref=e5353]
+        - paragraph [ref=e5354]: 하우스론(매매론)
+        - paragraph [ref=e5355]: 무직 포함 모든 직군 가능 (추정소득으로 진행되고, 실소득이 높을 경우 보완해서 진행 가능)
+        - generic [ref=e5357]: 상세보기 →
+      - generic [ref=e5358] [cursor=pointer]:
+        - generic [ref=e5359]:
+          - button "즐겨찾기 추가" [ref=e5360]:
+            - img [ref=e5361]
+          - button "비교하기" [ref=e5363]:
+            - img [ref=e5364]
+        - generic [ref=e5370]: 저축은행
+        - heading "키움저축은행" [level=3] [ref=e5371]
+        - paragraph [ref=e5372]: 신용대출(개인회생)
+        - paragraph [ref=e5373]: 회생 변제계획의 3분의 1 이상 상환자 (소득 확인 되는 모든 직군 가능 - 사대가입, 미가입, 프리랜서, 사업자, 법인대표)
+        - generic [ref=e5375]: 상세보기 →
+      - generic [ref=e5376] [cursor=pointer]:
+        - generic [ref=e5377]:
+          - button "즐겨찾기 추가" [ref=e5378]:
+            - img [ref=e5379]
+          - button "비교하기" [ref=e5381]:
+            - img [ref=e5382]
+        - generic [ref=e5388]: 저축은행
+        - heading "SBI저축은행" [level=3] [ref=e5389]
+        - paragraph [ref=e5390]: 햇살론(미가입)
+        - paragraph [ref=e5391]: 2026년1월7읿부터 중단
+        - generic [ref=e5393]: 상세보기 →
+      - generic [ref=e5394] [cursor=pointer]:
+        - generic [ref=e5395]:
+          - button "즐겨찾기 추가" [ref=e5396]:
+            - img [ref=e5397]
+          - button "비교하기" [ref=e5399]:
+            - img [ref=e5400]
+        - generic [ref=e5406]: 저축은행
+        - heading "융창저축은행" [level=3] [ref=e5407]
+        - paragraph [ref=e5408]: 사잇돌(4대가입)
+        - paragraph [ref=e5409]: 4대가입 직장인, 법인대표 진행 가능
+        - generic [ref=e5411]: 상세보기 →
+      - generic [ref=e5412] [cursor=pointer]:
+        - generic [ref=e5413]:
+          - button "즐겨찾기 추가" [ref=e5414]:
+            - img [ref=e5415]
+          - button "비교하기" [ref=e5417]:
+            - img [ref=e5418]
+        - generic [ref=e5424]: 캐피탈
+        - heading "NH농협캐피탈" [level=3] [ref=e5425]
+        - paragraph [ref=e5426]: 하우스론(배우자명의)
+        - paragraph [ref=e5427]: ★가득론 상품★ (본인 명의, 배우자 명의, 공동 명의 등 현재 자산 및 과거 자산 확인되는 경우 접수 상품)
+        - generic [ref=e5429]: 상세보기 →
+      - generic [ref=e5430] [cursor=pointer]:
+        - generic [ref=e5431]:
+          - button "즐겨찾기 추가" [ref=e5432]:
+            - img [ref=e5433]
+          - button "비교하기" [ref=e5435]:
+            - img [ref=e5436]
+        - generic [ref=e5442]: 캐피탈
+        - heading "한국투자캐피탈" [level=3] [ref=e5443]
+        - paragraph [ref=e5444]: 신용대출(4대가입)
+        - paragraph [ref=e5445]: 4대보험가입 직장인만 진행가능 (재직전화 아예 안들어감, 재직전화 불편한 고객들 타겟으로 잡으면 좋은 상품)
+        - generic [ref=e5447]: 상세보기 →
+      - generic [ref=e5448] [cursor=pointer]:
+        - generic [ref=e5449]:
+          - button "즐겨찾기 추가" [ref=e5450]:
+            - img [ref=e5451]
+          - button "비교하기" [ref=e5453]:
+            - img [ref=e5454]
+        - generic [ref=e5460]: 캐피탈
+        - heading "한국투자캐피탈" [level=3] [ref=e5461]
+        - paragraph [ref=e5462]: 하우스론(본인명의)
+        - paragraph [ref=e5463]: CB상 자산보유 확인 되는 사업자 (공동사업자 가능)
+        - generic [ref=e5465]: 상세보기 →
+      - generic [ref=e5466] [cursor=pointer]:
+        - generic [ref=e5467]:
+          - button "즐겨찾기 추가" [ref=e5468]:
+            - img [ref=e5469]
+          - button "비교하기" [ref=e5471]:
+            - img [ref=e5472]
+        - generic [ref=e5478]: 캐피탈
+        - heading "한국투자캐피탈" [level=3] [ref=e5479]
+        - paragraph [ref=e5480]: 오토론
+        - paragraph [ref=e5481]: 본인명의 차량 소유중인 4대보험가입 직장인, 사업자(공동사업자 가능), 무직 진행가능 ※ 차량시세 제한 없음
+        - generic [ref=e5483]: 상세보기 →
+      - generic [ref=e5484] [cursor=pointer]:
+        - generic [ref=e5485]:
+          - button "즐겨찾기 추가" [ref=e5486]:
+            - img [ref=e5487]
+          - button "비교하기" [ref=e5489]:
+            - img [ref=e5490]
+        - generic [ref=e5496]: 저축은행
+        - heading "세람저축은행" [level=3] [ref=e5497]
+        - paragraph [ref=e5498]: 신용대출(4대가입)
+        - paragraph
+        - generic [ref=e5500]: 상세보기 →
+      - generic [ref=e5501] [cursor=pointer]:
+        - generic [ref=e5502]:
+          - button "즐겨찾기 추가" [ref=e5503]:
+            - img [ref=e5504]
+          - button "비교하기" [ref=e5506]:
+            - img [ref=e5507]
+        - generic [ref=e5513]: 저축은행
+        - heading "세람저축은행" [level=3] [ref=e5514]
+        - paragraph [ref=e5515]: 신용대출(개인회생)
+        - paragraph [ref=e5516]: 회생중인 고객 접수 - 총 회차의 25% 납부자 (4대가입 직장인만 진행 가능)
+        - generic [ref=e5518]: 상세보기 →
+      - generic [ref=e5519] [cursor=pointer]:
+        - generic [ref=e5520]:
+          - button "즐겨찾기 추가" [ref=e5521]:
+            - img [ref=e5522]
+          - button "비교하기" [ref=e5524]:
+            - img [ref=e5525]
+        - generic [ref=e5531]: 저축은행
+        - heading "세람저축은행" [level=3] [ref=e5532]
+        - paragraph [ref=e5533]: 신용대출(개인회생)
+        - paragraph [ref=e5534]: 회생 면책 이후 12개월 이내 고객 접수 (4대가입 직장인만 진행가능)
+        - generic [ref=e5536]: 상세보기 →
+      - generic [ref=e5537] [cursor=pointer]:
+        - generic [ref=e5538]:
+          - button "즐겨찾기 추가" [ref=e5539]:
+            - img [ref=e5540]
+          - button "비교하기" [ref=e5542]:
+            - img [ref=e5543]
+        - generic [ref=e5549]: 저축은행
+        - heading "한국투자저축은행" [level=3] [ref=e5550]
+        - paragraph [ref=e5551]: 신용대출(주부론)
+        - paragraph [ref=e5552]: 신용상 문제는 없지만, 다른 상품의 조건이 맞지 않아 접수할 상품이 없는 주부! (대출 과다, 연체, 최근 대출 등 신용 조건 안좋은 분 한도 미발생)
+        - generic [ref=e5554]: 상세보기 →
+      - generic [ref=e5555] [cursor=pointer]:
+        - generic [ref=e5556]:
+          - button "즐겨찾기 추가" [ref=e5557]:
+            - img [ref=e5558]
+          - button "비교하기" [ref=e5560]:
+            - img [ref=e5561]
+        - generic [ref=e5567]: 대부
+        - heading "유미캐피탈" [level=3] [ref=e5568]
+        - paragraph [ref=e5569]: 연계대출(대부)
+        - paragraph [ref=e5570]: JB우리캐, NH캐, 하나캐, BNK캐피탈 승인자 및 사용자 뒤 신용대출 연계상품
+        - generic [ref=e5572]: 상세보기 →
+      - generic [ref=e5573] [cursor=pointer]:
+        - generic [ref=e5574]:
+          - button "즐겨찾기 추가" [ref=e5575]:
+            - img [ref=e5576]
+          - button "비교하기" [ref=e5578]:
+            - img [ref=e5579]
+        - generic [ref=e5585]: 저축은행
+        - heading "페퍼저축은행" [level=3] [ref=e5586]
+        - paragraph [ref=e5587]: 신용대출(4대가입)
+        - paragraph [ref=e5588]: 4대가입 직장인만 진행 가능 (6납부 필수, 타사에서 한도 안나오는 고객들 한도 발생되는 경우 다수 있음)
+        - generic [ref=e5590]: 상세보기 →
+      - generic [ref=e5591] [cursor=pointer]:
+        - generic [ref=e5592]:
+          - button "즐겨찾기 추가" [ref=e5593]:
+            - img [ref=e5594]
+          - button "비교하기" [ref=e5596]:
+            - img [ref=e5597]
+        - generic [ref=e5603]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e5604]
+        - paragraph [ref=e5605]: 신용대출(주부론)
+        - paragraph [ref=e5606]: 신용상 문제는 없지만, 다른 상품의 조건이 맞지 않아 접수할 상품이 없는 주부! (대출 과다, 연체, 최근 대출 등 신용 조건 안좋은 분 한도 미발생)
+        - generic [ref=e5608]: 상세보기 →
+      - generic [ref=e5609] [cursor=pointer]:
+        - generic [ref=e5610]:
+          - button "즐겨찾기 추가" [ref=e5611]:
+            - img [ref=e5612]
+          - button "비교하기" [ref=e5614]:
+            - img [ref=e5615]
+        - generic [ref=e5621]: 저축은행
+        - heading "페퍼저축은행" [level=3] [ref=e5622]
+        - paragraph [ref=e5623]: 신용대출(개인사업자)
+        - paragraph [ref=e5624]: 개인사업자 불가 / 전문직 자영업자만 가능 ※변호사, 변리사, 의사, 한의사, 약사, 회계사, 세무사, 법무사, 수의사 등
+        - generic [ref=e5626]: 상세보기 →
+      - generic [ref=e5627] [cursor=pointer]:
+        - generic [ref=e5628]:
+          - button "즐겨찾기 추가" [ref=e5629]:
+            - img [ref=e5630]
+          - button "비교하기" [ref=e5632]:
+            - img [ref=e5633]
+        - generic [ref=e5639]: 저축은행
+        - heading "페퍼저축은행" [level=3] [ref=e5640]
+        - paragraph [ref=e5641]: 오토론
+        - paragraph [ref=e5642]: 무직 제외 모든 직군 진행 가능
+        - generic [ref=e5644]: 상세보기 →
+      - generic [ref=e5645] [cursor=pointer]:
+        - generic [ref=e5646]:
+          - button "즐겨찾기 추가" [ref=e5647]:
+            - img [ref=e5648]
+          - button "비교하기" [ref=e5650]:
+            - img [ref=e5651]
+        - generic [ref=e5657]: 대부
+        - heading "리드코프" [level=3] [ref=e5658]
+        - paragraph [ref=e5659]: 오토론
+        - paragraph [ref=e5660]: 사대가입 직장인, 사대미가입 직장인, 개인사업자 진행가능 소득증빙 가능한 고객만 진행가능 (단, 프리랜서 진행불가)
+        - generic [ref=e5662]: 상세보기 →
+      - generic [ref=e5663] [cursor=pointer]:
+        - generic [ref=e5664]:
+          - button "즐겨찾기 추가" [ref=e5665]:
+            - img [ref=e5666]
+          - button "비교하기" [ref=e5668]:
+            - img [ref=e5669]
+        - generic [ref=e5675]: 대부
+        - heading "유미캐피탈" [level=3] [ref=e5676]
+        - paragraph [ref=e5677]: 연계대출(대부)
+        - paragraph [ref=e5678]: 캐피탈, 저축은행(오토론) 사용자 뒤 신용대출 연계상품
+        - generic [ref=e5680]: 상세보기 →
+      - generic [ref=e5681] [cursor=pointer]:
+        - generic [ref=e5682]:
+          - button "즐겨찾기 추가" [ref=e5683]:
+            - img [ref=e5684]
+          - button "비교하기" [ref=e5686]:
+            - img [ref=e5687]
+        - generic [ref=e5693]: 대부
+        - heading "KM대부" [level=3] [ref=e5694]
+        - paragraph [ref=e5695]: 오토론
+        - paragraph [ref=e5696]: 4대가입 직장인, 미가입자, 프리랜서 진행가능 ( 주부, 무직 불가)
+        - generic [ref=e5698]: 상세보기 →
+      - generic [ref=e5699] [cursor=pointer]:
+        - generic [ref=e5700]:
+          - button "즐겨찾기 추가" [ref=e5701]:
+            - img [ref=e5702]
+          - button "비교하기" [ref=e5704]:
+            - img [ref=e5705]
+        - generic [ref=e5711]: 대부
+        - heading "바로대부" [level=3] [ref=e5712]
+        - paragraph [ref=e5713]: 오토론
+        - paragraph [ref=e5714]: 사대가입 직장인 / 사대미가입 직장인 / 프리랜서 무직 가능 (300만 한도 제한)
+        - generic [ref=e5716]: 상세보기 →
+      - generic [ref=e5717] [cursor=pointer]:
+        - generic [ref=e5718]:
+          - button "즐겨찾기 추가" [ref=e5719]:
+            - img [ref=e5720]
+          - button "비교하기" [ref=e5722]:
+            - img [ref=e5723]
+        - generic [ref=e5729]: 캐피탈
+        - heading "JB우리캐피탈" [level=3] [ref=e5730]
+        - paragraph [ref=e5731]: 하우스론(유담보)
+        - paragraph [ref=e5732]: 등록일자 기준으로 3개월 이상된 개인 사업자만 가능 ★비거주 불가★
+        - generic [ref=e5734]: 상세보기 →
+      - generic [ref=e5735] [cursor=pointer]:
+        - generic [ref=e5736]:
+          - button "즐겨찾기 추가" [ref=e5737]:
+            - img [ref=e5738]
+          - button "비교하기" [ref=e5740]:
+            - img [ref=e5741]
+        - generic [ref=e5747]: 저축은행
+        - heading "친애저축은행" [level=3] [ref=e5748]
+        - paragraph [ref=e5749]: 햇살론(4대가입)
+        - paragraph [ref=e5750]: 4대가입 직장인만 진행 가능
+        - generic [ref=e5752]: 상세보기 →
+      - generic [ref=e5753] [cursor=pointer]:
+        - generic [ref=e5754]:
+          - button "즐겨찾기 추가" [ref=e5755]:
+            - img [ref=e5756]
+          - button "비교하기" [ref=e5758]:
+            - img [ref=e5759]
+        - generic [ref=e5765]: 저축은행
+        - heading "친애저축은행" [level=3] [ref=e5766]
+        - paragraph [ref=e5767]: 햇살론(개인사업자)
+        - paragraph [ref=e5768]: 조회시 한도 , 금리 기표 > 정확한 한도는 방문해서 확인 가능
+        - generic [ref=e5770]: 상세보기 →
+      - generic [ref=e5771] [cursor=pointer]:
+        - generic [ref=e5772]:
+          - button "즐겨찾기 추가" [ref=e5773]:
+            - img [ref=e5774]
+          - button "비교하기" [ref=e5776]:
+            - img [ref=e5777]
+        - generic [ref=e5783]: 저축은행
+        - heading "친애저축은행" [level=3] [ref=e5784]
+        - paragraph [ref=e5785]: 햇살론(프리랜서)
+        - paragraph [ref=e5786]: 조회시 한도 , 금리 기표 > 정확한 한도는 방문해서 확인 가능
+        - generic [ref=e5788]: 상세보기 →
+      - generic [ref=e5789] [cursor=pointer]:
+        - generic [ref=e5790]:
+          - button "즐겨찾기 추가" [ref=e5791]:
+            - img [ref=e5792]
+          - button "비교하기" [ref=e5794]:
+            - img [ref=e5795]
+        - generic [ref=e5801]: 캐피탈
+        - heading "롯데캐피탈" [level=3] [ref=e5802]
+        - paragraph [ref=e5803]: 오토론
+        - paragraph [ref=e5804]: 무직 포함 모든 직군 진행 가능
+        - generic [ref=e5806]: 상세보기 →
+      - generic [ref=e5807] [cursor=pointer]:
+        - generic [ref=e5808]:
+          - button "즐겨찾기 추가" [ref=e5809]:
+            - img [ref=e5810]
+          - button "비교하기" [ref=e5812]:
+            - img [ref=e5813]
+        - generic [ref=e5819]: 금융백과
+        - heading "★금융사TIP★" [level=3] [ref=e5820]
+        - paragraph [ref=e5821]: 금융사별TIP
+        - paragraph
+        - generic [ref=e5823]: 상세보기 →
+      - generic [ref=e5824] [cursor=pointer]:
+        - generic [ref=e5825]:
+          - button "즐겨찾기 추가" [ref=e5826]:
+            - img [ref=e5827]
+          - button "비교하기" [ref=e5829]:
+            - img [ref=e5830]
+        - generic [ref=e5836]: 저축은행
+        - heading "OK저축은행" [level=3] [ref=e5837]
+        - paragraph [ref=e5838]: 오토론
+        - paragraph [ref=e5839]: 무직 제외, 소득 확인되는 모든 직군 진행 가능 (사대가입, 미가입, 프리랜서, 사업자, 법인대표 등)
+        - generic [ref=e5841]: 상세보기 →
+      - generic [ref=e5842] [cursor=pointer]:
+        - generic [ref=e5843]:
+          - button "즐겨찾기 추가" [ref=e5844]:
+            - img [ref=e5845]
+          - button "비교하기" [ref=e5847]:
+            - img [ref=e5848]
+        - generic [ref=e5854]: 저축은행
+        - heading "키움저축은행" [level=3] [ref=e5855]
+        - paragraph [ref=e5856]: 주택담보대출(직군무관)
+        - paragraph
+        - generic [ref=e5858]: 상세보기 →
+      - generic [ref=e5859] [cursor=pointer]:
+        - generic [ref=e5860]:
+          - button "즐겨찾기 추가" [ref=e5861]:
+            - img [ref=e5862]
+          - button "비교하기" [ref=e5864]:
+            - img [ref=e5865]
+        - generic [ref=e5871]: 캐피탈
+        - heading "NH농협캐피탈" [level=3] [ref=e5872]
+        - paragraph [ref=e5873]: 신용대출(개인사업자)
+        - paragraph
+        - generic [ref=e5875]: 상세보기 →
+      - generic [ref=e5876] [cursor=pointer]:
+        - generic [ref=e5877]:
+          - button "즐겨찾기 추가" [ref=e5878]:
+            - img [ref=e5879]
+          - button "비교하기" [ref=e5881]:
+            - img [ref=e5882]
+        - generic [ref=e5888]: 저축은행
+        - heading "친애저축은행" [level=3] [ref=e5889]
+        - paragraph [ref=e5890]: 사잇돌(4대가입)
+        - paragraph [ref=e5891]: 4대보험가입 직장인, 일용직 진행 가능 → 신용, 대환 거정자에 한해서 사잇돌 조회됨
+        - generic [ref=e5893]: 상세보기 →
+      - generic [ref=e5894] [cursor=pointer]:
+        - generic [ref=e5895]:
+          - button "즐겨찾기 추가" [ref=e5896]:
+            - img [ref=e5897]
+          - button "비교하기" [ref=e5899]:
+            - img [ref=e5900]
+        - generic [ref=e5906]: 저축은행
+        - heading "예가람저축은행" [level=3] [ref=e5907]
+        - paragraph [ref=e5908]: 신용대출(4대가입)
+        - paragraph [ref=e5909]: 4대가입 직장인, 법인대표 진행가능 (연소득 제한 없고, 불가직군도 거의 없음)
+        - generic [ref=e5911]: 상세보기 →
+      - generic [ref=e5912] [cursor=pointer]:
+        - generic [ref=e5913]:
+          - button "즐겨찾기 추가" [ref=e5914]:
+            - img [ref=e5915]
+          - button "비교하기" [ref=e5917]:
+            - img [ref=e5918]
+        - generic [ref=e5924]: 저축은행
+        - heading "예가람저축은행" [level=3] [ref=e5925]
+        - paragraph [ref=e5926]: 사잇돌(4대가입)
+        - paragraph [ref=e5927]: 4대가입 직장인, 법인대표 진행 가능
+        - generic [ref=e5929]: 상세보기 →
+      - generic [ref=e5930] [cursor=pointer]:
+        - generic [ref=e5931]:
+          - button "즐겨찾기 추가" [ref=e5932]:
+            - img [ref=e5933]
+          - button "비교하기" [ref=e5935]:
+            - img [ref=e5936]
+        - generic [ref=e5942]: 저축은행
+        - heading "예가람저축은행" [level=3] [ref=e5943]
+        - paragraph [ref=e5944]: 햇살론(4대가입)
+        - paragraph [ref=e5945]: 4대가입 직장인만 진행 가능
+        - generic [ref=e5947]: 상세보기 →
+      - generic [ref=e5948] [cursor=pointer]:
+        - generic [ref=e5949]:
+          - button "즐겨찾기 추가" [ref=e5950]:
+            - img [ref=e5951]
+          - button "비교하기" [ref=e5953]:
+            - img [ref=e5954]
+        - generic [ref=e5960]: 대부
+        - heading "안전대부" [level=3] [ref=e5961]
+        - paragraph [ref=e5962]: 오토론
+        - paragraph [ref=e5963]: 4대가입, 미가입, 프리랜서 진행 가능(무직, 주부, 사업자 불가) 주행거리 제한 없음!!
+        - generic [ref=e5965]: 상세보기 →
+      - generic [ref=e5966] [cursor=pointer]:
+        - generic [ref=e5967]:
+          - button "즐겨찾기 추가" [ref=e5968]:
+            - img [ref=e5969]
+          - button "비교하기" [ref=e5971]:
+            - img [ref=e5972]
+        - generic [ref=e5978]: 저축은행
+        - heading "예가람저축은행" [level=3] [ref=e5979]
+        - paragraph [ref=e5980]: 사잇돌(프리랜서)
+        - paragraph [ref=e5981]: 3.3% 소득공제 프리랜서
+        - generic [ref=e5983]: 상세보기 →
+      - generic [ref=e5984] [cursor=pointer]:
+        - generic [ref=e5985]:
+          - button "즐겨찾기 추가" [ref=e5986]:
+            - img [ref=e5987]
+          - button "비교하기" [ref=e5989]:
+            - img [ref=e5990]
+        - generic [ref=e5996]: 저축은행
+        - heading "예가람저축은행" [level=3] [ref=e5997]
+        - paragraph [ref=e5998]: 사잇돌(개인사업자)
+        - paragraph [ref=e5999]: 개인사업자, 본인사업장 4대가입자 진행가능
+        - generic [ref=e6001]: 상세보기 →
+      - generic [ref=e6002] [cursor=pointer]:
+        - generic [ref=e6003]:
+          - button "즐겨찾기 추가" [ref=e6004]:
+            - img [ref=e6005]
+          - button "비교하기" [ref=e6007]:
+            - img [ref=e6008]
+        - generic [ref=e6014]: 저축은행
+        - heading "예가람저축은행" [level=3] [ref=e6015]
+        - paragraph [ref=e6016]: 신용대출(미가입)
+        - paragraph [ref=e6017]: 4대보험 미가입 직장인 (소득 신고 안들어가는 고정급 받는 고객) (연소득 제한 없고, 불가직군도 거의 없음)
+        - generic [ref=e6019]: 상세보기 →
+      - generic [ref=e6020] [cursor=pointer]:
+        - generic [ref=e6021]:
+          - button "즐겨찾기 추가" [ref=e6022]:
+            - img [ref=e6023]
+          - button "비교하기" [ref=e6025]:
+            - img [ref=e6026]
+        - generic [ref=e6032]: 저축은행
+        - heading "예가람저축은행" [level=3] [ref=e6033]
+        - paragraph [ref=e6034]: 신용대출(프리랜서)
+        - paragraph [ref=e6035]: 3.3% 소득공제 프리랜서 (급여 나눠서 받는거 전부 합산해서 진행가능)
+        - generic [ref=e6037]: 상세보기 →
+```
