@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Position {
     x: number;
@@ -102,14 +102,15 @@ export function CatCompanion() {
                 if (y < 20) { y = 20; vel.current.y *= -1; }
                 if (y > window.innerHeight - 60) { y = window.innerHeight - 60; vel.current.y *= -1; }
 
-                // Update rotation based on velocity
-                if (speed > 5) {
-                    const angle = Math.atan2(vel.current.y, vel.current.x) * (180 / Math.PI);
-                    setRotation(angle);
-                }
-
                 return { x, y };
             });
+
+            // LIFTED ROTATION OUT OF STATE UPDATER
+            const speed = Math.sqrt(vel.current.x ** 2 + vel.current.y ** 2);
+            if (speed > 5) {
+                const angle = Math.atan2(vel.current.y, vel.current.x) * (180 / Math.PI);
+                setRotation(angle);
+            }
 
             frameId = requestAnimationFrame(update);
         };

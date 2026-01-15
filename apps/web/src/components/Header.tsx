@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useThemeStore, applyTheme } from "../lib/theme";
 import { useAuthStore } from "../lib/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 // Icons
 const SunIcon = () => (
@@ -146,7 +146,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto max-w-3xl flex h-14 items-center justify-between px-4">
+      <div className="mx-auto max-w-5xl flex h-14 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
@@ -165,10 +165,10 @@ export function Header() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${isActive
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
+                className={`relative rounded - md px - 3 py - 1.5 text - sm font - medium transition - all duration - 200 ${isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                  } `}
               >
                 {isActive && (
                   <span className="absolute inset-0 rounded-md bg-secondary/80" />
@@ -185,7 +185,7 @@ export function Header() {
           <button
             onClick={toggleTheme}
             className="linear-btn-ghost h-9 w-9 p-0"
-            title={`테마: ${theme === "light" ? "라이트" : "다크"}`}
+            title={`테마: ${theme === "light" ? "라이트" : "다크"} `}
           >
             {themeIcon[theme]}
           </button>
@@ -237,10 +237,10 @@ export function Header() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                    }`}
+                  className={`rounded - lg px - 4 py - 3 text - sm font - medium transition - all duration - 200 ${isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                    } `}
                 >
                   {item.label}
                 </Link>
