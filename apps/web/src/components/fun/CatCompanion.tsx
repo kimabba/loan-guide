@@ -8,7 +8,6 @@ interface Position {
 export function CatCompanion() {
     const [pos, setPos] = useState<Position>({ x: 100, y: 100 });
     const [rotation, setRotation] = useState(0);
-    const [isWaking, setIsWaking] = useState(false);
     const [isScared, setIsScared] = useState(false);
 
     const mousePos = useRef<Position>({ x: -1000, y: -1000 });
@@ -34,7 +33,7 @@ export function CatCompanion() {
             const dt = Math.min((now - lastUpdate.current) / 1000, 0.1); // max 100ms delta
             lastUpdate.current = now;
 
-            setPos(prev => {
+            setPos((prev: Position) => {
                 let { x, y } = prev;
 
                 // 1. Calculate vector to cursor

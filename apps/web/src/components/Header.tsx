@@ -114,7 +114,7 @@ export function Header() {
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
-      if (theme === "system") applyTheme("system");
+      applyTheme(theme);
     };
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
@@ -141,6 +141,7 @@ export function Header() {
     { path: "/products", label: "상품목록" },
     { path: "/report", label: "버그신고" },
     { path: "/announcements", label: "공지" },
+    { path: "/admin", label: "관리자" },
   ];
 
   return (
@@ -165,8 +166,8 @@ export function Header() {
                 key={item.path}
                 to={item.path}
                 className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${isActive
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
                   }`}
               >
                 {isActive && (
@@ -237,8 +238,8 @@ export function Header() {
                   key={item.path}
                   to={item.path}
                   className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                     }`}
                 >
                   {item.label}
