@@ -11,6 +11,7 @@ export function CatCompanion() {
     const [rotation, setRotation] = useState(0);
     const [isScared, setIsScared] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
+    const [isPanicking, setIsPanicking] = useState(false);
 
     const mousePos = useRef<Position>({ x: -1000, y: -1000 });
     const vel = useRef<Position>({ x: 0, y: 0 });
@@ -47,43 +48,62 @@ export function CatCompanion() {
 
                 let acceleration = { x: 0, y: 0 };
 
-                // STARTLED threshold reduced but force increased for "Urgency"
-                if (dist < 160) {
+                // EDGE DETECTION for corner escape
+                const margin = 140;
+                const isNearEdge = x < margin || x > window.innerWidth - margin || y < margin || y > window.innerHeight - margin;
+
+                if (dist < 180) {
                     setIsScared(true);
-                    const force = (160 - dist) * 22;
+                    let forceMultiplier = 25;
+
+                    // CORNER ESCAPE: If near edge and mouse is coming, PANIC and dash!
+                    if (isNearEdge && dist < 150) {
+                        setIsPanicking(true);
+                        forceMultiplier = 65;
+                        // Set target to far center area
+                        target.current = {
+                            x: x < window.innerWidth / 2 ? window.innerWidth * 0.7 : window.innerWidth * 0.3,
+                            y: y < window.innerHeight / 2 ? window.innerHeight * 0.7 : window.innerHeight * 0.3
+                        };
+                    } else {
+                        setIsPanicking(false);
+                    }
+
+                    const force = (180 - dist) * forceMultiplier;
                     acceleration.x = (dx / dist) * force;
                     acceleration.y = (dy / dist) * force;
 
-                    if (Math.random() > 0.94) {
+                    if (Math.random() > 0.96) {
                         target.current = {
-                            x: Math.random() * (window.innerWidth - 80) + 40,
-                            y: Math.random() * (window.innerHeight - 80) + 40
+                            x: Math.random() * (window.innerWidth - 120) + 60,
+                            y: Math.random() * (window.innerHeight - 120) + 60
                         };
                     }
                 } else {
                     setIsScared(false);
+                    setIsPanicking(false);
                     const tx = target.current.x - x;
                     const ty = target.current.y - y;
                     const tDist = Math.sqrt(tx * tx + ty * ty);
 
-                    if (tDist < 30) {
+                    if (tDist < 40) {
                         target.current = {
-                            x: Math.random() * (window.innerWidth - 80) + 40,
-                            y: Math.random() * (window.innerHeight - 80) + 40
+                            x: Math.random() * (window.innerWidth - 120) + 60,
+                            y: Math.random() * (window.innerHeight - 120) + 60
                         };
                     } else {
-                        acceleration.x = (tx / tDist) * 70;
-                        acceleration.y = (ty / tDist) * 70;
+                        acceleration.x = (tx / tDist) * 85;
+                        acceleration.y = (ty / tDist) * 85;
                     }
                 }
 
-                vel.current.x *= 0.93;
-                vel.current.y *= 0.93;
+                vel.current.x *= 0.91;
+                vel.current.y *= 0.91;
 
                 vel.current.x += acceleration.x * dt;
                 vel.current.y += acceleration.y * dt;
 
-                const maxSpeed = isScared ? 800 : 140;
+                const maxSpeed = isPanicking ? 1400 : (isScared ? 900 : 160);
                 if (speed > maxSpeed) {
                     vel.current.x = (vel.current.x / speed) * maxSpeed;
                     vel.current.y = (vel.current.y / speed) * maxSpeed;
@@ -92,17 +112,16 @@ export function CatCompanion() {
                 x += vel.current.x * dt;
                 y += vel.current.y * dt;
 
-                if (x < 30) { x = 30; vel.current.x *= -1; }
-                if (x > window.innerWidth - 90) { x = window.innerWidth - 90; vel.current.x *= -1; }
-                if (y < 30) { y = 30; vel.current.y *= -1; }
-                if (y > window.innerHeight - 90) { y = window.innerHeight - 90; vel.current.y *= -1; }
+                if (x < 20) { x = 20; vel.current.x *= -1.2; }
+                if (x > window.innerWidth - 120) { x = window.innerWidth - 120; vel.current.x *= -1.2; }
+                if (y < 20) { y = 20; vel.current.y *= -1.2; }
+                if (y > window.innerHeight - 120) { y = window.innerHeight - 120; vel.current.y *= -1.2; }
 
                 return { x, y };
             });
 
             if (speed > 5) {
-                // Side view cat doesn't rotate 360, but tilts slightly based on vertical velocity
-                const tilt = Math.max(Math.min(vel.current.y * 0.1, 15), -15);
+                const tilt = Math.max(Math.min(vel.current.y * 0.15, 25), -25);
                 setRotation(tilt);
             } else {
                 setRotation(0);
@@ -113,7 +132,7 @@ export function CatCompanion() {
 
         frameId = requestAnimationFrame(update);
         return () => cancelAnimationFrame(frameId);
-    }, [isScared]);
+    }, [isScared, isPanicking]);
 
     return (
         <div
@@ -124,65 +143,78 @@ export function CatCompanion() {
                 transform: `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${rotation}deg)`,
             }}
         >
-            <div className={`relative ${vel.current.x < 0 ? 'scale-x-[-1]' : ''}`}>
+            <div className={`relative ${vel.current.x < 0 ? 'scale-x-[-1]' : ''} transition-transform duration-300`}>
+                {/* SVG Filter for Fuzzy/Sketchy look */}
+                <svg width="0" height="0" className="absolute">
+                    <filter id="fuzzy">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.4" numOctaves="4" result="noise" />
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+                    </filter>
+                </svg>
+
                 <style dangerouslySetInnerHTML={{
                     __html: `
-                    @keyframes cat-gallop {
-                        0%, 100% { transform: translateY(0) rotate(0); }
-                        25% { transform: translateY(-4px) rotate(-5deg); }
-                        50% { transform: translateY(0) rotate(0); }
-                        75% { transform: translateY(-4px) rotate(5deg); }
+                    @keyframes fuzzy-jitter {
+                        0%, 100% { filter: url(#fuzzy) brightness(1); }
+                        50% { filter: url(#fuzzy) brightness(1.05) translate(0.5px, 0.5px); }
                     }
-                    @keyframes tail-wave {
-                        0%, 100% { transform: rotate(0); }
-                        50% { transform: rotate(15deg); }
+                    @keyframes fuzzy-run {
+                        0%, 100% { transform: translateY(0) scale(1, 1); }
+                        25% { transform: translateY(-8px) scale(0.92, 1.08); }
+                        50% { transform: translateY(0) scale(1.08, 0.92); }
+                        75% { transform: translateY(-8px) scale(0.92, 1.08); }
                     }
-                    @keyframes leg-move {
-                        0%, 100% { transform: translateX(0); }
-                        50% { transform: translateX(3px); }
+                    .cat-fuzzy-style { 
+                        filter: url(#fuzzy); 
+                        animation: fuzzy-jitter 0.15s infinite;
                     }
-                    .cat-running .cat-body-container { animation: cat-gallop 0.25s infinite ease-in-out; }
-                    .cat-tail { animation: tail-wave 1s infinite ease-in-out; transform-origin: bottom left; }
-                    .cat-running .leg { animation: leg-move 0.15s infinite ease-in-out; }
-                    .leg-2, .leg-4 { animation-delay: 0.07s !important; }
+                    .cat-running .cat-graphic { 
+                        animation: fuzzy-run 0.2s infinite ease-in-out; 
+                    }
+                    .cat-panicking .cat-graphic { 
+                        animation: fuzzy-run 0.08s infinite linear; 
+                    }
                 `}} />
 
-                {/* Side-view Cat Silhouette */}
-                <div className={`cat-body-container ${isRunning ? 'cat-running' : ''} ${isScared ? 'animate-bounce' : 'animate-pulse'} transition-colors duration-500`}>
+                <div className={`cat-graphic ${isRunning ? 'cat-running' : ''} ${isPanicking ? 'cat-panicking' : ''}`}>
                     <svg
-                        width="80" height="60" viewBox="0 0 40 30" fill="none"
+                        width="110" height="90" viewBox="0 0 40 30" fill="none"
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`text-zinc-900 dark:text-zinc-100`}
+                        className="cat-fuzzy-style transition-colors duration-500 text-zinc-900 dark:text-zinc-100"
                     >
-                        {/* Body */}
-                        <path d="M10 20Q15 12 25 15Q30 18 30 22L10 22Z" fill="currentColor" />
+                        {/* Fuzzy Torso */}
+                        <path d="M8 22C8 22 10 12 20 12C30 12 34 18 34 22L8 22Z" fill="currentColor" />
 
-                        {/* Head */}
-                        <circle cx="28" cy="14" r="5" fill="currentColor" />
+                        {/* Fuzzy Head */}
+                        <path d="M24 14C24 10 28 8 32 10C36 12 36 18 32 20C28 22 24 18 24 14Z" fill="currentColor" />
 
-                        {/* Ears */}
-                        <path d="M25 10L26 5L28 9" fill="currentColor" />
-                        <path d="M31 10L32 5L30 9" fill="currentColor" />
+                        {/* Fuzzy Ears */}
+                        <path d="M26 10L25 3L29 8" fill="currentColor" />
+                        <path d="M33 10L34 3L31 8" fill="currentColor" />
 
-                        {/* Tail */}
-                        <path className="cat-tail" d="M10 20Q2 15 5 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                        {/* Fuzzy Tail */}
+                        <path d="M10 22C6 22 3 18 5 12C7 6 12 8 10 12" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
 
-                        {/* Legs */}
-                        <path className="leg leg-1" d="M14 22V26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                        <path className="leg leg-2" d="M18 22V26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                        <path className="leg leg-3" d="M24 22V26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                        <path className="leg leg-4" d="M28 22V26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                        {/* Fuzzy Legs */}
+                        <path d="M13 22V28" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+                        <path d="M19 22V28" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+                        <path d="M26 22V28" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+                        <path d="M31 22V28" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
 
-                        {/* Eyes */}
-                        <circle cx="30" cy="13" r="1.2" fill={isScared ? "#ef4444" : "white"} />
-                        <circle cx="30" cy="13" r="0.6" fill="black" />
+                        {/* Large Fuzzy Eyes from Reference */}
+                        <circle cx="28.5" cy="14" r="3.2" fill="white" />
+                        <circle cx="34.5" cy="14" r="3.2" fill="white" />
+
+                        {/* Pupils */}
+                        <circle cx="28.8" cy="14.2" r="1.2" fill={isScared ? "#ef4444" : "black"} />
+                        <circle cx="34.8" cy="14.2" r="1.2" fill={isScared ? "#ef4444" : "black"} />
                     </svg>
                 </div>
 
-                {/* Speech Bubble */}
-                {isScared && (
-                    <div className="absolute -top-10 right-0 bg-white dark:bg-zinc-800 text-[11px] font-bold px-3 py-1 rounded-full border border-primary/20 shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200">
-                        냥!!!
+                {/* Panic Bubble */}
+                {isPanicking && (
+                    <div className="absolute -top-14 right-2 bg-red-600 text-white text-[11px] font-black px-2 py-0.5 rounded-sm shadow-2xl animate-bounce">
+                        탈출!!
                     </div>
                 )}
             </div>
