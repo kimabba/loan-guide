@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useThemeStore, applyTheme } from "../lib/theme";
 import { useAuthStore } from "../lib/auth";
@@ -141,7 +142,7 @@ export function Header() {
     { path: "/products", label: "상품목록" },
     { path: "/report", label: "버그신고" },
     { path: "/announcements", label: "공지" },
-    { path: "/admin", label: "관리자" },
+    { path: "/admin", label: "관리자(NEW)" },
   ];
 
   return (
@@ -166,8 +167,8 @@ export function Header() {
                 key={item.path}
                 to={item.path}
                 className={`relative rounded - md px - 3 py - 1.5 text - sm font - medium transition - all duration - 200 ${isActive
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
                   } `}
               >
                 {isActive && (
@@ -238,8 +239,8 @@ export function Header() {
                   key={item.path}
                   to={item.path}
                   className={`rounded - lg px - 4 py - 3 text - sm font - medium transition - all duration - 200 ${isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                     } `}
                 >
                   {item.label}

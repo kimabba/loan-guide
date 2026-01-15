@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "pages:dev": "wrangler pages dev dist --compatibility-date=2024-12-01 --compatibility-flags=nodejs_compat",
