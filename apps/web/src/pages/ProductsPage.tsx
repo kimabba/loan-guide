@@ -10,7 +10,7 @@ import { PasteSearch } from "../components/products/PasteSearch";
 import { useFavoritesStore } from "../lib/favorites";
 import { useCompareStore } from "../lib/compare";
 import { MatchResult } from "../lib/conditionParser";
-import { getAllTags, getPopularTags, getTagColor } from "../lib/tagExtractor";
+import { getAllTags, getPopularTags, getTagColor, extractProductTags } from "../lib/tagExtractor";
 
 interface Product {
   item_cd: string;
@@ -45,6 +45,7 @@ export function ProductsPage() {
   const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null);
   const [fullProducts, setFullProducts] = useState<any[]>([]); // depth3 포함 전체 데이터
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
 
   const { favorites } = useFavoritesStore();
   const { compareList } = useCompareStore();
@@ -126,11 +127,22 @@ export function ProductsPage() {
     const categoryMap = new Map<string, number>();
     const productTypeMap = new Map<string, number>();
     const companyMap = new Map<string, number>();
+    const employmentTypeMap = new Map<string, number>();
 
     products.forEach((p) => {
       categoryMap.set(p.depth1, (categoryMap.get(p.depth1) || 0) + 1);
       productTypeMap.set(p.depth2, (productTypeMap.get(p.depth2) || 0) + 1);
       companyMap.set(p.pfi_name, (companyMap.get(p.pfi_name) || 0) + 1);
+    });
+
+    // 직군 태그 추출 (fullProducts에서)
+    fullProducts.forEach((p) => {
+      const tags = extractProductTags(p);
+      tags.employmentType.forEach((tag) => {
+        // # 제거한 값 사용
+        const value = tag.replace(/^#/, "");
+        employmentTypeMap.set(value, (employmentTypeMap.get(value) || 0) + 1);
+      });
     });
 
     return {
@@ -143,8 +155,11 @@ export function ProductsPage() {
       companies: Array.from(companyMap.entries())
         .map(([value, count]) => ({ value, count }))
         .sort((a, b) => b.count - a.count),
+      employmentTypes: Array.from(employmentTypeMap.entries())
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.count - a.count),
     };
-  }, [products]);
+  }, [products, fullProducts]);
 
   // 인기 태그 계산
   const popularTags = useMemo(() => {
@@ -218,6 +233,16 @@ export function ProductsPage() {
       result = result.filter((p) => selectedCompanies.includes(p.pfi_name));
     }
 
+    // 직군 필터
+    if (selectedEmploymentTypes.length > 0) {
+      result = result.filter((p) => {
+        const productTags = productTagsMap.get(p.item_cd) || [];
+        return selectedEmploymentTypes.some((type) =>
+          productTags.includes(`#${type}`)
+        );
+      });
+    }
+
     // 태그 필터
     if (selectedTags.length > 0) {
       result = result.filter((p) => {
@@ -235,6 +260,7 @@ export function ProductsPage() {
     selectedCategories,
     selectedProductTypes,
     selectedCompanies,
+    selectedEmploymentTypes,
     selectedTags,
     productTagsMap,
     matchResults,
@@ -265,6 +291,14 @@ export function ProductsPage() {
     );
   };
 
+  const handleEmploymentTypeChange = (employmentType: string) => {
+    setSelectedEmploymentTypes((prev) =>
+      prev.includes(employmentType)
+        ? prev.filter((e) => e !== employmentType)
+        : [...prev, employmentType]
+    );
+  };
+
   const handleTagClick = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag)
@@ -277,6 +311,7 @@ export function ProductsPage() {
     setSelectedCategories([]);
     setSelectedProductTypes([]);
     setSelectedCompanies([]);
+    setSelectedEmploymentTypes([]);
     setSelectedTags([]);
     setSearch("");
   };
@@ -411,12 +446,15 @@ export function ProductsPage() {
               categories={filterOptions.categories}
               productTypes={filterOptions.productTypes}
               companies={filterOptions.companies}
+              employmentTypes={filterOptions.employmentTypes}
               selectedCategories={selectedCategories}
               selectedProductTypes={selectedProductTypes}
               selectedCompanies={selectedCompanies}
+              selectedEmploymentTypes={selectedEmploymentTypes}
               onCategoryChange={handleCategoryChange}
               onProductTypeChange={handleProductTypeChange}
               onCompanyChange={handleCompanyChange}
+              onEmploymentTypeChange={handleEmploymentTypeChange}
               onClearAll={clearAllFilters}
             />
 
