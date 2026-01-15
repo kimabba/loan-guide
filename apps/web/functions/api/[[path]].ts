@@ -14,7 +14,10 @@ import loanGuides from "../loan_guides.json";
 // ============================================
 // Supabase Client Factory
 // ============================================
-function getSupabase(env: Env): SupabaseClient {
+function getSupabase(env: Env): SupabaseClient | null {
+  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+    return null;
+  }
   return createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
 }
 
@@ -520,27 +523,35 @@ app.post("/chat", async (c) => {
     // 검색어 기록
     recordSearch(message);
 
-    // 세션 ID 확인/생성
+    // 세션 ID 확인/생성 (Supabase가 설정된 경우에만)
     let activeSessionId = sessionId;
-    if (!activeSessionId) {
-      const { data: newSession, error: sessionError } = await supabase
-        .from('chat_sessions')
-        .insert({ title: message.slice(0, 50) })
-        .select('id')
-        .single();
+    if (supabase && !activeSessionId) {
+      try {
+        const { data: newSession, error: sessionError } = await supabase
+          .from('chat_sessions')
+          .insert({ title: message.slice(0, 50) })
+          .select('id')
+          .single();
 
-      if (!sessionError && newSession) {
-        activeSessionId = newSession.id;
+        if (!sessionError && newSession) {
+          activeSessionId = newSession.id;
+        }
+      } catch (e) {
+        console.error('Session creation error:', e);
       }
     }
 
-    // 사용자 메시지 저장
-    if (activeSessionId) {
-      await supabase.from('chat_messages').insert({
-        session_id: activeSessionId,
-        role: 'user',
-        content: message
-      });
+    // 사용자 메시지 저장 (Supabase가 설정된 경우에만)
+    if (supabase && activeSessionId) {
+      try {
+        await supabase.from('chat_messages').insert({
+          session_id: activeSessionId,
+          role: 'user',
+          content: message
+        });
+      } catch (e) {
+        console.error('User message save error:', e);
+      }
     }
 
     let responseData: {
@@ -574,58 +585,62 @@ app.post("/chat", async (c) => {
         // 품질 분석
         const quality = analyzeResponseQuality(message, response, guides, groundingMetadata);
 
-        // AI 응답 저장 및 품질 로그 기록
-        if (activeSessionId) {
-          const { data: aiMessage } = await supabase
-            .from('chat_messages')
-            .insert({
-              session_id: activeSessionId,
-              role: 'assistant',
-              content: response,
-              guide_ids: guides.map(g => g.item_cd)
-            })
-            .select('id')
-            .single();
-
-          // 품질 로그 저장
-          const qualityLogData: any = {
-            session_id: activeSessionId,
-            quality_score: quality.score,
-            issue_type: quality.issueType,
-            grounding_chunks_count: groundingMetadata?.groundingChunks?.length || 0,
-            has_guide_reference: guides.length > 0
-          };
-
-          if (aiMessage?.id) {
-            qualityLogData.message_id = aiMessage.id;
-          }
-
-          const { data: qualityLog } = await supabase
-            .from('chat_quality_logs')
-            .insert(qualityLogData)
-            .select('id')
-            .single();
-
-          // 문제 감지 시 버그 리포트 자동 생성
-          if (quality.score < 0.5 && qualityLog?.id) {
-            const { data: bugReport } = await supabase
-              .from('bug_reports')
+        // AI 응답 저장 및 품질 로그 기록 (Supabase가 설정된 경우에만)
+        if (supabase && activeSessionId) {
+          try {
+            const { data: aiMessage } = await supabase
+              .from('chat_messages')
               .insert({
-                type: 'guide_fix',
-                title: `[자동] ${quality.issueType}: ${message.slice(0, 50)}`,
-                description: `## 사용자 질문\n${message}\n\n## AI 응답\n${response.slice(0, 500)}\n\n## 문제 유형\n${quality.issueType}\n\n## 품질 점수\n${quality.score}`,
-                status: 'open'
+                session_id: activeSessionId,
+                role: 'assistant',
+                content: response,
+                guide_ids: guides.map(g => g.item_cd)
               })
               .select('id')
               .single();
 
-            // 품질 로그와 버그 리포트 연결
-            if (bugReport?.id) {
-              await supabase
-                .from('chat_quality_logs')
-                .update({ bug_report_id: bugReport.id })
-                .eq('id', qualityLog.id);
+            // 품질 로그 저장
+            const qualityLogData: any = {
+              session_id: activeSessionId,
+              quality_score: quality.score,
+              issue_type: quality.issueType,
+              grounding_chunks_count: groundingMetadata?.groundingChunks?.length || 0,
+              has_guide_reference: guides.length > 0
+            };
+
+            if (aiMessage?.id) {
+              qualityLogData.message_id = aiMessage.id;
             }
+
+            const { data: qualityLog } = await supabase
+              .from('chat_quality_logs')
+              .insert(qualityLogData)
+              .select('id')
+              .single();
+
+            // 문제 감지 시 버그 리포트 자동 생성
+            if (quality.score < 0.5 && qualityLog?.id) {
+              const { data: bugReport } = await supabase
+                .from('bug_reports')
+                .insert({
+                  type: 'guide_fix',
+                  title: `[자동] ${quality.issueType}: ${message.slice(0, 50)}`,
+                  description: `## 사용자 질문\n${message}\n\n## AI 응답\n${response.slice(0, 500)}\n\n## 문제 유형\n${quality.issueType}\n\n## 품질 점수\n${quality.score}`,
+                  status: 'open'
+                })
+                .select('id')
+                .single();
+
+              // 품질 로그와 버그 리포트 연결
+              if (bugReport?.id) {
+                await supabase
+                  .from('chat_quality_logs')
+                  .update({ bug_report_id: bugReport.id })
+                  .eq('id', qualityLog.id);
+              }
+            }
+          } catch (e) {
+            console.error('AI message/quality log save error:', e);
           }
         }
 
@@ -653,22 +668,26 @@ app.post("/chat", async (c) => {
     const { response, guides } = fallbackSearch(message);
     recordTokenUsage("keyword_search", "none", 0, 0);
 
-    // Fallback 응답도 저장
-    if (activeSessionId) {
-      await supabase.from('chat_messages').insert({
-        session_id: activeSessionId,
-        role: 'assistant',
-        content: response,
-        guide_ids: guides.map(g => g.item_cd)
-      });
+    // Fallback 응답도 저장 (Supabase가 설정된 경우에만)
+    if (supabase && activeSessionId) {
+      try {
+        await supabase.from('chat_messages').insert({
+          session_id: activeSessionId,
+          role: 'assistant',
+          content: response,
+          guide_ids: guides.map(g => g.item_cd)
+        });
 
-      // Fallback은 low_confidence로 기록
-      await supabase.from('chat_quality_logs').insert({
-        session_id: activeSessionId,
-        quality_score: 0.5,
-        issue_type: 'low_confidence',
-        has_guide_reference: guides.length > 0
-      });
+        // Fallback은 low_confidence로 기록
+        await supabase.from('chat_quality_logs').insert({
+          session_id: activeSessionId,
+          quality_score: 0.5,
+          issue_type: 'low_confidence',
+          has_guide_reference: guides.length > 0
+        });
+      } catch (e) {
+        console.error('Fallback message save error:', e);
+      }
     }
 
     responseData = {
@@ -694,6 +713,10 @@ app.post("/chat", async (c) => {
 // 세션 목록 조회
 app.get("/chat/sessions", async (c) => {
   const supabase = getSupabase(c.env);
+  if (!supabase) {
+    return c.json({ error: "Database not configured", total: 0, sessions: [] });
+  }
+
   const limit = Math.min(parseInt(c.req.query("limit") || "20"), 50);
 
   const { data: sessions, error } = await supabase
@@ -718,6 +741,9 @@ app.get("/chat/sessions/:sessionId/messages", async (c) => {
   }
 
   const supabase = getSupabase(c.env);
+  if (!supabase) {
+    return c.json({ error: "Database not configured", sessionId, total: 0, messages: [] });
+  }
 
   const { data: messages, error } = await supabase
     .from('chat_messages')
@@ -750,6 +776,9 @@ app.post("/chat/feedback", async (c) => {
     }
 
     const supabase = getSupabase(c.env);
+    if (!supabase) {
+      return c.json({ error: "Database not configured" }, 503);
+    }
 
     // messageId 또는 sessionId로 품질 로그 찾기
     let query = supabase.from('chat_quality_logs').update({ user_feedback: feedback });
@@ -836,6 +865,9 @@ app.post("/chat/feedback", async (c) => {
 // 품질 통계 조회 (관리자용)
 app.get("/chat/quality/stats", async (c) => {
   const supabase = getSupabase(c.env);
+  if (!supabase) {
+    return c.json({ error: "Database not configured" }, 503);
+  }
   const days = Math.min(parseInt(c.req.query("days") || "7"), 30);
 
   // issue_type별 카운트
