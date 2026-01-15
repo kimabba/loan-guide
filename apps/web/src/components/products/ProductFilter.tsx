@@ -51,7 +51,7 @@ function AccordionFilterSection({
     <div className="border-b border-border/50">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between py-3 px-2 -mx-2 rounded-lg text-left transition-colors hover:bg-muted/50 cursor-pointer"
+        className="flex w-full items-center justify-between py-3 px-3 -mx-3 rounded-lg text-left transition-all hover:bg-primary/10 hover:text-primary cursor-pointer"
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-foreground">{title}</span>
