@@ -9,6 +9,7 @@ import { StatsPage } from "./pages/StatsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { Header } from "./components/Header";
+import { Footer } from "./components/Footer";
 import { useThemeStore, applyTheme } from "./lib/theme";
 import { useAuthStore } from "./lib/auth";
 
@@ -22,18 +23,21 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/chat" element={<ChatPage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/stats" element={<StatsPage />} />
-        <Route path="/report" element={<ReportPage />} />
-        <Route path="/announcements" element={<AnnouncementsPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
-      </Routes>
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/stats" element={<StatsPage />} />
+          <Route path="/report" element={<ReportPage />} />
+          <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        </Routes>
+      </main>
+      <Footer />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { PasteSearch } from "../components/products/PasteSearch";
 import { useFavoritesStore } from "../lib/favorites";
 import { useCompareStore } from "../lib/compare";
 import { MatchResult } from "../lib/conditionParser";
+import { getAllTags, getPopularTags, getTagColor } from "../lib/tagExtractor";
 
 interface Product {
   item_cd: string;
@@ -43,6 +44,7 @@ export function ProductsPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null);
   const [fullProducts, setFullProducts] = useState<any[]>([]); // depth3 포함 전체 데이터
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const { favorites } = useFavoritesStore();
   const { compareList } = useCompareStore();
@@ -144,6 +146,20 @@ export function ProductsPage() {
     };
   }, [products]);
 
+  // 인기 태그 계산
+  const popularTags = useMemo(() => {
+    return getPopularTags(fullProducts).slice(0, 15);
+  }, [fullProducts]);
+
+  // 상품별 태그 맵
+  const productTagsMap = useMemo(() => {
+    const map = new Map<string, string[]>();
+    fullProducts.forEach((p) => {
+      map.set(p.item_cd, getAllTags(p));
+    });
+    return map;
+  }, [fullProducts]);
+
   // 매칭 점수 맵 생성
   const matchScoreMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -202,6 +218,14 @@ export function ProductsPage() {
       result = result.filter((p) => selectedCompanies.includes(p.pfi_name));
     }
 
+    // 태그 필터
+    if (selectedTags.length > 0) {
+      result = result.filter((p) => {
+        const productTags = productTagsMap.get(p.item_cd) || [];
+        return selectedTags.every((tag) => productTags.includes(tag));
+      });
+    }
+
     return result;
   }, [
     products,
@@ -211,6 +235,8 @@ export function ProductsPage() {
     selectedCategories,
     selectedProductTypes,
     selectedCompanies,
+    selectedTags,
+    productTagsMap,
     matchResults,
     matchScoreMap,
   ]);
@@ -239,10 +265,19 @@ export function ProductsPage() {
     );
   };
 
+  const handleTagClick = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
   const clearAllFilters = () => {
     setSelectedCategories([]);
     setSelectedProductTypes([]);
     setSelectedCompanies([]);
+    setSelectedTags([]);
     setSearch("");
   };
 
@@ -385,6 +420,71 @@ export function ProductsPage() {
               onClearAll={clearAllFilters}
             />
 
+            {/* 인기 태그 */}
+            {popularTags.length > 0 && (
+              <div className="mt-4">
+                <h4 className="mb-2 text-sm font-medium text-foreground">인기 태그</h4>
+                <div className="flex flex-wrap gap-2">
+                  {popularTags.map(({ tag, count }) => {
+                    const colors = getTagColor(tag);
+                    const isSelected = selectedTags.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        onClick={() => handleTagClick(tag)}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2"
+                            : `${colors.bg} ${colors.text} hover:scale-105 hover:shadow-sm`
+                        }`}
+                      >
+                        {tag}
+                        <span className={`text-xs ${isSelected ? "opacity-80" : "opacity-60"}`}>
+                          ({count})
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 선택된 태그 표시 */}
+            {selectedTags.length > 0 && (
+              <div className="mt-3 flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">선택된 태그:</span>
+                {selectedTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => handleTagClick(tag)}
+                    className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
+                  >
+                    {tag}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                ))}
+                <button
+                  onClick={() => setSelectedTags([])}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  전체 해제
+                </button>
+              </div>
+            )}
+
             {/* 복붙 검색 아코디언 */}
             <div className="mt-4">
               <PasteSearch
@@ -493,6 +593,8 @@ export function ProductsPage() {
                 productType={product.depth2}
                 summary={product.fi_memo || ""}
                 matchScore={matchScoreMap.get(product.item_cd)}
+                tags={productTagsMap.get(product.item_cd) || []}
+                onTagClick={handleTagClick}
                 onClick={() => setSelectedGuide(product.item_cd)}
               />
             ))}
