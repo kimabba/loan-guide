@@ -5,7 +5,6 @@ import { ProductFilter } from "../components/products/ProductFilter";
 import { CompareBar } from "../components/products/CompareBar";
 import { CompareModal } from "../components/products/CompareModal";
 import { FloatingCompareButton } from "../components/products/FloatingCompareButton";
-import { PasteAnalyzer } from "../components/products/PasteAnalyzer";
 import { GuideModal } from "../components/GuideModal";
 import { PasteSearch } from "../components/products/PasteSearch";
 import { useFavoritesStore } from "../lib/favorites";
@@ -371,17 +370,6 @@ export function ProductsPage() {
             </span>
           </button>
 
-          {/* 복붙 검색 영역 */}
-          <div className="mt-4">
-            <PasteAnalyzer
-              onFilterProducts={(filters) => {
-                if (filters.productTypes?.length) {
-                  setSelectedProductTypes(filters.productTypes);
-                }
-              }}
-            />
-          </div>
-
           {/* 필터 영역 */}
           <div className={`mt-4 ${filterOpen ? "block" : "hidden"} sm:block`}>
             <ProductFilter
@@ -396,16 +384,20 @@ export function ProductsPage() {
               onCompanyChange={handleCompanyChange}
               onClearAll={clearAllFilters}
             />
+
+            {/* 복붙 검색 아코디언 */}
+            <div className="mt-4">
+              <PasteSearch
+                products={fullProducts}
+                onMatchResults={setMatchResults}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 복붙 검색 아코디언 */}
+      {/* 매칭 결과 영역 */}
       <div className="mx-auto max-w-7xl px-5 pt-4 sm:px-6">
-        <PasteSearch
-          products={fullProducts}
-          onMatchResults={setMatchResults}
-        />
 
         {/* 매칭 결과 헤더 */}
         {matchResults && matchResults.length > 0 && (
