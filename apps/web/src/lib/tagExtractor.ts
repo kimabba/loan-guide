@@ -64,7 +64,9 @@ const FEATURE_KEYWORDS: Record<string, string> = {
 };
 
 // 텍스트에서 태그 추출
-function extractTagsFromText(text: string, keywordMap: Record<string, string>): string[] {
+function extractTagsFromText(text: string | undefined | null, keywordMap: Record<string, string>): string[] {
+  if (!text) return [];
+
   const tags = new Set<string>();
   const lowerText = text.toLowerCase();
 
@@ -79,16 +81,20 @@ function extractTagsFromText(text: string, keywordMap: Record<string, string>): 
 
 // 상품에서 모든 태그 추출
 export function extractProductTags(product: {
-  depth2: string;
-  fi_memo: string;
+  depth2?: string;
+  fi_memo?: string;
   depth3?: Array<{
     depth4_key?: Array<{
       detail?: string;
     }>;
   }>;
-}): ProductTags {
+} | null | undefined): ProductTags {
+  if (!product) {
+    return { employmentType: [], productType: [], features: [] };
+  }
+
   // depth2와 fi_memo에서 텍스트 수집
-  let searchText = `${product.depth2} ${product.fi_memo}`;
+  let searchText = `${product.depth2 || ""} ${product.fi_memo || ""}`;
 
   // depth3의 상세 내용에서도 수집
   if (product.depth3) {
@@ -105,21 +111,23 @@ export function extractProductTags(product: {
 
   return {
     employmentType: extractTagsFromText(searchText, EMPLOYMENT_KEYWORDS),
-    productType: extractTagsFromText(product.depth2, PRODUCT_TYPE_KEYWORDS),
+    productType: extractTagsFromText(product.depth2 || "", PRODUCT_TYPE_KEYWORDS),
     features: extractTagsFromText(searchText, FEATURE_KEYWORDS),
   };
 }
 
 // 모든 태그를 하나의 배열로 반환
 export function getAllTags(product: {
-  depth2: string;
-  fi_memo: string;
+  depth2?: string;
+  fi_memo?: string;
   depth3?: Array<{
     depth4_key?: Array<{
       detail?: string;
     }>;
   }>;
-}): string[] {
+} | null | undefined): string[] {
+  if (!product) return [];
+
   const tags = extractProductTags(product);
   return [
     ...tags.employmentType,
@@ -146,17 +154,20 @@ export function getTagColor(tag: string): { bg: string; text: string } {
 
 // 인기 태그 집계
 export function getPopularTags(products: Array<{
-  depth2: string;
-  fi_memo: string;
+  depth2?: string;
+  fi_memo?: string;
   depth3?: Array<{
     depth4_key?: Array<{
       detail?: string;
     }>;
   }>;
-}>): { tag: string; count: number }[] {
+} | null | undefined> | null | undefined): { tag: string; count: number }[] {
+  if (!products || !Array.isArray(products)) return [];
+
   const tagCounts = new Map<string, number>();
 
   for (const product of products) {
+    if (!product) continue;
     const tags = getAllTags(product);
     for (const tag of tags) {
       tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
