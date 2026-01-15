@@ -163,7 +163,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="flex h-14 items-center justify-between px-4">
+      <div className="mx-auto max-w-5xl flex h-14 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
