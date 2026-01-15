@@ -33,7 +33,8 @@ export function Footer() {
                     strokeLinejoin="round"
                     className="text-primary"
                   >
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
                   </svg>
                 </div>
                 <span className="font-semibold text-foreground">{APP_NAME}</span>
@@ -85,14 +86,10 @@ export function Footer() {
           <div className="my-4 border-t border-border/50" />
 
           {/* 하단: 카피라이트 */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             <p>
               © 2026 {APP_NAME}. All rights reserved. Developed by{" "}
               <span className="font-medium text-foreground">ssfak</span>
-            </p>
-            <p className="flex items-center gap-1">
-              <span>Powered by</span>
-              <span className="font-medium text-foreground">Gemini AI</span>
             </p>
           </div>
         </div>

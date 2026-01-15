@@ -1,7 +1,7 @@
 // 앱 버전 정보
 
 export const APP_VERSION = "1.0.0";
-export const APP_NAME = "대출 가이드";
+export const APP_NAME = "론 파인더";
 
 export interface ChangelogEntry {
   version: string;
