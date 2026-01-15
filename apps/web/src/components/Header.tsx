@@ -55,7 +55,8 @@ const MonitorIcon = () => (
   </svg>
 );
 
-const SparklesIcon = () => (
+// 나침반 + 돋보기 조합 아이콘 (Loan Finder 컨셉)
+const LogoIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="18"
@@ -67,7 +68,10 @@ const SparklesIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+    <circle cx="10" cy="10" r="7" />
+    <path d="m21 21-4.3-4.3" />
+    <path d="M10 7v6" />
+    <path d="M7 10h6" />
   </svg>
 );
 
@@ -163,10 +167,10 @@ export function Header() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-            <SparklesIcon />
+            <LogoIcon />
           </div>
           <span className="font-semibold gradient-text">
-            대출 가이드
+            론 파인더
           </span>
         </Link>
 
