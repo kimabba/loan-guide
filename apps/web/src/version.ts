@@ -2,8 +2,6 @@
 
 export const APP_VERSION = "1.0.0";
 export const APP_NAME = "대출 가이드";
-export const APP_AUTHOR = "ssfak";
-export const APP_GITHUB = "https://github.com/ssfak/loan-guide";
 
 export interface ChangelogEntry {
   version: string;
