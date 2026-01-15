@@ -9,6 +9,11 @@ import {
 
 export const reportsRoutes = new Hono<{ Bindings: Env }>();
 
+interface Screenshot {
+  name: string;
+  data: string; // base64
+}
+
 interface BugReport {
   id: string;
   type: "bug" | "guide_fix" | "feature" | "other";
@@ -16,6 +21,7 @@ interface BugReport {
   description: string;
   email?: string;
   guideId?: string;
+  screenshots?: Screenshot[];
   createdAt: string;
 }
 
@@ -48,6 +54,15 @@ reportsRoutes.post("/", async (c) => {
       return c.json({ error: emailValidation.error }, 400);
     }
 
+    // Validate screenshots (max 3, each max 5MB)
+    let screenshots: Screenshot[] | undefined;
+    if (body.screenshots && Array.isArray(body.screenshots)) {
+      screenshots = body.screenshots.slice(0, 3).map((s: Screenshot) => ({
+        name: sanitizeString(s.name || "screenshot").slice(0, 100),
+        data: typeof s.data === "string" ? s.data.slice(0, 7 * 1024 * 1024) : "", // ~5MB base64
+      }));
+    }
+
     const report: BugReport = {
       id: crypto.randomUUID(),
       type: typeValidation.sanitized as BugReport["type"],
@@ -55,6 +70,7 @@ reportsRoutes.post("/", async (c) => {
       description: descValidation.sanitized!,
       email: emailValidation.sanitized,
       guideId: body.guideId ? sanitizeString(body.guideId).slice(0, 50) : undefined,
+      screenshots,
       createdAt: new Date().toISOString(),
     };
 
@@ -67,6 +83,7 @@ reportsRoutes.post("/", async (c) => {
     console.log(`   내용: ${report.description.slice(0, 100)}...`);
     if (report.email) console.log(`   이메일: ${report.email}`);
     if (report.guideId) console.log(`   가이드: ${report.guideId}`);
+    if (report.screenshots?.length) console.log(`   스크린샷: ${report.screenshots.length}장`);
 
     return c.json({
       success: true,

@@ -6,7 +6,7 @@ import { handle } from "hono/cloudflare-pages";
 import { GoogleGenAI } from "@google/genai";
 
 // 로컬 데이터
-import loanGuides from "../../../../loan_guides.json";
+import loanGuides from "../loan_guides.json";
 
 // Types
 export interface Env {

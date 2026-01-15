@@ -246,19 +246,22 @@ export function ChatPage() {
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {isEmptyState ? (
           /* Empty State - Welcome Screen */
-          <div className="flex h-full flex-col items-center justify-center px-4">
-            <div className="w-full max-w-2xl space-y-8 slide-up">
+          <div className="flex h-full flex-col items-center justify-center px-5 sm:px-6">
+            <div className="w-full max-w-2xl space-y-6 sm:space-y-8 slide-up">
               {/* Logo & Title */}
-              <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 glow">
+              <div className="text-center space-y-3 sm:space-y-4">
+                <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 glow">
                   <SparklesIcon />
                 </div>
-                <h1 className="text-2xl font-semibold">
+                <h1 className="text-xl sm:text-2xl font-semibold">
                   <span className="gradient-text">대출 가이드</span> 챗봇
                 </h1>
-                <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                  금융사, 상품유형, 조건 등을 자연스럽게 질문해주세요. AI가
-                  최적의 대출 상품을 찾아드립니다.
+                <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed px-2">
+                  금융사, 상품유형, 조건 등을
+                  <br className="sm:hidden" />
+                  {" "}자연스럽게 질문해주세요.
+                  <br className="hidden sm:block" />
+                  AI가 최적의 대출 상품을 찾아드립니다.
                 </p>
               </div>
 
@@ -272,7 +275,7 @@ export function ChatPage() {
                     <button
                       key={index}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="linear-card p-3 text-left text-sm group"
+                      className="linear-card p-3 sm:p-3.5 text-left text-sm group"
                     >
                       <span className="text-foreground/90 group-hover:text-foreground transition-colors">
                         {question}
@@ -286,7 +289,7 @@ export function ChatPage() {
           </div>
         ) : (
           /* Chat Messages */
-          <div className="mx-auto max-w-3xl px-4 py-6 space-y-6">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6">
             {messages.map((msg, index) => (
               <div
                 key={msg.id}
@@ -379,7 +382,7 @@ export function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-4">
+      <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3 sm:p-4">
         <div className="mx-auto max-w-3xl">
           <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
@@ -390,7 +393,7 @@ export function ChatPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="대출 조건을 물어보세요..."
-                className="linear-input w-full pr-12"
+                className="linear-input w-full pr-4 text-base sm:pr-12"
                 disabled={loading}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50 hidden sm:block">
@@ -400,14 +403,16 @@ export function ChatPage() {
             <button
               onClick={() => sendMessageWithText(input)}
               disabled={loading || !input.trim()}
-              className="linear-btn-primary h-[46px] px-5 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="linear-btn-primary h-[46px] px-4 sm:px-5 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <SendIcon />
               <span className="hidden sm:inline">전송</span>
             </button>
           </div>
-          <p className="mt-2 text-center text-xs text-muted-foreground/60">
-            AI가 생성한 정보는 참고용이며, 정확한 조건은 금융사에 확인하세요.
+          <p className="mt-2 text-center text-[11px] sm:text-xs text-muted-foreground/60 leading-relaxed">
+            AI가 생성한 정보는 참고용이며,
+            <br className="sm:hidden" />
+            {" "}정확한 조건은 금융사에 확인하세요.
           </p>
         </div>
       </div>

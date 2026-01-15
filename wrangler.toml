@@ -1,12 +1,11 @@
 name = "loan-guide"
+pages_build_output_dir = "apps/web/dist"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-[build]
-command = "cd apps/web && npm install && npm run build"
+# Smart Placement - Gemini API 지원 지역으로 라우팅
+[placement]
+mode = "smart"
 
-[build.upload]
-format = "directory"
-
-# Pages specific configuration
-pages_build_output_dir = "apps/web/dist"
+[vars]
+ENVIRONMENT = "production"

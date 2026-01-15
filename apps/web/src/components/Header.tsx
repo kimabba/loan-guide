@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useThemeStore, applyTheme } from "../lib/theme";
 import { useAuthStore } from "../lib/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Icons
 const SunIcon = () => (
@@ -71,15 +71,52 @@ const SparklesIcon = () => (
   </svg>
 );
 
+const MenuIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="4" x2="20" y1="12" y2="12" />
+    <line x1="4" x2="20" y1="6" y2="6" />
+    <line x1="4" x2="20" y1="18" y2="18" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" x2="6" y1="6" y2="18" />
+    <line x1="6" x2="18" y1="6" y2="18" />
+  </svg>
+);
+
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useThemeStore();
   const { user, signOut } = useAuthStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
+    setMobileMenuOpen(false);
   };
 
   useEffect(() => {
@@ -94,6 +131,11 @@ export function Header() {
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
   }, [theme]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const toggleTheme = () => {
     const next =
@@ -118,39 +160,38 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="flex h-14 items-center justify-between px-4">
-        {/* Logo & Navigation */}
-        <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-              <SparklesIcon />
-            </div>
-            <span className="font-semibold hidden sm:inline gradient-text">
-              대출 가이드
-            </span>
-          </Link>
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
+            <SparklesIcon />
+          </div>
+          <span className="font-semibold gradient-text">
+            대출 가이드
+          </span>
+        </Link>
 
-          <nav className="flex items-center gap-0.5">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {isActive && (
-                    <span className="absolute inset-0 rounded-md bg-secondary/80" />
-                  )}
-                  <span className="relative">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-0.5">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {isActive && (
+                  <span className="absolute inset-0 rounded-md bg-secondary/80" />
+                )}
+                <span className="relative">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -163,31 +204,95 @@ export function Header() {
             {themeIcon[theme]}
           </button>
 
-          {/* User Menu */}
-          {user ? (
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-primary text-xs font-semibold ring-1 ring-primary/20">
-                  {user.email?.charAt(0).toUpperCase() || "U"}
+          {/* Desktop User Menu */}
+          <div className="hidden md:flex items-center gap-2">
+            {user ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-primary text-xs font-semibold ring-1 ring-primary/20">
+                    {user.email?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <span className="text-sm text-muted-foreground max-w-[100px] truncate">
+                    {user.email?.split("@")[0]}
+                  </span>
                 </div>
-                <span className="text-sm text-muted-foreground max-w-[100px] truncate">
-                  {user.email?.split("@")[0]}
-                </span>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="linear-btn-ghost text-sm"
-              >
-                로그아웃
-              </button>
-            </div>
-          ) : (
-            <Link to="/login" className="linear-btn-primary text-sm">
-              로그인
-            </Link>
-          )}
+                <button
+                  onClick={handleSignOut}
+                  className="linear-btn-ghost text-sm"
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="linear-btn-primary text-sm">
+                로그인
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden linear-btn-ghost h-9 w-9 p-0"
+            aria-label="메뉴"
+          >
+            {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl">
+          <nav className="flex flex-col p-4 gap-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            {/* Mobile User Menu */}
+            <div className="mt-2 pt-2 border-t border-border/50">
+              {user ? (
+                <div className="flex items-center justify-between px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-primary text-xs font-semibold ring-1 ring-primary/20">
+                      {user.email?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {user.email?.split("@")[0]}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="linear-btn-ghost text-sm"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="block rounded-lg px-4 py-3 text-sm font-medium text-center bg-primary text-primary-foreground"
+                >
+                  로그인
+                </Link>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

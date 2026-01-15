@@ -5,6 +5,7 @@ import { ProductFilter } from "../components/products/ProductFilter";
 import { CompareBar } from "../components/products/CompareBar";
 import { CompareModal } from "../components/products/CompareModal";
 import { FloatingCompareButton } from "../components/products/FloatingCompareButton";
+import { PasteAnalyzer } from "../components/products/PasteAnalyzer";
 import { GuideModal } from "../components/GuideModal";
 import { PasteSearch } from "../components/products/PasteSearch";
 import { useFavoritesStore } from "../lib/favorites";
@@ -270,13 +271,13 @@ export function ProductsPage() {
 
       {/* 헤더 영역 */}
       <div className="border-b bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto max-w-7xl px-5 py-5 sm:px-6 sm:py-6">
+          <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">
                 대출 상품 탐색
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-0.5 sm:mt-1 text-sm text-muted-foreground">
                 {filteredProducts.length}개 상품{" "}
                 {products.length !== filteredProducts.length &&
                   `(전체 ${products.length}개)`}
@@ -287,7 +288,7 @@ export function ProductsPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode("all")}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-lg px-3 py-2 sm:px-4 text-sm font-medium transition-colors ${
                   viewMode === "all"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -297,7 +298,7 @@ export function ProductsPage() {
               </button>
               <button
                 onClick={() => setViewMode("favorites")}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-2 sm:px-4 text-sm font-medium transition-colors ${
                   viewMode === "favorites"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -305,18 +306,19 @@ export function ProductsPage() {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="14"
+                  height="14"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  className="sm:w-4 sm:h-4"
                 >
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
-                즐겨찾기 ({favorites.length})
+                <span className="hidden xs:inline">즐겨찾기</span> ({favorites.length})
               </button>
             </div>
           </div>
@@ -329,7 +331,7 @@ export function ProductsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="금융사명, 상품명, 키워드 검색..."
-                className="w-full rounded-lg border bg-background px-4 py-3 pl-10 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-xl border bg-background px-4 py-3 pl-10 text-base focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <svg
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -352,7 +354,7 @@ export function ProductsPage() {
           {/* 필터 토글 버튼 (모바일) */}
           <button
             onClick={() => setFilterOpen(!filterOpen)}
-            className="mt-4 flex w-full items-center justify-between rounded-lg border bg-background px-4 py-2 text-sm sm:hidden"
+            className="mt-3 flex w-full items-center justify-between rounded-xl border bg-background px-4 py-2.5 text-sm sm:hidden"
           >
             <span className="font-medium">필터</span>
             <span className="text-muted-foreground">
@@ -368,6 +370,17 @@ export function ProductsPage() {
                 : "선택 없음"}
             </span>
           </button>
+
+          {/* 복붙 검색 영역 */}
+          <div className="mt-4">
+            <PasteAnalyzer
+              onFilterProducts={(filters) => {
+                if (filters.productTypes?.length) {
+                  setSelectedProductTypes(filters.productTypes);
+                }
+              }}
+            />
+          </div>
 
           {/* 필터 영역 */}
           <div className={`mt-4 ${filterOpen ? "block" : "hidden"} sm:block`}>
@@ -388,7 +401,7 @@ export function ProductsPage() {
       </div>
 
       {/* 복붙 검색 아코디언 */}
-      <div className="mx-auto max-w-7xl px-4 pt-4">
+      <div className="mx-auto max-w-7xl px-5 pt-4 sm:px-6">
         <PasteSearch
           products={fullProducts}
           onMatchResults={setMatchResults}
@@ -396,28 +409,28 @@ export function ProductsPage() {
 
         {/* 매칭 결과 헤더 */}
         {matchResults && matchResults.length > 0 && (
-          <div className="mt-4 flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-green-600 dark:text-green-400"
+                className="text-green-600 dark:text-green-400 flex-shrink-0"
               >
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
-              <span className="font-medium text-green-700 dark:text-green-300">
+              <span className="font-medium text-sm sm:text-base text-green-700 dark:text-green-300">
                 {matchResults.length}개 적합 상품 발견
               </span>
-              <span className="text-sm text-green-600 dark:text-green-400">
-                (적합도순 정렬)
+              <span className="text-xs sm:text-sm text-green-600 dark:text-green-400">
+                (적합도순)
               </span>
             </div>
             <button
@@ -431,7 +444,7 @@ export function ProductsPage() {
       </div>
 
       {/* 상품 목록 */}
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mx-auto max-w-7xl px-5 py-5 sm:px-6 sm:py-6">
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
