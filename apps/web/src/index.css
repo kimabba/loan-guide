@@ -125,13 +125,14 @@
 
   /* Linear-style card */
   .linear-card {
-    @apply bg-secondary/50 border border-border/50 rounded-lg backdrop-blur-sm;
-    @apply transition-all duration-200 ease-out;
+    @apply bg-white/[0.03] border border-white/10 rounded-xl backdrop-blur-md;
+    @apply transition-all duration-300 ease-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   .linear-card:hover {
-    @apply bg-secondary/70 border-border;
-    box-shadow: 0 4px 20px -5px hsl(var(--primary) / 0.15);
+    @apply bg-white/[0.06] border-primary/30 -translate-y-1;
+    box-shadow: 0 10px 30px -5px hsl(var(--primary) / 0.2);
   }
 
   /* Linear-style input */
@@ -163,6 +164,59 @@
   .linear-btn-ghost {
     @apply linear-btn text-muted-foreground;
     @apply hover:text-foreground hover:bg-secondary/50;
+  }
+
+  /* Decorative Background Glows */
+  .bg-glow-container {
+    @apply absolute inset-0 -z-10 overflow-hidden pointer-events-none;
+  }
+
+  .bg-glow-blob {
+    @apply absolute w-[500px] h-[500px] rounded-full filter blur-[100px] opacity-20 transition-all duration-1000;
+    background: radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%);
+  }
+
+  .bg-glow-blob-1 {
+    @apply -top-[10%] -left-[10%];
+    animation: blob-float 15s infinite alternate ease-in-out;
+  }
+
+  .bg-glow-blob-2 {
+    @apply -bottom-[10%] -right-[10%];
+    animation: blob-float 12s infinite alternate-reverse ease-in-out;
+    background: radial-gradient(circle, hsl(245 40% 40%) 0%, transparent 70%);
+  }
+
+  @keyframes blob-float {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(50px, 30px) scale(1.1); }
+    100% { transform: translate(-20px, 50px) scale(0.9); }
+  }
+
+  /* Logo Glow & Border Animation */
+  .logo-container {
+    @apply relative flex items-center justify-center p-0.5 rounded-2xl;
+    background: linear-gradient(135deg, hsl(var(--primary)/0.3), transparent 60%);
+  }
+
+  .logo-inner {
+    @apply relative z-10 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0B0D17] border border-white/5;
+  }
+
+  .logo-glow {
+    @apply absolute inset-0 -z-10 blur-xl opacity-50 scale-110;
+    background: radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%);
+  }
+
+  .rotating-border {
+    @apply absolute inset-0 border border-primary/20 rounded-2xl;
+    animation: rotate-border 8s linear infinite;
+  }
+
+  @keyframes rotate-border {
+    0% { transform: rotate(0deg); opacity: 0.3; }
+    50% { opacity: 0.6; }
+    100% { transform: rotate(360deg); opacity: 0.3; }
   }
 
   /* Message bubble styles */

@@ -285,6 +285,14 @@ export function ChatPage() {
         onClose={() => setSelectedGuide(null)}
       />
 
+      {/* Decorative Background Glows */}
+      {isEmptyState && (
+        <div className="bg-glow-container">
+          <div className="bg-glow-blob bg-glow-blob-1" />
+          <div className="bg-glow-blob bg-glow-blob-2" />
+        </div>
+      )}
+
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {isEmptyState ? (
@@ -292,38 +300,55 @@ export function ChatPage() {
           <div className="flex h-full flex-col items-center justify-center px-5 sm:px-6">
             <div className="w-full max-w-2xl space-y-6 sm:space-y-8 slide-up">
               {/* Logo & Title */}
-              <div className="text-center space-y-3 sm:space-y-4">
-                <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 glow">
-                  <SparklesIcon />
+              <div className="text-center space-y-4 sm:space-y-6">
+                <div className="logo-container inline-block">
+                  <div className="logo-inner">
+                    <SparklesIcon />
+                    <div className="logo-glow" />
+                    <div className="rotating-border" />
+                  </div>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-semibold">
-                  <span className="gradient-text">대출 가이드</span> 챗봇
-                </h1>
-                <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed px-2">
-                  금융사, 상품유형, 조건 등을
-                  <br className="sm:hidden" />
-                  {" "}자연스럽게 질문해주세요.
-                  <br className="hidden sm:block" />
-                  AI가 최적의 대출 상품을 찾아드립니다.
-                </p>
+
+                <div className="space-y-2">
+                  <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">
+                    <span className="gradient-text">대출 가이드</span> 챗봇
+                  </h1>
+                  <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto leading-relaxed px-4 opacity-80">
+                    심사 조건부터 한도 조회까지,
+                    <br className="sm:hidden" />
+                    {" "}준비된 AI 어드바이저에게 물어보세요.
+                  </p>
+                </div>
               </div>
 
               {/* Suggested Questions */}
-              <div className="space-y-3">
-                <p className="text-xs text-muted-foreground text-center uppercase tracking-wider">
-                  추천 질문
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent to-border/50" />
+                  <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                    Quick Start
+                  </span>
+                  <div className="h-px flex-1 bg-gradient-to-l from-transparent to-border/50" />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {SUGGESTED_QUESTIONS.map((question, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="linear-card p-3 sm:p-3.5 text-left text-sm group"
+                      className="linear-card group relative overflow-hidden p-4 text-left"
                     >
-                      <span className="text-foreground/90 group-hover:text-foreground transition-colors">
-                        {question}
-                      </span>
-                      <ChevronRightIcon />
+                      <div className="relative z-10 flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">
+                          {question}
+                        </span>
+                        <div className="p-1 rounded-full bg-primary/0 group-hover:bg-primary/10 text-muted-foreground/0 group-hover:text-primary transition-all duration-300 transform translate-x-1 group-hover:translate-x-0">
+                          <ChevronRightIcon />
+                        </div>
+                      </div>
+
+                      {/* Subtle hover backlight */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
                   ))}
                 </div>
@@ -336,9 +361,8 @@ export function ChatPage() {
             {messages.map((msg, index) => (
               <div
                 key={msg.id}
-                className={`flex gap-3 fade-in ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex gap-3 fade-in ${msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Avatar for Assistant */}
@@ -350,9 +374,8 @@ export function ChatPage() {
 
                 {/* Message Content */}
                 <div
-                  className={`max-w-[85%] ${
-                    msg.role === "user" ? "message-user" : "message-assistant"
-                  } px-4 py-3`}
+                  className={`max-w-[85%] ${msg.role === "user" ? "message-user" : "message-assistant"
+                    } px-4 py-3`}
                 >
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
                     {msg.content}
@@ -400,13 +423,12 @@ export function ChatPage() {
                       <button
                         onClick={() => submitFeedback(msg.id, "helpful")}
                         disabled={!!feedbackSent[msg.id]}
-                        className={`p-1.5 rounded-md transition-colors ${
-                          feedbackSent[msg.id] === "helpful"
+                        className={`p-1.5 rounded-md transition-colors ${feedbackSent[msg.id] === "helpful"
                             ? "bg-green-500/20 text-green-500"
                             : feedbackSent[msg.id]
-                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
-                            : "hover:bg-green-500/10 text-muted-foreground hover:text-green-500"
-                        }`}
+                              ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                              : "hover:bg-green-500/10 text-muted-foreground hover:text-green-500"
+                          }`}
                         title="도움이 됐어요"
                       >
                         <ThumbsUpIcon />
@@ -414,13 +436,12 @@ export function ChatPage() {
                       <button
                         onClick={() => submitFeedback(msg.id, "not_helpful")}
                         disabled={!!feedbackSent[msg.id]}
-                        className={`p-1.5 rounded-md transition-colors ${
-                          feedbackSent[msg.id] === "not_helpful"
+                        className={`p-1.5 rounded-md transition-colors ${feedbackSent[msg.id] === "not_helpful"
                             ? "bg-yellow-500/20 text-yellow-500"
                             : feedbackSent[msg.id]
-                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
-                            : "hover:bg-yellow-500/10 text-muted-foreground hover:text-yellow-500"
-                        }`}
+                              ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                              : "hover:bg-yellow-500/10 text-muted-foreground hover:text-yellow-500"
+                          }`}
                         title="도움이 안 됐어요"
                       >
                         <ThumbsDownIcon />
@@ -428,13 +449,12 @@ export function ChatPage() {
                       <button
                         onClick={() => submitFeedback(msg.id, "wrong")}
                         disabled={!!feedbackSent[msg.id]}
-                        className={`p-1.5 rounded-md transition-colors ${
-                          feedbackSent[msg.id] === "wrong"
+                        className={`p-1.5 rounded-md transition-colors ${feedbackSent[msg.id] === "wrong"
                             ? "bg-red-500/20 text-red-500"
                             : feedbackSent[msg.id]
-                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
-                            : "hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
-                        }`}
+                              ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                              : "hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
+                          }`}
                         title="잘못된 정보예요"
                       >
                         <AlertIcon />
