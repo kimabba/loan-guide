@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { CHANGELOG, CHANGE_TYPE_LABELS } from "../version";
 
 interface Announcement {
   id: string;
@@ -196,6 +197,56 @@ export function AnnouncementsPage() {
             ))}
           </div>
         )}
+
+        {/* 업데이트 내역 섹션 */}
+        <div className="pt-6 border-t">
+          <h2 className="text-lg font-bold mb-4">업데이트 내역</h2>
+          <div className="space-y-4">
+            {CHANGELOG.map((entry, idx) => (
+              <div key={entry.version} className="rounded-xl border p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${
+                      idx === 0
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    v{entry.version}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {entry.date}
+                  </span>
+                  {idx === 0 && (
+                    <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
+                      Latest
+                    </span>
+                  )}
+                </div>
+                <ul className="space-y-1.5">
+                  {entry.changes.map((change, changeIdx) => {
+                    const typeInfo = CHANGE_TYPE_LABELS[change.type];
+                    return (
+                      <li
+                        key={changeIdx}
+                        className="flex items-start gap-2 text-sm"
+                      >
+                        <span
+                          className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-xs font-medium ${typeInfo.color}`}
+                        >
+                          {typeInfo.label}
+                        </span>
+                        <span className="text-foreground/80">
+                          {change.description}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Back link */}
         <div className="pt-4 border-t">

@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import {
   APP_VERSION,
   APP_NAME,
@@ -21,8 +20,8 @@ export function Footer() {
             </span>
           </div>
 
-          {/* 우측: 링크들 */}
-          <div className="flex items-center gap-4 text-sm">
+          {/* 우측: 제이영컨설팅 (권한) */}
+          <div className="flex items-center text-sm">
             <a
               href={WEBSITE_URL}
               target="_blank"
@@ -45,13 +44,6 @@ export function Footer() {
               </svg>
               제이영컨설팅 (권한)
             </a>
-            <span className="text-border">|</span>
-            <Link
-              to="/announcements"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              공지사항
-            </Link>
           </div>
         </div>
 
@@ -61,7 +53,16 @@ export function Footer() {
         {/* 하단: 카피라이트 */}
         <div className="text-xs text-muted-foreground">
           <p>
-            © 2026 {APP_NAME}. All rights reserved. Developed by{" "}
+            © 2026{" "}
+            <a
+              href={WEBSITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground hover:text-primary transition-colors"
+            >
+              jyoung consulting
+            </a>
+            . All rights reserved. Developed by{" "}
             <button
               onClick={() => {
                 navigator.clipboard.writeText("ssfak@naver.com");
