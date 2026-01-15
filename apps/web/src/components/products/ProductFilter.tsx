@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface FilterChipProps {
   label: string;
   active: boolean;
@@ -24,6 +26,85 @@ function FilterChip({ label, active, count, onClick }: FilterChipProps) {
         </span>
       )}
     </button>
+  );
+}
+
+interface ExpandableFilterSectionProps {
+  title: string;
+  items: { value: string; count: number }[];
+  selectedItems: string[];
+  onItemChange: (item: string) => void;
+  initialVisibleCount: number;
+}
+
+function ExpandableFilterSection({
+  title,
+  items,
+  selectedItems,
+  onItemChange,
+  initialVisibleCount,
+}: ExpandableFilterSectionProps) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleItems = expanded ? items : items.slice(0, initialVisibleCount);
+  const hasMore = items.length > initialVisibleCount;
+
+  return (
+    <div>
+      <h4 className="mb-2 text-sm font-medium text-foreground">{title}</h4>
+      <div className="flex flex-wrap gap-2">
+        {visibleItems.map((item) => (
+          <FilterChip
+            key={item.value}
+            label={item.value}
+            count={item.count}
+            active={selectedItems.includes(item.value)}
+            onClick={() => onItemChange(item.value)}
+          />
+        ))}
+        {hasMore && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+          >
+            {expanded ? (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="18 15 12 9 6 15" />
+                </svg>
+                접기
+              </>
+            ) : (
+              <>
+                +{items.length - initialVisibleCount}개 더
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -72,62 +153,31 @@ export function ProductFilter({
       )}
 
       {/* 카테고리 필터 */}
-      <div>
-        <h4 className="mb-2 text-sm font-medium text-foreground">카테고리</h4>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <FilterChip
-              key={cat.value}
-              label={cat.value}
-              count={cat.count}
-              active={selectedCategories.includes(cat.value)}
-              onClick={() => onCategoryChange(cat.value)}
-            />
-          ))}
-        </div>
-      </div>
+      <ExpandableFilterSection
+        title="카테고리"
+        items={categories}
+        selectedItems={selectedCategories}
+        onItemChange={onCategoryChange}
+        initialVisibleCount={10}
+      />
 
       {/* 상품유형 필터 */}
-      <div>
-        <h4 className="mb-2 text-sm font-medium text-foreground">상품 유형</h4>
-        <div className="flex flex-wrap gap-2">
-          {productTypes.slice(0, 10).map((type) => (
-            <FilterChip
-              key={type.value}
-              label={type.value}
-              count={type.count}
-              active={selectedProductTypes.includes(type.value)}
-              onClick={() => onProductTypeChange(type.value)}
-            />
-          ))}
-          {productTypes.length > 10 && (
-            <span className="inline-flex items-center px-2 text-sm text-muted-foreground">
-              +{productTypes.length - 10}개 더
-            </span>
-          )}
-        </div>
-      </div>
+      <ExpandableFilterSection
+        title="상품 유형"
+        items={productTypes}
+        selectedItems={selectedProductTypes}
+        onItemChange={onProductTypeChange}
+        initialVisibleCount={10}
+      />
 
       {/* 금융사 필터 */}
-      <div>
-        <h4 className="mb-2 text-sm font-medium text-foreground">금융사</h4>
-        <div className="flex flex-wrap gap-2">
-          {companies.slice(0, 12).map((company) => (
-            <FilterChip
-              key={company.value}
-              label={company.value}
-              count={company.count}
-              active={selectedCompanies.includes(company.value)}
-              onClick={() => onCompanyChange(company.value)}
-            />
-          ))}
-          {companies.length > 12 && (
-            <span className="inline-flex items-center px-2 text-sm text-muted-foreground">
-              +{companies.length - 12}개 더
-            </span>
-          )}
-        </div>
-      </div>
+      <ExpandableFilterSection
+        title="금융사"
+        items={companies}
+        selectedItems={selectedCompanies}
+        onItemChange={onCompanyChange}
+        initialVisibleCount={12}
+      />
     </div>
   );
 }

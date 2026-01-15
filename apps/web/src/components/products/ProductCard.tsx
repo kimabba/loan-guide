@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useFavoritesStore } from "../../lib/favorites";
 import { useCompareStore } from "../../lib/compare";
+import { getTagColor } from "../../lib/tagExtractor";
 
 interface ProductCardProps {
   itemCd: string;
@@ -9,6 +10,8 @@ interface ProductCardProps {
   productType: string;
   summary: string;
   matchScore?: number;
+  tags?: string[];
+  onTagClick?: (tag: string) => void;
   onClick: () => void;
 }
 
@@ -19,6 +22,8 @@ export function ProductCard({
   productType,
   summary,
   matchScore,
+  tags = [],
+  onTagClick,
   onClick,
 }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -156,6 +161,32 @@ export function ProductCard({
 
       {/* 요약 */}
       <p className="line-clamp-2 text-sm text-muted-foreground">{summary}</p>
+
+      {/* 태그 */}
+      {tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {tags.slice(0, 5).map((tag) => {
+            const colors = getTagColor(tag);
+            return (
+              <button
+                key={tag}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTagClick?.(tag);
+                }}
+                className={`rounded-full px-2 py-0.5 text-xs font-medium transition-all hover:scale-105 hover:shadow-sm ${colors.bg} ${colors.text}`}
+              >
+                {tag}
+              </button>
+            );
+          })}
+          {tags.length > 5 && (
+            <span className="px-1 py-0.5 text-xs text-muted-foreground">
+              +{tags.length - 5}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* 하단 액션 */}
       <div className="mt-3 flex items-center justify-between border-t pt-3">

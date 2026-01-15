@@ -9,6 +9,7 @@ interface Message {
   content: string;
   guides?: GuideResult[];
   timestamp?: Date;
+  quality?: { score: number; issueType: string };
 }
 
 interface GuideResult {
@@ -141,12 +142,33 @@ const SUGGESTED_QUESTIONS = [
   "햇살론 신청 조건",
 ];
 
+// Feedback icons
+const ThumbsUpIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 10v12" /><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+  </svg>
+);
+
+const ThumbsDownIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 14V2" /><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z" />
+  </svg>
+);
+
+const AlertIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" />
+  </svg>
+);
+
 export function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [feedbackSent, setFeedbackSent] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const initialQueryProcessed = useRef(false);
@@ -183,14 +205,23 @@ export function ChatPage() {
         const data = await api.post<{
           response: string;
           guides?: GuideResult[];
-        }>("/api/chat", { message: userMessage.content });
+          sessionId?: string;
+          messageId?: string;
+          quality?: { score: number; issueType: string };
+        }>("/api/chat", { message: userMessage.content, sessionId });
+
+        // 새 세션 ID가 반환되면 저장
+        if (data.sessionId && !sessionId) {
+          setSessionId(data.sessionId);
+        }
 
         const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
+          id: data.messageId || (Date.now() + 1).toString(),
           role: "assistant",
           content: data.response || "응답을 생성하지 못했습니다.",
           guides: data.guides,
           timestamp: new Date(),
+          quality: data.quality,
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
@@ -208,8 +239,20 @@ export function ChatPage() {
         setLoading(false);
       }
     },
-    [loading]
+    [loading, sessionId]
   );
+
+  // 피드백 제출 함수
+  const submitFeedback = async (messageId: string, feedback: "helpful" | "not_helpful" | "wrong") => {
+    if (feedbackSent[messageId]) return;
+
+    try {
+      await api.post("/api/chat/feedback", { messageId, feedback });
+      setFeedbackSent((prev) => ({ ...prev, [messageId]: feedback }));
+    } catch (error) {
+      console.error("피드백 제출 실패:", error);
+    }
+  };
 
   // Handle query parameter from URL
   useEffect(() => {
@@ -347,6 +390,62 @@ export function ChatPage() {
                           </div>
                         </button>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Feedback Buttons for Assistant Messages */}
+                  {msg.role === "assistant" && (
+                    <div className="mt-3 pt-3 border-t border-border/30 flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground mr-1">도움이 되셨나요?</span>
+                      <button
+                        onClick={() => submitFeedback(msg.id, "helpful")}
+                        disabled={!!feedbackSent[msg.id]}
+                        className={`p-1.5 rounded-md transition-colors ${
+                          feedbackSent[msg.id] === "helpful"
+                            ? "bg-green-500/20 text-green-500"
+                            : feedbackSent[msg.id]
+                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                            : "hover:bg-green-500/10 text-muted-foreground hover:text-green-500"
+                        }`}
+                        title="도움이 됐어요"
+                      >
+                        <ThumbsUpIcon />
+                      </button>
+                      <button
+                        onClick={() => submitFeedback(msg.id, "not_helpful")}
+                        disabled={!!feedbackSent[msg.id]}
+                        className={`p-1.5 rounded-md transition-colors ${
+                          feedbackSent[msg.id] === "not_helpful"
+                            ? "bg-yellow-500/20 text-yellow-500"
+                            : feedbackSent[msg.id]
+                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                            : "hover:bg-yellow-500/10 text-muted-foreground hover:text-yellow-500"
+                        }`}
+                        title="도움이 안 됐어요"
+                      >
+                        <ThumbsDownIcon />
+                      </button>
+                      <button
+                        onClick={() => submitFeedback(msg.id, "wrong")}
+                        disabled={!!feedbackSent[msg.id]}
+                        className={`p-1.5 rounded-md transition-colors ${
+                          feedbackSent[msg.id] === "wrong"
+                            ? "bg-red-500/20 text-red-500"
+                            : feedbackSent[msg.id]
+                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                            : "hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
+                        }`}
+                        title="잘못된 정보예요"
+                      >
+                        <AlertIcon />
+                      </button>
+                      {msg.quality && msg.quality.score < 0.7 && (
+                        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-600">
+                          {msg.quality.issueType === "off_topic" && "대출 외 질문"}
+                          {msg.quality.issueType === "no_answer" && "정보 부족"}
+                          {msg.quality.issueType === "low_confidence" && "낮은 신뢰도"}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
