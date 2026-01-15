@@ -142,7 +142,7 @@ export function Header() {
     { path: "/products", label: "상품목록" },
     { path: "/report", label: "버그신고" },
     { path: "/announcements", label: "공지" },
-    { path: "/admin", label: "관리자(NEW)" },
+    { path: "/admin", label: "관리자" },
   ];
 
   return (
@@ -159,7 +159,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-0.5">
+        <nav className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
