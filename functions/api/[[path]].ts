@@ -375,10 +375,10 @@ async function generateGeminiResponse(
     const usageMetadata = (response as any).usageMetadata;
     const usage = usageMetadata
       ? {
-          inputTokens: usageMetadata.promptTokenCount || 0,
-          outputTokens: usageMetadata.candidatesTokenCount || 0,
-          totalTokens: usageMetadata.totalTokenCount || 0,
-        }
+        inputTokens: usageMetadata.promptTokenCount || 0,
+        outputTokens: usageMetadata.candidatesTokenCount || 0,
+        totalTokens: usageMetadata.totalTokenCount || 0,
+      }
       : undefined;
 
     // Grounding metadata 추출
@@ -1066,23 +1066,80 @@ const announcements: Announcement[] = [
   },
 ];
 
-app.get("/announcements", (c) => {
+app.get("/announcements", async (c) => {
   const type = c.req.query("type");
   const important = c.req.query("important");
+  const supabase = getSupabase(c.env);
 
-  let filtered = [...announcements];
-
-  if (type) {
-    filtered = filtered.filter((a) => a.type === type);
+  if (!supabase) {
+    // DB 미설정 시 하드코딩된 데이터 폴백
+    let filtered = [...announcements];
+    if (type) filtered = filtered.filter((a) => a.type === type);
+    if (important === "true") filtered = filtered.filter((a) => a.important);
+    filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return c.json({ total: filtered.length, announcements: filtered });
   }
 
-  if (important === "true") {
-    filtered = filtered.filter((a) => a.important);
+  try {
+    let query = supabase.from('announcements').select('*');
+    if (type) query = query.eq('type', type);
+    if (important === "true") query = query.eq('important', true);
+
+    const { data: dbAnnouncements, error } = await query.order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const formatted = dbAnnouncements.map(a => ({
+      ...a,
+      createdAt: a.created_at // DB 명명 규칙 (snake_case) 대응
+    }));
+
+    return c.json({ total: formatted.length, announcements: formatted });
+  } catch (error) {
+    console.error("Announcements fetch error:", error);
+    return c.json({ error: "공지사항을 불러올 수 없습니다" }, 500);
   }
+});
 
-  filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+// 공지사항 작성 (관리자용)
+app.post("/announcements", async (c) => {
+  const supabase = getSupabase(c.env);
+  if (!supabase) return c.json({ error: "Database not configured" }, 503);
 
-  return c.json({ total: filtered.length, announcements: filtered });
+  try {
+    const body = await c.req.json();
+    const { type, title, content, important } = body;
+
+    const { data, error } = await supabase.from('announcements').insert({
+      type,
+      title,
+      content,
+      important: !!important
+    }).select().single();
+
+    if (error) throw error;
+
+    return c.json({ success: true, announcement: data });
+  } catch (error) {
+    console.error("Announcement create error:", error);
+    return c.json({ error: "공지사항 작성에 실패했습니다" }, 500);
+  }
+});
+
+// 공지사항 삭제 (관리자용)
+app.delete("/announcements/:id", async (c) => {
+  const id = c.req.param("id");
+  const supabase = getSupabase(c.env);
+  if (!supabase) return c.json({ error: "Database not configured" }, 503);
+
+  try {
+    const { error } = await supabase.from('announcements').delete().eq('id', id);
+    if (error) throw error;
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Announcement delete error:", error);
+    return c.json({ error: "공지사항 삭제에 실패했습니다" }, 500);
+  }
 });
 
 app.get("/announcements/:id", (c) => {
@@ -1454,12 +1511,12 @@ const cacheStore = new Map<string, CacheEntry<any>>();
 function getCachedData<T>(key: string): T | null {
   const entry = cacheStore.get(key);
   if (!entry) return null;
-  
+
   if (Date.now() > entry.timestamp + entry.ttl) {
     cacheStore.delete(key);
     return null;
   }
-  
+
   return entry.data;
 }
 
@@ -1469,7 +1526,7 @@ function setCachedData<T>(key: string, data: T, ttlMs: number = 5 * 60 * 1000): 
     timestamp: Date.now(),
     ttl: ttlMs,
   });
-  
+
   // Cleanup old entries (keep size reasonable)
   if (cacheStore.size > 100) {
     const now = Date.now();

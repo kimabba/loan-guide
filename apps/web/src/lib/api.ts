@@ -23,4 +23,9 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }),
+
+  delete: <T>(endpoint: string) =>
+    apiRequest<T>(endpoint, {
+      method: "DELETE",
+    }),
 };

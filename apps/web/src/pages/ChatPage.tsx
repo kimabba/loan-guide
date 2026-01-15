@@ -118,11 +118,11 @@ const BuildingIcon = () => (
   </svg>
 );
 
-const SparklesIcon = () => (
+const LogoIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
+    width="22"
+    height="22"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -130,7 +130,10 @@ const SparklesIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+    <circle cx="10" cy="10" r="7" />
+    <path d="m21 21-4.3-4.3" />
+    <path d="M10 7v6" />
+    <path d="M7 10h6" />
   </svg>
 );
 
@@ -303,7 +306,7 @@ export function ChatPage() {
               <div className="text-center space-y-4 sm:space-y-6">
                 <div className="logo-container inline-block">
                   <div className="logo-inner">
-                    <SparklesIcon />
+                    <LogoIcon />
                     <div className="logo-glow" />
                     <div className="rotating-border" />
                   </div>
@@ -424,10 +427,10 @@ export function ChatPage() {
                         onClick={() => submitFeedback(msg.id, "helpful")}
                         disabled={!!feedbackSent[msg.id]}
                         className={`p-1.5 rounded-md transition-colors ${feedbackSent[msg.id] === "helpful"
-                            ? "bg-green-500/20 text-green-500"
-                            : feedbackSent[msg.id]
-                              ? "opacity-30 cursor-not-allowed text-muted-foreground"
-                              : "hover:bg-green-500/10 text-muted-foreground hover:text-green-500"
+                          ? "bg-green-500/20 text-green-500"
+                          : feedbackSent[msg.id]
+                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                            : "hover:bg-green-500/10 text-muted-foreground hover:text-green-500"
                           }`}
                         title="도움이 됐어요"
                       >
@@ -437,10 +440,10 @@ export function ChatPage() {
                         onClick={() => submitFeedback(msg.id, "not_helpful")}
                         disabled={!!feedbackSent[msg.id]}
                         className={`p-1.5 rounded-md transition-colors ${feedbackSent[msg.id] === "not_helpful"
-                            ? "bg-yellow-500/20 text-yellow-500"
-                            : feedbackSent[msg.id]
-                              ? "opacity-30 cursor-not-allowed text-muted-foreground"
-                              : "hover:bg-yellow-500/10 text-muted-foreground hover:text-yellow-500"
+                          ? "bg-yellow-500/20 text-yellow-500"
+                          : feedbackSent[msg.id]
+                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                            : "hover:bg-yellow-500/10 text-muted-foreground hover:text-yellow-500"
                           }`}
                         title="도움이 안 됐어요"
                       >
@@ -450,10 +453,10 @@ export function ChatPage() {
                         onClick={() => submitFeedback(msg.id, "wrong")}
                         disabled={!!feedbackSent[msg.id]}
                         className={`p-1.5 rounded-md transition-colors ${feedbackSent[msg.id] === "wrong"
-                            ? "bg-red-500/20 text-red-500"
-                            : feedbackSent[msg.id]
-                              ? "opacity-30 cursor-not-allowed text-muted-foreground"
-                              : "hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
+                          ? "bg-red-500/20 text-red-500"
+                          : feedbackSent[msg.id]
+                            ? "opacity-30 cursor-not-allowed text-muted-foreground"
+                            : "hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
                           }`}
                         title="잘못된 정보예요"
                       >

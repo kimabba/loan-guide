@@ -12,6 +12,8 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { useThemeStore, applyTheme } from "./lib/theme";
 import { useAuthStore } from "./lib/auth";
+import { AdminPage } from "./pages/AdminPage";
+import { CatCompanion } from "./components/fun/CatCompanion";
 
 function App() {
   const { theme } = useThemeStore();
@@ -35,9 +37,11 @@ function App() {
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
       <Footer />
+      <CatCompanion />
     </div>
   );
 }

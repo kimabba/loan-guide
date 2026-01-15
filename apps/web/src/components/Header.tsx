@@ -37,23 +37,7 @@ const MoonIcon = () => (
   </svg>
 );
 
-const MonitorIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="2" y="3" width="20" height="14" rx="2" />
-    <line x1="8" x2="16" y1="21" y2="21" />
-    <line x1="12" x2="12" y1="17" y2="21" />
-  </svg>
-);
+// MonitorIcon removed as requested
 
 // 나침반 + 돋보기 조합 아이콘 (Loan Finder 컨셉)
 const LogoIcon = () => (
@@ -142,15 +126,13 @@ export function Header() {
   }, [location.pathname]);
 
   const toggleTheme = () => {
-    const next =
-      theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+    const next = theme === "light" ? "dark" : "light";
     setTheme(next);
   };
 
   const themeIcon = {
     light: <SunIcon />,
     dark: <MoonIcon />,
-    system: <MonitorIcon />,
   };
 
   const navItems = [
@@ -182,11 +164,10 @@ export function Header() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
-                  isActive
+                className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${isActive
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 {isActive && (
                   <span className="absolute inset-0 rounded-md bg-secondary/80" />
@@ -203,7 +184,7 @@ export function Header() {
           <button
             onClick={toggleTheme}
             className="linear-btn-ghost h-9 w-9 p-0"
-            title={`테마: ${theme === "light" ? "라이트" : theme === "dark" ? "다크" : "시스템"}`}
+            title={`테마: ${theme === "light" ? "라이트" : "다크"}`}
           >
             {themeIcon[theme]}
           </button>
@@ -255,11 +236,10 @@ export function Header() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                    isActive
+                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </Link>
