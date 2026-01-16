@@ -58,64 +58,147 @@ interface QualityAnalysis {
   reason?: string;
 }
 
+/**
+ * 개선된 응답 품질 분석 (Grounding 메타데이터 적극 활용)
+ */
 function analyzeResponseQuality(
   userMessage: string,
   response: string,
   guides: any[],
   groundingMetadata?: any
 ): QualityAnalysis {
-  // 대출 관련 키워드
+  // 대출 관련 키워드 (확장)
   const loanKeywords = [
     '대출', '금리', '한도', '저축은행', '대부', '신용', '담보', '조건',
     '4대', '프리랜서', '자영업', '직장인', '무직', '햇살론', '비상금',
     '전세', '주택담보', 'OK', 'SBI', '웰컴', '페퍼', '상환', '이자',
-    '승인', '심사', '서류', '소득', '신용등급', '연체'
+    '승인', '심사', '서류', '소득', '신용등급', '연체', '보증', '카드론',
+    '마이너스', '리볼빙', '연체', '채무', '부채', '원금', '월납입'
   ];
 
-  const hasLoanContext = loanKeywords.some(k => userMessage.includes(k));
-  const hasGuideReference = guides.length > 0;
-  const groundingChunksCount = groundingMetadata?.groundingChunks?.length || 0;
+  // 부정 응답 패턴
+  const negativePatterns = [
+    /찾지\s*못했/,
+    /정보가\s*없/,
+    /확인이\s*어렵/,
+    /도움드리기\s*어렵/,
+    /해당\s*정보를?\s*찾을\s*수\s*없/,
+    /관련\s*정보가?\s*없/,
+    /죄송\s*(합니다|해요)/,
+  ];
 
-  let score = 1.0;
+  // 긍정 응답 패턴 (구체적인 정보 제공)
+  const positivePatterns = [
+    /\d+%/, // 금리 언급
+    /\d+(만원|억|원)/, // 금액 언급
+    /한도.*\d/, // 한도 정보
+    /금리.*\d/, // 금리 정보
+    /대상.*직장인|프리랜서|자영업/, // 대상 언급
+  ];
+
+  const hasLoanContext = loanKeywords.some(k => userMessage.toLowerCase().includes(k.toLowerCase()));
+  const hasGuideReference = guides.length > 0;
+
+  // Grounding 메타데이터 분석
+  const groundingChunks = groundingMetadata?.groundingChunks || [];
+  const groundingChunksCount = groundingChunks.length;
+  const groundingSupports = groundingMetadata?.groundingSupports || [];
+
+  // Grounding 신뢰도 계산
+  let groundingConfidence = 0;
+  if (groundingSupports.length > 0) {
+    const avgConfidence = groundingSupports.reduce((sum: number, s: any) =>
+      sum + (s.confidenceScores?.[0] || 0), 0) / groundingSupports.length;
+    groundingConfidence = avgConfidence;
+  }
+
+  // 응답 품질 지표
+  const hasNegativeResponse = negativePatterns.some(p => p.test(response));
+  const hasPositiveContent = positivePatterns.some(p => p.test(response));
+  const responseLength = response.length;
+
+  let score = 0.5; // 기본 점수
   let issueType: IssueType = 'ok';
   let reason: string | undefined;
+
+  // === 점수 계산 로직 ===
 
   // 1. 대출 관련 없는 질문 (off_topic)
   if (!hasLoanContext && !hasGuideReference && groundingChunksCount === 0) {
     score = 0.3;
     issueType = 'off_topic';
     reason = '대출 관련 키워드 없음, 가이드 참조 없음';
+    return { score, issueType, reason };
   }
-  // 2. 대출 관련이지만 가이드 참조 없음 (no_answer)
-  else if (hasLoanContext && !hasGuideReference && groundingChunksCount === 0) {
-    score = 0.5;
+
+  // 2. Grounding 기반 점수 (가장 중요)
+  if (groundingChunksCount > 0) {
+    score += 0.2; // Grounding 있으면 +0.2
+    if (groundingConfidence > 0.7) {
+      score += 0.15; // 고신뢰도 Grounding +0.15
+    } else if (groundingConfidence > 0.4) {
+      score += 0.08; // 중신뢰도 Grounding +0.08
+    }
+  }
+
+  // 3. 가이드 참조 점수
+  if (hasGuideReference) {
+    score += 0.15; // 가이드 참조 +0.15
+    if (guides.length >= 3) {
+      score += 0.05; // 다중 가이드 +0.05
+    }
+  }
+
+  // 4. 응답 내용 품질
+  if (hasPositiveContent) {
+    score += 0.1; // 구체적 정보 포함 +0.1
+  }
+
+  // 5. 응답 길이 (너무 짧으면 감점)
+  if (responseLength < 50) {
+    score -= 0.15;
+  } else if (responseLength > 200) {
+    score += 0.05;
+  }
+
+  // 6. 부정 응답 감점
+  if (hasNegativeResponse) {
+    // 부정 응답이지만 가이드가 있으면 덜 감점
+    if (hasGuideReference) {
+      score -= 0.1;
+      reason = '부정 응답이나 가이드 참조 있음';
+    } else {
+      score -= 0.25;
+      issueType = 'low_confidence';
+      reason = '불확실한 응답, 가이드 참조 없음';
+    }
+  }
+
+  // 7. 대출 질문인데 가이드 없음
+  if (hasLoanContext && !hasGuideReference && groundingChunksCount === 0) {
+    score = Math.min(score, 0.5);
     issueType = 'no_answer';
     reason = '대출 질문이나 관련 가이드를 찾지 못함';
   }
-  // 3. "모르겠습니다" 류의 응답 (low_confidence)
-  else if (
-    response.includes('찾지 못했') ||
-    response.includes('정보가 없') ||
-    response.includes('확인이 어렵') ||
-    response.includes('도움드리기 어렵')
-  ) {
-    score = 0.6;
-    issueType = 'low_confidence';
-    reason = '불확실한 응답';
-  }
-  // 4. 가이드 참조는 있지만 적은 경우
-  else if (hasGuideReference && guides.length === 1 && groundingChunksCount < 2) {
-    score = 0.75;
-    issueType = 'ok';
-    reason = '단일 가이드 참조';
-  }
-  // 5. 정상 응답
-  else {
-    score = 1.0;
-    issueType = 'ok';
+
+  // 점수 범위 제한 (0.1 ~ 1.0)
+  score = Math.max(0.1, Math.min(1.0, score));
+
+  // 최종 이슈 타입 결정
+  if (issueType === 'ok') {
+    if (score < 0.5) {
+      issueType = 'low_confidence';
+      reason = reason || '전반적인 품질 점수 낮음';
+    } else if (score < 0.7) {
+      reason = reason || '보통 수준의 응답';
+    }
   }
 
-  return { score, issueType, reason };
+  return {
+    score: Math.round(score * 100) / 100,
+    issueType,
+    reason
+  };
 }
 
 // Types
@@ -307,20 +390,51 @@ app.get("/guides/search/:query", (c) => {
   }
 
   const query = sanitizeString(rawQuery).toLowerCase();
-  const results = (loanGuides as any[])
-    .filter((g) => {
-      const searchText = [g.pfi_name, g.depth1, g.depth2, g.fi_memo, JSON.stringify(g.depth3)]
-        .join(" ")
-        .toLowerCase();
-      return searchText.includes(query);
-    })
-    .slice(0, 10)
-    .map((g) => ({
-      item_cd: g.item_cd,
-      company: g.pfi_name,
-      category: g.depth1,
-      product_type: g.depth2,
-      memo: g.fi_memo?.slice(0, 150),
+
+  // 쿼리를 단어로 분리
+  const queryWords = query.split(/\s+/).filter(w => w.length > 0);
+
+  // 각 가이드에 대해 점수 계산
+  const scoredResults: { guide: any; score: number }[] = [];
+
+  for (const guide of loanGuides as any[]) {
+    const searchText = buildSearchText(guide).toLowerCase();
+    let score = 0;
+
+    // 전체 쿼리 매칭
+    if (searchText.includes(query)) {
+      score += 10;
+    }
+
+    // 개별 단어 매칭
+    for (const word of queryWords) {
+      if (searchText.includes(word)) {
+        score += 1;
+
+        // 필드별 가중치
+        if (guide.pfi_name?.toLowerCase().includes(word)) score += 3;
+        if (guide.depth2?.toLowerCase().includes(word)) score += 2;
+        if (guide.depth1?.toLowerCase().includes(word)) score += 1;
+      }
+    }
+
+    if (score > 0) {
+      scoredResults.push({ guide, score });
+    }
+  }
+
+  // 점수순 정렬 후 상위 결과 반환
+  const results = scoredResults
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 15)
+    .map(({ guide, score }) => ({
+      item_cd: guide.item_cd,
+      company: guide.pfi_name,
+      category: guide.depth1,
+      product_type: guide.depth2,
+      memo: guide.fi_memo?.slice(0, 150),
+      conditions: extractKeyConditions(guide.depth3),
+      relevance: score,
     }));
 
   return c.json({ query, total: results.length, results });
@@ -391,85 +505,570 @@ async function generateGeminiResponse(
   }
 }
 
+/**
+ * 응답에서 언급된 가이드 추출 (개선된 버전)
+ * - 단어 경계 기반 매칭으로 오탐 방지
+ * - 중복 제거를 위해 Set 사용
+ * - depth3 상세 조건 포함
+ */
 function extractMentionedGuides(response: string): any[] {
   const guides: any[] = [];
-  const mentionedCompanies: string[] = [];
+  const mentionedCompanies = new Set<string>();
+  const normalizedResponse = response.toLowerCase();
 
-  for (const guide of loanGuides as any[]) {
-    if (guide.pfi_name && response.includes(guide.pfi_name)) {
-      if (!mentionedCompanies.includes(guide.pfi_name)) {
-        mentionedCompanies.push(guide.pfi_name);
-        guides.push({
-          item_cd: guide.item_cd,
-          company: guide.pfi_name,
-          product_type: guide.depth2,
-          relevance: 1,
-          summary: guide.fi_memo?.slice(0, 200) || "",
-        });
-      }
-    }
-  }
+  // 금융사명을 길이 순으로 정렬 (긴 이름 우선 매칭)
+  const sortedGuides = [...(loanGuides as any[])].sort(
+    (a, b) => (b.pfi_name?.length || 0) - (a.pfi_name?.length || 0)
+  );
 
-  return guides.slice(0, 5);
-}
+  for (const guide of sortedGuides) {
+    if (!guide.pfi_name) continue;
 
-function fallbackSearch(message: string): { response: string; guides: any[] } {
-  const stopWords = [
-    "은", "는", "이", "가", "을", "를", "의", "에", "로", "으로", "와", "과", "도", "만",
-    "뭐", "어떤", "어디", "뭘", "좀", "알려줘", "알려주세요", "있어", "있나요", "할수",
-    "가능", "조건", "뭐야", "뭐에요",
-  ];
+    const companyName = guide.pfi_name;
+    const normalizedName = companyName.toLowerCase();
 
-  const keywords = message
-    .toLowerCase()
-    .replace(/[?!.,]/g, "")
-    .split(/\s+/)
-    .filter((word) => word.length > 1 && !stopWords.includes(word));
+    // 이미 추가된 금융사는 스킵
+    if (mentionedCompanies.has(companyName)) continue;
 
-  const results: any[] = [];
+    // 단어 경계 기반 매칭 (한글 지원)
+    // 한글은 \b가 작동하지 않으므로 앞뒤로 공백/구두점/문자열 경계 확인
+    const escapedName = normalizedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(
+      `(?:^|[\\s,.!?()\\[\\]{}:;'"~·…])${escapedName}(?:[\\s,.!?()\\[\\]{}:;'"~·…]|$)`,
+      'i'
+    );
 
-  for (const guide of loanGuides as any[]) {
-    const searchText = [guide.pfi_name, guide.depth1, guide.depth2, guide.fi_memo]
-      .join(" ")
-      .toLowerCase();
+    // 정규식 매칭 또는 정확한 포함 확인
+    const isMatched = pattern.test(normalizedResponse) ||
+                      normalizedResponse.includes(normalizedName);
 
-    let relevance = 0;
-    for (const keyword of keywords) {
-      if (searchText.includes(keyword)) {
-        relevance += 1;
-        if (guide.pfi_name?.toLowerCase().includes(keyword)) relevance += 2;
-        if (guide.depth2?.toLowerCase().includes(keyword)) relevance += 2;
-      }
-    }
+    if (isMatched) {
+      mentionedCompanies.add(companyName);
 
-    if (relevance > 0) {
-      results.push({
+      // depth3에서 주요 조건 추출
+      const conditions = extractKeyConditions(guide.depth3);
+
+      guides.push({
         item_cd: guide.item_cd,
         company: guide.pfi_name,
+        category: guide.depth1,
         product_type: guide.depth2,
-        relevance,
+        relevance: calculateRelevance(response, guide),
         summary: guide.fi_memo?.slice(0, 200) || "",
+        conditions, // 상세 조건 추가
       });
     }
   }
 
-  const guides = results.sort((a, b) => b.relevance - a.relevance).slice(0, 5);
+  // 관련성 점수로 정렬 후 상위 5개 반환
+  return guides
+    .sort((a, b) => b.relevance - a.relevance)
+    .slice(0, 5);
+}
+
+/**
+ * depth3에서 주요 조건 추출
+ */
+function extractKeyConditions(depth3: any[]): Record<string, string> {
+  const conditions: Record<string, string> = {};
+
+  if (!Array.isArray(depth3)) return conditions;
+
+  for (const section of depth3) {
+    if (!section.depth4_key || !Array.isArray(section.depth4_key)) continue;
+
+    for (const field of section.depth4_key) {
+      const name = field.depth4_name;
+      const detail = field.detail;
+
+      if (!name || !detail) continue;
+
+      // 주요 조건만 추출
+      if (name === '연령' || name === '나이') {
+        conditions.age = detail;
+      } else if (name === '한도' || name.includes('대출한도')) {
+        conditions.limit = detail;
+      } else if (name === '금리' || name.includes('이자')) {
+        conditions.rate = detail;
+      } else if (name === '대상' || name.includes('자격')) {
+        conditions.target = detail;
+      } else if (name === '재직' || name.includes('근무')) {
+        conditions.employment = detail;
+      } else if (name === '소득' || name.includes('연소득')) {
+        conditions.income = detail;
+      }
+    }
+  }
+
+  return conditions;
+}
+
+/**
+ * 가이드의 관련성 점수 계산
+ */
+function calculateRelevance(response: string, guide: any): number {
+  let relevance = 1;
+  const normalizedResponse = response.toLowerCase();
+
+  // 금융사명 언급 횟수
+  const companyMatches = (normalizedResponse.match(
+    new RegExp(guide.pfi_name?.toLowerCase() || '', 'g')
+  ) || []).length;
+  relevance += companyMatches * 2;
+
+  // 상품유형 언급 여부
+  if (guide.depth2 && normalizedResponse.includes(guide.depth2.toLowerCase())) {
+    relevance += 3;
+  }
+
+  // 카테고리 언급 여부
+  if (guide.depth1 && normalizedResponse.includes(guide.depth1.toLowerCase())) {
+    relevance += 1;
+  }
+
+  return relevance;
+}
+
+/**
+ * 개선된 폴백 검색 (TF-IDF 기반)
+ * - 키워드 가중치 적용
+ * - depth3 상세 조건 검색 포함
+ * - 동의어/유사어 처리
+ */
+function fallbackSearch(message: string): { response: string; guides: any[] } {
+  // 확장된 스탑워드 (조사, 어미, 일반적인 질문 패턴)
+  // 주의: "없는", "있는" 등은 직업 조건 판단에 중요하므로 제외하지 않음
+  const stopWords = new Set([
+    "은", "는", "이", "가", "을", "를", "의", "에", "로", "으로", "와", "과", "도", "만",
+    "뭐", "어떤", "어디", "뭘", "좀", "알려줘", "알려주세요", "있나요", "할수",
+    "조건", "뭐야", "뭐에요", "하고", "해서", "하면", "되나요", "싶어요",
+    "주세요", "부탁", "요", "데", "때", "것", "수", "거", "점"
+    // "없는", "있는", "가능" 제외 (직업 조건 판단에 필요)
+  ]);
+
+  // 동의어/유사어 매핑 (직업 구분 대폭 확장)
+  const synonyms: Record<string, string[]> = {
+    // === 대출 유형 ===
+    "신용대출": ["신용", "무담보", "신용론"],
+    "담보대출": ["담보", "주담대", "주택담보", "하우스론"],
+    "햇살론": ["햇살", "서민대출", "정부지원대출"],
+    "사잇돌": ["사잇돌대출", "중금리"],
+
+    // === 직업 구분 (핵심 개선) ===
+    // 4대보험 가입 직장인
+    "4대가입": ["4대보험", "4대", "사대보험", "사대", "직장인", "회사원", "근로자", "월급쟁이", "정규직"],
+    "직장인": ["회사원", "근로자", "월급쟁이", "정규직", "4대가입", "4대보험"],
+
+    // 4대보험 미가입자
+    "미가입": ["4대보험없는", "4대없는", "보험없는", "미가입자", "4대미가입"],
+    "4대보험없는": ["미가입", "4대없는", "보험없는", "미가입자"],
+
+    // 프리랜서
+    "프리랜서": ["자유직", "프리", "비정규직", "자유계약", "1인사업자", "플랫폼노동자"],
+
+    // 개인사업자
+    "개인사업자": ["자영업", "자영업자", "사업자", "개인사업", "소상공인", "자영업대출"],
+    "자영업": ["자영업자", "사업자", "개인사업", "개인사업자", "소상공인"],
+
+    // 무직/주부
+    "무직": ["무직자", "실업자", "미취업", "백수", "취준생"],
+    "주부": ["전업주부", "주부론", "가정주부"],
+
+    // 특수 직군
+    "청년": ["청년론", "사회초년생", "청년대출"],
+    "개인회생": ["회생", "회생자", "파산"],
+    "연금": ["연금수령", "국민연금", "퇴직연금"],
+
+    // === 금융 조건 ===
+    "금리": ["이자", "이율", "연이율", "금리대"],
+    "한도": ["최대금액", "대출금액", "한도액", "대출한도"],
+    "조건": ["자격", "요건", "기준", "대상"],
+
+    // === 근무형태 ===
+    "계약직": ["기간제", "단기계약"],
+    "파견직": ["파견근무", "파견"],
+    "일용직": ["일당제", "일용"],
+  };
+
+  // 키워드 추출 및 정규화
+  const normalizedMessage = message.toLowerCase().replace(/[?!.,()[\]{}'"]/g, " ");
+  const rawKeywords = normalizedMessage.split(/\s+/).filter(w => w.length > 0);
+
+  // 스탑워드 제거 및 동의어 확장
+  const keywords: { word: string; weight: number }[] = [];
+  const seenWords = new Set<string>();
+
+  for (const word of rawKeywords) {
+    if (word.length < 2 || stopWords.has(word)) continue;
+    if (seenWords.has(word)) continue;
+
+    seenWords.add(word);
+    keywords.push({ word, weight: 1.0 });
+
+    // 동의어 확장 (가중치 낮춤)
+    for (const [key, syns] of Object.entries(synonyms)) {
+      if (word === key || syns.includes(word)) {
+        for (const syn of [key, ...syns]) {
+          if (!seenWords.has(syn)) {
+            seenWords.add(syn);
+            keywords.push({ word: syn, weight: 0.7 });
+          }
+        }
+      }
+    }
+  }
+
+  // 키워드가 없으면 원본 메시지에서 2글자 이상 단어 추출
+  if (keywords.length === 0) {
+    const fallbackWords = normalizedMessage.match(/[가-힣a-z0-9]{2,}/g) || [];
+    for (const word of fallbackWords.slice(0, 5)) {
+      if (!stopWords.has(word)) {
+        keywords.push({ word, weight: 0.5 });
+      }
+    }
+  }
+
+  // 문서 빈도수 계산 (IDF용)
+  const docFrequency = new Map<string, number>();
+  const totalDocs = (loanGuides as any[]).length;
+
+  for (const guide of loanGuides as any[]) {
+    const searchText = buildSearchText(guide).toLowerCase();
+    const seenInDoc = new Set<string>();
+
+    for (const { word } of keywords) {
+      if (!seenInDoc.has(word) && searchText.includes(word)) {
+        seenInDoc.add(word);
+        docFrequency.set(word, (docFrequency.get(word) || 0) + 1);
+      }
+    }
+  }
+
+  // 각 가이드에 대해 TF-IDF 기반 점수 계산
+  const results: any[] = [];
+
+  for (const guide of loanGuides as any[]) {
+    const searchText = buildSearchText(guide).toLowerCase();
+    let score = 0;
+    const matchedKeywords: string[] = [];
+
+    for (const { word, weight } of keywords) {
+      // TF (단어 빈도)
+      const regex = new RegExp(escapeRegex(word), 'g');
+      const matches = searchText.match(regex);
+      const tf = matches ? matches.length : 0;
+
+      if (tf > 0) {
+        // IDF (역문서 빈도)
+        const df = docFrequency.get(word) || 1;
+        const idf = Math.log(totalDocs / df) + 1;
+
+        // TF-IDF 점수
+        let termScore = tf * idf * weight;
+
+        // 필드별 가중치 부여
+        if (guide.pfi_name?.toLowerCase().includes(word)) {
+          termScore *= 3; // 금융사명 매칭 → 3배
+        }
+        if (guide.depth2?.toLowerCase().includes(word)) {
+          termScore *= 2.5; // 상품유형 매칭 → 2.5배
+        }
+        if (guide.depth1?.toLowerCase().includes(word)) {
+          termScore *= 1.5; // 카테고리 매칭 → 1.5배
+        }
+
+        score += termScore;
+        if (!matchedKeywords.includes(word)) {
+          matchedKeywords.push(word);
+        }
+      }
+    }
+
+    // ★ 직업 타입 매칭 점수 추가 (핵심 개선)
+    const jobTypeScore = calculateJobTypeScore(keywords, guide);
+    score += jobTypeScore;
+
+    // 직업 타입 추출하여 결과에 포함
+    const jobType = extractJobType(guide.depth2);
+
+    if (score > 0) {
+      const conditions = extractKeyConditions(guide.depth3);
+      results.push({
+        item_cd: guide.item_cd,
+        company: guide.pfi_name,
+        category: guide.depth1,
+        product_type: guide.depth2,
+        jobType, // 직업 타입 추가
+        relevance: Math.round(score * 100) / 100,
+        summary: guide.fi_memo?.slice(0, 200) || "",
+        conditions,
+        matchedKeywords,
+      });
+    }
+  }
+
+  // 점수순 정렬 후 상위 결과 반환
+  const guides = results
+    .sort((a, b) => b.relevance - a.relevance)
+    .slice(0, 8); // 더 많은 결과 제공
 
   if (guides.length === 0) {
+    // 검색 결과 없을 때 추천 검색어 제공
+    const suggestions = getSuggestions(message);
     return {
-      response: `"${message}"에 대한 관련 가이드를 찾지 못했습니다. 다른 키워드로 검색해보세요.\n\n예시: "OK저축은행 신용대출", "4대가입 조건", "햇살론"`,
+      response: `"${message}"에 대한 관련 가이드를 찾지 못했습니다.\n\n**추천 검색어:**\n${suggestions.map(s => `- ${s}`).join('\n')}\n\n예시: "OK저축은행 신용대출", "4대보험 없는 직장인", "햇살론 조건"`,
       guides: [],
     };
   }
 
+  // 응답 생성 (조건 정보 포함)
   let response = `**${guides.length}개의 관련 가이드를 찾았습니다:**\n\n`;
-  for (const guide of guides) {
+  for (const guide of guides.slice(0, 5)) {
     response += `### ${guide.company} - ${guide.product_type}\n`;
-    response += `${guide.summary}\n\n`;
+    response += `${guide.summary}\n`;
+
+    // 조건 정보 표시
+    if (Object.keys(guide.conditions).length > 0) {
+      const conditionStr = Object.entries(guide.conditions)
+        .map(([key, value]) => {
+          const labels: Record<string, string> = {
+            age: '연령', limit: '한도', rate: '금리',
+            target: '대상', employment: '재직', income: '소득'
+          };
+          return `${labels[key] || key}: ${value}`;
+        })
+        .slice(0, 3)
+        .join(' | ');
+      response += `> ${conditionStr}\n`;
+    }
+    response += '\n';
+  }
+
+  if (guides.length > 5) {
+    response += `\n*그 외 ${guides.length - 5}개의 추가 결과가 있습니다.*\n`;
   }
   response += `\n상세 정보가 필요하시면 금융사명이나 상품명을 말씀해주세요.`;
 
   return { response, guides };
+}
+
+/**
+ * depth2에서 직업/대상 타입 추출
+ * 예: "신용대출(4대가입)" → "4대가입"
+ * 예: "햇살론(프리랜서)" → "프리랜서"
+ */
+function extractJobType(depth2: string): string | null {
+  if (!depth2) return null;
+  const match = depth2.match(/\(([^)]+)\)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * 직업 타입 매칭 점수 계산 (개선된 버전)
+ * - depth2 직업 타입 매칭
+ * - fi_memo에서 "무직가능", "무직 포함" 등 패턴 인식
+ * - "무직불가" 등 부정 패턴 감점
+ */
+function calculateJobTypeScore(keywords: { word: string; weight: number }[], guide: any): number {
+  const jobType = extractJobType(guide.depth2);
+  const depth2Lower = (guide.depth2 || "").toLowerCase();
+  const fiMemoLower = (guide.fi_memo || "").toLowerCase();
+  let score = 0;
+
+  // 직업 타입별 키워드 매핑
+  const jobTypeKeywords: Record<string, string[]> = {
+    "4대가입": ["4대", "4대보험", "직장인", "회사원", "정규직", "근로자"],
+    "미가입": ["미가입", "4대없는", "보험없는", "4대보험없는", "4대미가입"],
+    "프리랜서": ["프리랜서", "프리", "자유직", "플랫폼"],
+    "개인사업자": ["개인사업자", "자영업", "사업자", "소상공인"],
+    "주부론": ["주부", "전업주부", "가정주부"],
+    "주부": ["주부", "전업주부", "가정주부"],
+    "무직론": ["무직", "무직자", "실업", "미취업", "백수"],
+    "무직": ["무직", "무직자", "실업", "미취업", "백수"],
+    "청년론": ["청년", "사회초년생", "청년대출"],
+    "개인회생": ["회생", "파산", "개인회생"],
+    "연금수령": ["연금", "국민연금", "퇴직연금"],
+  };
+
+  // 사용자가 검색한 직업 키워드 추출
+  const searchedJobTypes: string[] = [];
+  for (const { word } of keywords) {
+    for (const [type, typeKeywords] of Object.entries(jobTypeKeywords)) {
+      if (typeKeywords.some(tk => tk.includes(word) || word.includes(tk))) {
+        if (!searchedJobTypes.includes(type)) {
+          searchedJobTypes.push(type);
+        }
+      }
+    }
+  }
+
+  // 1. depth2 직업 타입 정확 매칭 (높은 가점)
+  if (jobType) {
+    const jobTypeLower = jobType.toLowerCase();
+    for (const [type, typeKeywords] of Object.entries(jobTypeKeywords)) {
+      if (jobTypeLower.includes(type.toLowerCase()) || type.toLowerCase().includes(jobTypeLower)) {
+        for (const { word, weight } of keywords) {
+          if (typeKeywords.some(tk => tk.includes(word) || word.includes(tk))) {
+            score += 15 * weight; // depth2 직업 타입 정확 매칭 → 매우 높은 가점
+          }
+        }
+      }
+    }
+  }
+
+  // 2. fi_memo에서 직업 가능/불가 여부 확인
+  const isSearchingMujik = searchedJobTypes.includes("무직론") || searchedJobTypes.includes("무직") ||
+    keywords.some(k => k.word.includes("무직"));
+
+  if (isSearchingMujik) {
+    // "무직가능", "무직 가능", "무직 포함" 패턴 → 가점
+    if (/무직\s*(가능|포함|진행가능|ok|O)/i.test(fiMemoLower) ||
+        /모든\s*직군\s*(가능|진행가능)/i.test(fiMemoLower)) {
+      score += 20; // fi_memo에서 무직 가능 확인 → 높은 가점
+    }
+    // depth2에 "무직론" 포함 → 가점
+    if (depth2Lower.includes("무직")) {
+      score += 25; // 무직 전용 상품 → 최고 가점
+    }
+    // "무직불가", "무직 제외" 패턴 → 감점
+    if (/무직\s*(불가|제외|안됨|진행불가)/i.test(fiMemoLower)) {
+      score -= 30; // 무직 불가 상품 → 큰 감점
+    }
+  }
+
+  // 3. 주부 검색 처리
+  const isSearchingJubu = searchedJobTypes.includes("주부론") || searchedJobTypes.includes("주부") ||
+    keywords.some(k => k.word.includes("주부"));
+
+  if (isSearchingJubu) {
+    if (/주부\s*(가능|포함|진행가능)/i.test(fiMemoLower) || depth2Lower.includes("주부")) {
+      score += 20;
+    }
+    if (/주부\s*(불가|제외)/i.test(fiMemoLower)) {
+      score -= 30;
+    }
+  }
+
+  // 4. "없는" 패턴 특수 처리 (4대보험 없는 → 미가입)
+  const hasNegativePattern = keywords.some(k =>
+    k.word === "없는" || k.word === "없이" || k.word === "미"
+  );
+  const has4daeKeyword = keywords.some(k =>
+    k.word.includes("4대") || k.word.includes("보험")
+  );
+
+  if (hasNegativePattern && has4daeKeyword) {
+    if (jobType === "미가입" || depth2Lower.includes("미가입")) {
+      score += 15; // "4대보험 없는" → "미가입" 상품 강력 매칭
+    }
+  }
+
+  // 5. 반대 케이스: 4대보험 있는 직장인 → 4대가입 상품
+  if (!hasNegativePattern && has4daeKeyword) {
+    if (jobType === "4대가입" || depth2Lower.includes("4대가입")) {
+      score += 10;
+    }
+  }
+
+  return score;
+}
+
+/**
+ * 검색용 텍스트 생성 (depth3 포함 + 직업 타입 확장 + fi_memo 조건 파싱)
+ */
+function buildSearchText(guide: any): string {
+  const parts = [
+    guide.pfi_name,
+    guide.depth1,
+    guide.depth2,
+    guide.fi_memo,
+  ];
+
+  // 직업 타입 추출하여 검색 텍스트에 추가
+  const jobType = extractJobType(guide.depth2);
+  if (jobType) {
+    parts.push(jobType);
+    // 직업 타입의 동의어도 추가
+    const jobExpansions: Record<string, string[]> = {
+      "4대가입": ["직장인", "회사원", "정규직", "4대보험"],
+      "미가입": ["4대보험없는", "보험미가입"],
+      "프리랜서": ["자유직", "프리"],
+      "개인사업자": ["자영업", "사업자"],
+      "무직론": ["무직", "무직자", "무직가능"],
+      "주부론": ["주부", "전업주부"],
+    };
+    if (jobExpansions[jobType]) {
+      parts.push(...jobExpansions[jobType]);
+    }
+  }
+
+  // fi_memo에서 직업 조건 키워드 추출하여 추가
+  const fiMemo = guide.fi_memo || "";
+  if (/무직\s*(가능|포함|진행가능)/i.test(fiMemo) || /모든\s*직군.*가능/i.test(fiMemo)) {
+    parts.push("무직가능", "무직", "무직자");
+  }
+  if (/주부\s*(가능|포함)/i.test(fiMemo)) {
+    parts.push("주부가능", "주부", "전업주부");
+  }
+
+  // depth3 상세 조건도 검색 대상에 포함
+  if (Array.isArray(guide.depth3)) {
+    for (const section of guide.depth3) {
+      if (section.depth3_name) parts.push(section.depth3_name);
+      if (Array.isArray(section.depth4_key)) {
+        for (const field of section.depth4_key) {
+          if (field.depth4_name) parts.push(field.depth4_name);
+          if (field.detail) parts.push(field.detail);
+        }
+      }
+    }
+  }
+
+  return parts.filter(Boolean).join(" ");
+}
+
+/**
+ * 정규식 특수문자 이스케이프
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * 검색 결과 없을 때 추천 검색어 생성
+ */
+function getSuggestions(message: string): string[] {
+  const suggestions: string[] = [];
+
+  // 자주 사용되는 검색어
+  const popularTerms = [
+    "신용대출", "OK저축은행", "웰컴저축은행", "SBI저축은행",
+    "직장인 대출", "프리랜서 대출", "자영업자 대출",
+    "4대보험 없는", "햇살론", "비상금대출"
+  ];
+
+  // 메시지와 관련 있는 추천어 선택
+  const messageLower = message.toLowerCase();
+  for (const term of popularTerms) {
+    if (suggestions.length >= 3) break;
+
+    // 일부 글자가 겹치면 추천
+    const termChars = term.toLowerCase().split('');
+    const matchCount = termChars.filter(c => messageLower.includes(c)).length;
+    if (matchCount >= 2 || Math.random() > 0.5) {
+      suggestions.push(term);
+    }
+  }
+
+  // 최소 3개 추천
+  while (suggestions.length < 3) {
+    const randomTerm = popularTerms[Math.floor(Math.random() * popularTerms.length)];
+    if (!suggestions.includes(randomTerm)) {
+      suggestions.push(randomTerm);
+    }
+  }
+
+  return suggestions;
 }
 
 app.get("/chat/debug", async (c) => {
@@ -1424,6 +2023,138 @@ app.get("/stats/plans", (c) => {
   ];
 
   return c.json({ plans });
+});
+
+// ============================================
+// Admin API Endpoints
+// ============================================
+
+// 상품 분류 매핑 정보
+app.get("/admin/product-mappings", (c) => {
+  // 동의어 매핑 데이터
+  const synonymMappings = [
+    // 직업 구분
+    { key: "4대가입", synonyms: ["4대보험", "4대", "사대보험", "직장인", "회사원", "근로자", "정규직"], category: "직업" },
+    { key: "미가입", synonyms: ["4대보험없는", "4대없는", "보험없는", "미가입자"], category: "직업" },
+    { key: "프리랜서", synonyms: ["자유직", "프리", "비정규직", "자유계약", "플랫폼노동자"], category: "직업" },
+    { key: "개인사업자", synonyms: ["자영업", "자영업자", "사업자", "소상공인"], category: "직업" },
+    { key: "무직", synonyms: ["무직자", "실업자", "미취업", "백수", "취준생"], category: "직업" },
+    { key: "주부", synonyms: ["전업주부", "주부론", "가정주부"], category: "직업" },
+    { key: "청년", synonyms: ["청년론", "사회초년생", "청년대출"], category: "직업" },
+    { key: "개인회생", synonyms: ["회생", "회생자", "파산"], category: "특수" },
+    // 대출 유형
+    { key: "신용대출", synonyms: ["신용", "무담보", "신용론"], category: "대출유형" },
+    { key: "담보대출", synonyms: ["담보", "주담대", "주택담보", "하우스론"], category: "대출유형" },
+    { key: "햇살론", synonyms: ["햇살", "서민대출", "정부지원대출"], category: "대출유형" },
+    { key: "사잇돌", synonyms: ["사잇돌대출", "중금리"], category: "대출유형" },
+    { key: "오토론", synonyms: ["자동차담보", "차량담보", "자동차대출"], category: "대출유형" },
+    // 금융 조건
+    { key: "금리", synonyms: ["이자", "이율", "연이율"], category: "조건" },
+    { key: "한도", synonyms: ["최대금액", "대출금액", "한도액"], category: "조건" },
+  ];
+
+  // depth2에서 직업 유형 추출
+  function extractJobType(depth2: string): string | null {
+    if (!depth2) return null;
+    const match = depth2.match(/\(([^)]+)\)/);
+    return match ? match[1] : null;
+  }
+
+  // 상품별 통계 계산
+  const guides = loanGuides as any[];
+  const jobTypeCounts: Record<string, number> = {};
+  const loanTypeCounts: Record<string, number> = {};
+  const categories: { depth2: string; jobType: string | null; loanType: string; count: number }[] = [];
+
+  // depth2별 그룹화
+  const depth2Groups: Record<string, any[]> = {};
+  for (const guide of guides) {
+    const d2 = guide.depth2 || "기타";
+    if (!depth2Groups[d2]) depth2Groups[d2] = [];
+    depth2Groups[d2].push(guide);
+  }
+
+  // 각 그룹 분석
+  for (const [depth2, groupGuides] of Object.entries(depth2Groups)) {
+    const jobType = extractJobType(depth2);
+
+    // 대출 유형 추출 (괄호 앞 부분)
+    let loanType = depth2.replace(/\([^)]+\)/, "").trim();
+    if (!loanType) loanType = depth2;
+
+    // 직업 유형 카운트
+    if (jobType) {
+      jobTypeCounts[jobType] = (jobTypeCounts[jobType] || 0) + groupGuides.length;
+    }
+
+    // 대출 유형 카운트
+    loanTypeCounts[loanType] = (loanTypeCounts[loanType] || 0) + groupGuides.length;
+
+    categories.push({
+      depth2,
+      jobType,
+      loanType,
+      count: groupGuides.length,
+    });
+  }
+
+  // 직업 유형 요약
+  const jobTypeSummary = Object.entries(jobTypeCounts)
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count);
+
+  // 대출 유형 요약
+  const loanTypeSummary = Object.entries(loanTypeCounts)
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count);
+
+  // 주의 필요한 검색 패턴
+  const problematicPatterns = [
+    {
+      pattern: "4대보험 없는 직장인",
+      expectedMapping: "미가입",
+      description: "부정 표현 '없는'이 포함되어 '미가입' 상품으로 매핑 필요",
+      scoreBonus: 10,
+    },
+    {
+      pattern: "자영업자 대출",
+      expectedMapping: "개인사업자",
+      description: "'자영업자'는 '개인사업자' 동의어로 매핑",
+      scoreBonus: 5,
+    },
+    {
+      pattern: "회사원 신용대출",
+      expectedMapping: "4대가입",
+      description: "'회사원'은 '4대가입' 동의어로 매핑",
+      scoreBonus: 5,
+    },
+    {
+      pattern: "프리 대출",
+      expectedMapping: "프리랜서",
+      description: "'프리'는 '프리랜서' 축약형으로 매핑",
+      scoreBonus: 5,
+    },
+    {
+      pattern: "전업주부 대출",
+      expectedMapping: "주부",
+      description: "'전업주부'는 '주부' 동의어로 매핑",
+      scoreBonus: 5,
+    },
+  ];
+
+  return c.json({
+    stats: {
+      totalProducts: guides.length,
+      jobTypeCount: Object.keys(jobTypeCounts).length,
+      loanTypeCount: Object.keys(loanTypeCounts).length,
+      synonymGroupCount: synonymMappings.length,
+    },
+    synonymMappings,
+    categories: categories.sort((a, b) => b.count - a.count),
+    jobTypeSummary,
+    loanTypeSummary,
+    problematicPatterns,
+  });
 });
 
 // 404 Handler
