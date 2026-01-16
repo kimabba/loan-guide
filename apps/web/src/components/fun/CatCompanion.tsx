@@ -161,96 +161,111 @@ export function CatCompanion() {
             style={{ left: 0, top: 0, transform: `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${rotation}deg)` }}
         >
             <div className="relative transition-transform duration-300">
-                {/* SVG Filter for Fuzzy/Sketchy look */}
-                <svg width="0" height="0" className="absolute">
-                    <filter id="fuzzy">
-                        <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="5" result="noise" />
-                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="5.5" xChannelSelector="R" yChannelSelector="G" />
-                    </filter>
-                </svg>
                 <style dangerouslySetInnerHTML={{
                     __html: `
-                    @keyframes fuzzy-jitter { 0%,100% { filter:url(#fuzzy) brightness(1);} 50% { filter:url(#fuzzy) brightness(1.02) translate(0.2px,0.2px);} }
-                    @keyframes mini-scoot { 0%,100% { transform:translateY(0) scale(1,1);} 50% { transform:translateY(-3px) scale(0.96,1.04);} }
-                    .cat-front-style { filter:url(#fuzzy); animation:fuzzy-jitter 0.2s infinite; }
-                    .cat-running .cat-inner { animation:mini-scoot 0.15s infinite ease-in-out; }
-                    .cat-panicking .cat-inner { animation:mini-scoot 0.08s infinite linear; }
+                    @keyframes cat-float { 
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-3px); }
+                    }
+                    @keyframes cat-scoot { 
+                        0%, 100% { transform: translateY(0) scale(1, 1); }
+                        50% { transform: translateY(-2px) scale(1.05, 0.95); }
+                    }
+                    @keyframes cat-panic {
+                        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+                        25% { transform: translate(-2px, -2px) rotate(-3deg); }
+                        75% { transform: translate(2px, 2px) rotate(3deg); }
+                    }
+                    .cat-container { 
+                        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+                        animation: cat-float 3s ease-in-out infinite;
+                    }
+                    .cat-running .cat-inner { animation: cat-scoot 0.15s infinite ease-in-out; }
+                    .cat-panicking .cat-inner { animation: cat-panic 0.1s infinite linear; }
                 `}} />
-                <div className={`cat-inner ${isRunning ? 'cat-running' : ''} ${isPanicking ? 'cat-panicking' : ''}`}>
+                <div className={`cat-inner ${isRunning ? 'cat-running' : ''} ${isPanicking ? 'cat-panicking' : ''} cat-container`}>
                     <svg
-                        width="40"
-                        height="40"
-                        viewBox="0 0 40 40"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 48 48"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
-                        className="cat-front-style transition-colors duration-500 text-zinc-900 dark:text-zinc-100"
+                        className="transition-colors duration-500 text-zinc-800 dark:text-zinc-100"
                     >
-                        {/* Fluffy Body - slightly broader and softer */}
-                        <path d="M10 35C10 22 8 13 20 13C32 13 30 22 30 35" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
-                        <rect x="12" y="18" width="16" height="17" rx="8" fill="currentColor" />
-                        {/* Legs */}
-                        <path d="M15 28V36" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                        <path d="M25 28V36" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                        {/* Large Fluffy Head */}
-                        <circle cx="20" cy="14" r="10" fill="currentColor" />
-                        {/* Fluffy Ears with tufts */}
-                        <path d="M11 11L8 1L18 8" fill="currentColor" />
-                        <path d="M29 11L32 1L22 8" fill="currentColor" />
-                        <path d="M8 1L7 -1L9 1" stroke="currentColor" strokeWidth="1" />
-                        <path d="M32 1L33 -1L31 1" stroke="currentColor" strokeWidth="1" />
-                        {/* Whiskers */}
-                        <line x1="10" y1="14" x2="3" y2="12" stroke="currentColor" strokeWidth="1.5" />
-                        <line x1="10" y1="16" x2="2" y2="18" stroke="currentColor" strokeWidth="1.5" />
-                        <line x1="30" y1="14" x2="37" y2="12" stroke="currentColor" strokeWidth="1.5" />
-                        <line x1="30" y1="16" x2="38" y2="18" stroke="currentColor" strokeWidth="1.5" />
-                        {/* Eyes - ultra large */}
-                        <circle cx="16.5" cy="14" r="3" fill="white" />
-                        <circle cx="23.5" cy="14" r="3" fill="white" />
-                        {/* Pupils */}
-                        <circle cx="16.5" cy="14" r="1.2" fill={isScared ? "#ef4444" : "black"} />
-                        <circle cx="23.5" cy="14" r="1.2" fill={isScared ? "#ef4444" : "black"} />
-                        {/* Blush */}
-                        <circle cx="14" cy="17" r="1.2" fill="#f9a8d4" opacity="0.8" />
-                        <circle cx="26" cy="17" r="1.2" fill="#f9a8d4" opacity="0.8" />
-                        {/* Nose - heart shape */}
-                        <path d="M20 16 C19.5 15.5, 19 15.5, 18.5 16 C18 16.5, 18 17, 18.5 17.5 C19 18, 20 18.5, 20 19 C20 18.5, 21 18, 21.5 17.5 C22 17, 22 16.5, 21.5 16 C21 15.5, 20.5 15.5, 20 16 Z" fill="pink" />
-                        {/* Tiny paws */}
-                        <circle cx="16" cy="38" r="1.5" fill="currentColor" />
-                        <circle cx="24" cy="38" r="1.5" fill="currentColor" />
+                        {/* Body - Clean Pill Shape */}
+                        <rect x="12" y="16" width="24" height="24" rx="12" fill="currentColor" />
+
+                        {/* Feet - Simple Circles */}
+                        <circle cx="18" cy="38" r="4" fill="currentColor" />
+                        <circle cx="30" cy="38" r="4" fill="currentColor" />
+
+                        {/* Ears - Sharp Points */}
+                        <path d="M14 18L10 8L22 16" fill="currentColor" />
+                        <path d="M34 18L38 8L26 16" fill="currentColor" />
+
+                        {/* Face Group */}
+                        <g transform="translate(0, 2)">
+                            {/* Eyes - Crisp and Expressive */}
+                            <circle cx="19" cy="20" r="3.5" fill="white" />
+                            <circle cx="29" cy="20" r="3.5" fill="white" />
+
+                            {/* Pupils */}
+                            <circle
+                                cx="19"
+                                cy="20"
+                                r={isScared ? 1.5 : 2}
+                                fill={isScared ? "#ef4444" : "#18181b"}
+                                className="transition-all duration-200"
+                            />
+                            <circle
+                                cx="29"
+                                cy="20"
+                                r={isScared ? 1.5 : 2}
+                                fill={isScared ? "#ef4444" : "#18181b"}
+                                className="transition-all duration-200"
+                            />
+
+                            {/* Nose */}
+                            <circle cx="24" cy="24" r="1.5" fill="#fda4af" />
+
+                            {/* Whiskers - Thin and Subtle */}
+                            <path d="M14 24H8" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.4" />
+                            <path d="M14 26H9" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.4" />
+                            <path d="M34 24H40" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.4" />
+                            <path d="M34 26H39" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.4" />
+                        </g>
+
                         {/* Accessories */}
                         {accessory === 'mask' && (
                             <g className="cat-accessory">
-                                <rect x="13" y="15" width="14" height="7" rx="2" fill="white" stroke="currentColor" strokeWidth="0.5" opacity="0.95" />
-                                <path d="M13 16L10 16" stroke="currentColor" strokeWidth="0.4" />
-                                <path d="M27 16L30 16" stroke="currentColor" strokeWidth="0.4" />
-                                <line x1="16" y1="17.5" x2="24" y2="17.5" stroke="#ccc" strokeWidth="0.3" />
-                                <line x1="16" y1="19.5" x2="24" y2="19.5" stroke="#ccc" strokeWidth="0.3" />
+                                <rect x="15" y="21" width="18" height="8" rx="2" fill="white" fillOpacity="0.9" stroke="#e4e4e7" strokeWidth="0.5" />
+                                <path d="M15 22L11 22.5" stroke="#e4e4e7" strokeWidth="0.5" />
+                                <path d="M33 22L37 22.5" stroke="#e4e4e7" strokeWidth="0.5" />
                             </g>
                         )}
                         {accessory === 'hat' && (
-                            <g className="cat-accessory" transform="translate(0,-2)">
-                                <path d="M14 6L20 -4L26 6" fill="#3b82f6" opacity="0.9" />
-                                <circle cx="20" cy="-4" r="1.5" fill="white" />
-                                <rect x="13" y="5" width="14" height="2" rx="1" fill="white" />
+                            <g className="cat-accessory" transform="translate(0,-1)">
+                                <path d="M16 10L24 0L32 10H16Z" fill="#3b82f6" />
+                                <rect x="15" y="9" width="18" height="2" rx="1" fill="#2563eb" />
+                                <circle cx="24" cy="0" r="2" fill="white" />
                             </g>
                         )}
                         {accessory === 'crown' && (
-                            <g className="cat-accessory" transform="translate(0,-2)">
-                                <path d="M13 6L13 0L17 4L20 0L23 4L27 0L27 6Z" fill="#fbbf24" stroke="#d97706" strokeWidth="0.5" />
+                            <g className="cat-accessory" transform="translate(0,-1)">
+                                <path d="M15 10V4L19.5 8L24 4L28.5 8L33 4V10H15Z" fill="#fbbf24" stroke="#d97706" strokeWidth="0.5" />
                             </g>
                         )}
                     </svg>
                 </div>
-                {/* NYANG bubble */}
+                {/* Speech Bubbles - Refined Style */}
                 {showNyang && (
-                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-black text-sm font-bold px-2 py-0.5 rounded-full shadow-lg border-2 border-zinc-200" style={{ textShadow: '0 0 4px rgba(255,255,255,0.8)' }}>
-                        냐옹
+                    <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm text-zinc-900 text-xs font-bold px-3 py-1.5 rounded-2xl shadow-xl border border-zinc-200/50 flex items-center gap-1 whitespace-nowrap animate-in fade-in zoom-in duration-300">
+                        <span className="text-[10px]">✨</span> 냐옹
                     </div>
                 )}
-                {/* Panic text */}
                 {isPanicking && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[8px] font-black px-1 py-0.2 rounded-xs shadow-xl animate-bounce whitespace-nowrap">
-                        탈출!!
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-lg animate-bounce whitespace-nowrap flex items-center gap-1">
+                        ⚠️ 탈출!!
                     </div>
                 )}
             </div>

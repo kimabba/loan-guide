@@ -41,6 +41,7 @@ const MoonIcon = () => (
 // MonitorIcon removed as requested
 
 // 나침반 + 돋보기 조합 아이콘 (Loan Finder 컨셉)
+// Simple Sparkle Logo Icon
 const LogoIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -49,14 +50,12 @@ const LogoIcon = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <circle cx="10" cy="10" r="7" />
-    <path d="m21 21-4.3-4.3" />
-    <path d="M10 7v6" />
-    <path d="M7 10h6" />
+    <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+    <circle cx="12" cy="12" r="2" fill="currentColor" />
   </svg>
 );
 
@@ -166,7 +165,7 @@ export function Header() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative rounded - md px - 3 py - 1.5 text - sm font - medium transition - all duration - 200 ${isActive
+                className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${isActive
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground"
                   } `}
@@ -238,7 +237,7 @@ export function Header() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`rounded - lg px - 4 py - 3 text - sm font - medium transition - all duration - 200 ${isActive
+                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                     } `}
