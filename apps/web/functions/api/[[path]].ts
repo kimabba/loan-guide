@@ -629,13 +629,100 @@ function calculateRelevance(response: string, guide: any): number {
   return relevance;
 }
 
+// ============================================
+// Synonym Mapping Helper Functions
+// ============================================
+
+// 동의어 매핑 캐시 (5분 TTL)
+let synonymMappingsCache: { data: any[] | null; timestamp: number } = { data: null, timestamp: 0 };
+const SYNONYM_CACHE_TTL = 5 * 60 * 1000; // 5분
+
+// DB에서 동의어 매핑 조회 (캐시 포함)
+async function getSynonymMappingsFromDB(supabase: SupabaseClient | null): Promise<Record<string, string[]>> {
+  // Supabase 없으면 하드코딩 사용
+  if (!supabase) {
+    return getDefaultSynonyms();
+  }
+
+  // 캐시 확인
+  if (synonymMappingsCache.data && Date.now() - synonymMappingsCache.timestamp < SYNONYM_CACHE_TTL) {
+    return convertToSynonymObject(synonymMappingsCache.data);
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('synonym_mappings')
+      .select('*')
+      .eq('is_active', true)
+      .order('priority', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      console.log('DB 동의어 조회 실패 또는 비어있음, 기본값 사용:', error?.message);
+      return getDefaultSynonyms();
+    }
+
+    // 캐시 갱신
+    synonymMappingsCache = { data, timestamp: Date.now() };
+    return convertToSynonymObject(data);
+  } catch (err) {
+    console.error('동의어 매핑 조회 오류:', err);
+    return getDefaultSynonyms();
+  }
+}
+
+// DB 데이터를 검색용 객체로 변환
+function convertToSynonymObject(mappings: any[]): Record<string, string[]> {
+  const result: Record<string, string[]> = {};
+  for (const mapping of mappings) {
+    result[mapping.primary_key] = mapping.synonyms || [];
+  }
+  return result;
+}
+
+// 기본 동의어 (DB 없을 때 폴백)
+function getDefaultSynonyms(): Record<string, string[]> {
+  return {
+    // 대출 유형
+    "신용대출": ["신용", "무담보", "신용론"],
+    "담보대출": ["담보", "주담대", "주택담보", "하우스론"],
+    "햇살론": ["햇살", "서민대출", "정부지원대출"],
+    "사잇돌": ["사잇돌대출", "중금리"],
+    // 직업 구분
+    "4대가입": ["4대보험", "4대", "사대보험", "사대", "직장인", "회사원", "근로자", "월급쟁이", "정규직"],
+    "직장인": ["회사원", "근로자", "월급쟁이", "정규직", "4대가입", "4대보험"],
+    "미가입": ["4대보험없는", "4대없는", "보험없는", "미가입자", "4대미가입"],
+    "4대보험없는": ["미가입", "4대없는", "보험없는", "미가입자"],
+    "프리랜서": ["자유직", "프리", "비정규직", "자유계약", "1인사업자", "플랫폼노동자"],
+    "개인사업자": ["자영업", "자영업자", "사업자", "개인사업", "소상공인", "자영업대출"],
+    "자영업": ["자영업자", "사업자", "개인사업", "개인사업자", "소상공인"],
+    "무직": ["무직자", "실업자", "미취업", "백수", "취준생"],
+    "주부": ["전업주부", "주부론", "가정주부"],
+    "청년": ["청년론", "사회초년생", "청년대출"],
+    "개인회생": ["회생", "회생자", "파산"],
+    "연금": ["연금수령", "국민연금", "퇴직연금"],
+    // 금융 조건
+    "금리": ["이자", "이율", "연이율", "금리대"],
+    "한도": ["최대금액", "대출금액", "한도액", "대출한도"],
+    "조건": ["자격", "요건", "기준", "대상"],
+    // 근무형태
+    "계약직": ["기간제", "단기계약"],
+    "파견직": ["파견근무", "파견"],
+    "일용직": ["일당제", "일용"],
+  };
+}
+
+// 캐시 무효화
+function invalidateSynonymCache() {
+  synonymMappingsCache = { data: null, timestamp: 0 };
+}
+
 /**
  * 개선된 폴백 검색 (TF-IDF 기반)
  * - 키워드 가중치 적용
  * - depth3 상세 조건 검색 포함
- * - 동의어/유사어 처리
+ * - 동의어/유사어 처리 (DB에서 조회)
  */
-function fallbackSearch(message: string): { response: string; guides: any[] } {
+async function fallbackSearch(message: string, supabase: SupabaseClient | null): Promise<{ response: string; guides: any[] }> {
   // 확장된 스탑워드 (조사, 어미, 일반적인 질문 패턴)
   // 주의: "없는", "있는" 등은 직업 조건 판단에 중요하므로 제외하지 않음
   const stopWords = new Set([
@@ -646,49 +733,8 @@ function fallbackSearch(message: string): { response: string; guides: any[] } {
     // "없는", "있는", "가능" 제외 (직업 조건 판단에 필요)
   ]);
 
-  // 동의어/유사어 매핑 (직업 구분 대폭 확장)
-  const synonyms: Record<string, string[]> = {
-    // === 대출 유형 ===
-    "신용대출": ["신용", "무담보", "신용론"],
-    "담보대출": ["담보", "주담대", "주택담보", "하우스론"],
-    "햇살론": ["햇살", "서민대출", "정부지원대출"],
-    "사잇돌": ["사잇돌대출", "중금리"],
-
-    // === 직업 구분 (핵심 개선) ===
-    // 4대보험 가입 직장인
-    "4대가입": ["4대보험", "4대", "사대보험", "사대", "직장인", "회사원", "근로자", "월급쟁이", "정규직"],
-    "직장인": ["회사원", "근로자", "월급쟁이", "정규직", "4대가입", "4대보험"],
-
-    // 4대보험 미가입자
-    "미가입": ["4대보험없는", "4대없는", "보험없는", "미가입자", "4대미가입"],
-    "4대보험없는": ["미가입", "4대없는", "보험없는", "미가입자"],
-
-    // 프리랜서
-    "프리랜서": ["자유직", "프리", "비정규직", "자유계약", "1인사업자", "플랫폼노동자"],
-
-    // 개인사업자
-    "개인사업자": ["자영업", "자영업자", "사업자", "개인사업", "소상공인", "자영업대출"],
-    "자영업": ["자영업자", "사업자", "개인사업", "개인사업자", "소상공인"],
-
-    // 무직/주부
-    "무직": ["무직자", "실업자", "미취업", "백수", "취준생"],
-    "주부": ["전업주부", "주부론", "가정주부"],
-
-    // 특수 직군
-    "청년": ["청년론", "사회초년생", "청년대출"],
-    "개인회생": ["회생", "회생자", "파산"],
-    "연금": ["연금수령", "국민연금", "퇴직연금"],
-
-    // === 금융 조건 ===
-    "금리": ["이자", "이율", "연이율", "금리대"],
-    "한도": ["최대금액", "대출금액", "한도액", "대출한도"],
-    "조건": ["자격", "요건", "기준", "대상"],
-
-    // === 근무형태 ===
-    "계약직": ["기간제", "단기계약"],
-    "파견직": ["파견근무", "파견"],
-    "일용직": ["일당제", "일용"],
-  };
+  // DB에서 동의어 매핑 로드 (캐시됨)
+  const synonyms = await getSynonymMappingsFromDB(supabase);
 
   // 키워드 추출 및 정규화
   const normalizedMessage = message.toLowerCase().replace(/[?!.,()[\]{}'"]/g, " ");
@@ -1264,7 +1310,7 @@ app.post("/chat", async (c) => {
     }
 
     // Fallback: 키워드 검색 (토큰 사용 없음)
-    const { response, guides } = fallbackSearch(message);
+    const { response, guides } = await fallbackSearch(message, supabase);
     recordTokenUsage("keyword_search", "none", 0, 0);
 
     // Fallback 응답도 저장 (Supabase가 설정된 경우에만)
@@ -2155,6 +2201,193 @@ app.get("/admin/product-mappings", (c) => {
     loanTypeSummary,
     problematicPatterns,
   });
+});
+
+// ============================================
+// Synonym Mapping CRUD API
+// ============================================
+
+// GET: 모든 동의어 매핑 조회
+app.get("/admin/synonyms", async (c) => {
+  const supabase = getSupabase(c.env);
+
+  if (!supabase) {
+    // DB 없으면 기본값 반환
+    const defaults = getDefaultSynonyms();
+    const mappings = Object.entries(defaults).map(([key, synonyms], idx) => ({
+      id: `default-${idx}`,
+      category: '기타',
+      primary_key: key,
+      synonyms,
+      description: null,
+      is_active: true,
+      priority: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
+    return c.json({ mappings, source: 'default' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('synonym_mappings')
+      .select('*')
+      .order('category')
+      .order('priority', { ascending: false });
+
+    if (error) {
+      console.error('동의어 조회 오류:', error);
+      return c.json({ error: '동의어 목록을 가져올 수 없습니다' }, 500);
+    }
+
+    return c.json({ mappings: data || [], source: 'database' });
+  } catch (err) {
+    console.error('동의어 API 오류:', err);
+    return c.json({ error: '서버 오류가 발생했습니다' }, 500);
+  }
+});
+
+// POST: 새 동의어 매핑 추가
+app.post("/admin/synonyms", async (c) => {
+  const supabase = getSupabase(c.env);
+
+  if (!supabase) {
+    return c.json({ error: '데이터베이스가 설정되지 않았습니다' }, 503);
+  }
+
+  try {
+    const body = await c.req.json();
+    const { category, primary_key, synonyms, description, priority } = body;
+
+    // 유효성 검사
+    if (!category || !primary_key || !synonyms || !Array.isArray(synonyms)) {
+      return c.json({ error: 'category, primary_key, synonyms(배열)는 필수입니다' }, 400);
+    }
+
+    if (synonyms.length === 0) {
+      return c.json({ error: '최소 하나 이상의 동의어가 필요합니다' }, 400);
+    }
+
+    const { data, error } = await supabase
+      .from('synonym_mappings')
+      .insert({
+        category: category.trim(),
+        primary_key: primary_key.trim(),
+        synonyms: synonyms.map((s: string) => s.trim()).filter(Boolean),
+        description: description?.trim() || null,
+        priority: priority || 0,
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        return c.json({ error: '이미 존재하는 키워드입니다 (같은 카테고리 내)' }, 409);
+      }
+      console.error('동의어 추가 오류:', error);
+      return c.json({ error: '동의어 추가에 실패했습니다' }, 500);
+    }
+
+    // 캐시 무효화
+    invalidateSynonymCache();
+
+    return c.json({ success: true, mapping: data });
+  } catch (err) {
+    console.error('동의어 추가 API 오류:', err);
+    return c.json({ error: '서버 오류가 발생했습니다' }, 500);
+  }
+});
+
+// PUT: 동의어 매핑 수정
+app.put("/admin/synonyms/:id", async (c) => {
+  const supabase = getSupabase(c.env);
+
+  if (!supabase) {
+    return c.json({ error: '데이터베이스가 설정되지 않았습니다' }, 503);
+  }
+
+  const id = c.req.param('id');
+
+  try {
+    const body = await c.req.json();
+    const { category, primary_key, synonyms, description, priority, is_active } = body;
+
+    const updateData: any = {};
+    if (category !== undefined) updateData.category = category.trim();
+    if (primary_key !== undefined) updateData.primary_key = primary_key.trim();
+    if (synonyms !== undefined) {
+      if (!Array.isArray(synonyms) || synonyms.length === 0) {
+        return c.json({ error: '동의어는 최소 1개 이상의 배열이어야 합니다' }, 400);
+      }
+      updateData.synonyms = synonyms.map((s: string) => s.trim()).filter(Boolean);
+    }
+    if (description !== undefined) updateData.description = description?.trim() || null;
+    if (priority !== undefined) updateData.priority = priority;
+    if (is_active !== undefined) updateData.is_active = is_active;
+
+    if (Object.keys(updateData).length === 0) {
+      return c.json({ error: '수정할 필드가 없습니다' }, 400);
+    }
+
+    const { data, error } = await supabase
+      .from('synonym_mappings')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        return c.json({ error: '이미 존재하는 키워드입니다' }, 409);
+      }
+      console.error('동의어 수정 오류:', error);
+      return c.json({ error: '동의어 수정에 실패했습니다' }, 500);
+    }
+
+    if (!data) {
+      return c.json({ error: '해당 동의어를 찾을 수 없습니다' }, 404);
+    }
+
+    // 캐시 무효화
+    invalidateSynonymCache();
+
+    return c.json({ success: true, mapping: data });
+  } catch (err) {
+    console.error('동의어 수정 API 오류:', err);
+    return c.json({ error: '서버 오류가 발생했습니다' }, 500);
+  }
+});
+
+// DELETE: 동의어 매핑 삭제
+app.delete("/admin/synonyms/:id", async (c) => {
+  const supabase = getSupabase(c.env);
+
+  if (!supabase) {
+    return c.json({ error: '데이터베이스가 설정되지 않았습니다' }, 503);
+  }
+
+  const id = c.req.param('id');
+
+  try {
+    const { error } = await supabase
+      .from('synonym_mappings')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('동의어 삭제 오류:', error);
+      return c.json({ error: '동의어 삭제에 실패했습니다' }, 500);
+    }
+
+    // 캐시 무효화
+    invalidateSynonymCache();
+
+    return c.json({ success: true, message: '동의어가 삭제되었습니다' });
+  } catch (err) {
+    console.error('동의어 삭제 API 오류:', err);
+    return c.json({ error: '서버 오류가 발생했습니다' }, 500);
+  }
 });
 
 // 404 Handler

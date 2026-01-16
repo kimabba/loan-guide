@@ -86,6 +86,18 @@ export interface BranchInvite {
   created_at: string;
 }
 
+export interface SynonymMapping {
+  id: string;
+  category: string;
+  primary_key: string;
+  synonyms: string[];
+  description: string | null;
+  is_active: boolean;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // Database 타입 (Supabase 클라이언트용)
 export interface Database {
   public: {
@@ -129,6 +141,11 @@ export interface Database {
         Row: BranchInvite;
         Insert: Omit<BranchInvite, "id" | "created_at">;
         Update: Partial<Omit<BranchInvite, "id" | "created_at">>;
+      };
+      synonym_mappings: {
+        Row: SynonymMapping;
+        Insert: Omit<SynonymMapping, "id" | "created_at" | "updated_at">;
+        Update: Partial<Omit<SynonymMapping, "id" | "created_at" | "updated_at">>;
       };
     };
   };
