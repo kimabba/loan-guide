@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import { LoadingSpinner } from "../components/ui";
 
 // Types
 interface DashboardData {
@@ -187,8 +188,8 @@ export function StatsPage({ isAdminView = false }: { isAdminView?: boolean }) {
 
   useEffect(() => {
     Promise.all([
-      api.get<DashboardData>("/api/stats/dashboard"),
-      api.get<DailyStatsResponse>("/api/stats/daily?days=30"),
+      api.authGet<DashboardData>("/api/stats/dashboard"),
+      api.authGet<DailyStatsResponse>("/api/stats/daily?days=30"),
     ])
       .then(([dashboardData, dailyData]) => {
         setDashboard(dashboardData);
@@ -197,20 +198,17 @@ export function StatsPage({ isAdminView = false }: { isAdminView?: boolean }) {
       })
       .catch((err) => {
         console.error("Failed to load stats:", err);
-        setError("통계 데이터를 불러올 수 없습니다. 아직 데이터가 없거나 API가 배포 중입니다.");
+        if (err.message?.includes("Authentication")) {
+          setError("관리자 로그인이 필요합니다.");
+        } else {
+          setError("통계 데이터를 불러올 수 없습니다. 아직 데이터가 없거나 API가 배포 중입니다.");
+        }
         setLoading(false);
       });
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <span className="text-muted-foreground">통계 데이터 로딩 중...</span>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner size="lg" message="통계 데이터 로딩 중..." fullScreen />;
   }
 
   return (

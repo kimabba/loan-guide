@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from "react";
+import { api } from "../../lib/api";
+import { LoadingSpinner, ErrorMessage } from "../ui";
 
 interface SynonymMapping {
   id: string;
@@ -55,23 +57,24 @@ export function AdminProductMappings() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 동의어 매핑 조회
-      const synonymsRes = await fetch("/api/admin/synonyms");
-      if (synonymsRes.ok) {
-        const data = await synonymsRes.json();
-        setMappings(data.mappings || []);
-        setDataSource(data.source || "unknown");
-      }
+      // 동의어 매핑 조회 (관리자 인증 필요)
+      const synonymsData = await api.authGet<{ mappings: SynonymMapping[]; source: string }>(
+        "/api/admin/synonyms"
+      );
+      setMappings(synonymsData.mappings || []);
+      setDataSource(synonymsData.source || "unknown");
 
-      // 상품 분류 정보 조회
-      const mappingsRes = await fetch("/api/admin/product-mappings");
-      if (mappingsRes.ok) {
-        const data = await mappingsRes.json();
-        setStats(data.stats || {});
-        setProductCategories(data.categories || []);
-      }
-    } catch (error) {
+      // 상품 분류 정보 조회 (관리자 인증 필요)
+      const mappingsData = await api.authGet<{ stats: typeof stats; categories: ProductCategory[] }>(
+        "/api/admin/product-mappings"
+      );
+      setStats(mappingsData.stats || {});
+      setProductCategories(mappingsData.categories || []);
+    } catch (error: any) {
       console.error("Failed to fetch data:", error);
+      if (error.message?.includes("Authentication")) {
+        setError("관리자 로그인이 필요합니다");
+      }
     } finally {
       setLoading(false);
     }
@@ -122,34 +125,24 @@ export function AdminProductMappings() {
       .filter(Boolean);
 
     try {
-      const url = editingMapping
-        ? `/api/admin/synonyms/${editingMapping.id}`
-        : "/api/admin/synonyms";
-      const method = editingMapping ? "PUT" : "POST";
+      const payload = {
+        category: formData.category,
+        primary_key: formData.primary_key.trim(),
+        synonyms: synonymsArray,
+        description: formData.description.trim() || null,
+        priority: formData.priority,
+      };
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: formData.category,
-          primary_key: formData.primary_key.trim(),
-          synonyms: synonymsArray,
-          description: formData.description.trim() || null,
-          priority: formData.priority,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "저장에 실패했습니다");
-        return;
+      if (editingMapping) {
+        await api.authPut(`/api/admin/synonyms/${editingMapping.id}`, payload);
+      } else {
+        await api.authPost("/api/admin/synonyms", payload);
       }
 
       setShowModal(false);
       fetchData(); // 데이터 새로고침
-    } catch (err) {
-      setError("서버 오류가 발생했습니다");
+    } catch (err: any) {
+      setError(err.message || "서버 오류가 발생했습니다");
     } finally {
       setSaving(false);
     }
@@ -161,32 +154,19 @@ export function AdminProductMappings() {
     }
 
     try {
-      const res = await fetch(`/api/admin/synonyms/${mapping.id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        fetchData();
-      } else {
-        const data = await res.json();
-        alert(data.error || "삭제에 실패했습니다");
-      }
-    } catch (err) {
-      alert("서버 오류가 발생했습니다");
+      await api.authDelete(`/api/admin/synonyms/${mapping.id}`);
+      fetchData();
+    } catch (err: any) {
+      alert(err.message || "삭제에 실패했습니다");
     }
   };
 
   const handleToggleActive = async (mapping: SynonymMapping) => {
     try {
-      const res = await fetch(`/api/admin/synonyms/${mapping.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_active: !mapping.is_active }),
+      await api.authPut(`/api/admin/synonyms/${mapping.id}`, {
+        is_active: !mapping.is_active,
       });
-
-      if (res.ok) {
-        fetchData();
-      }
+      fetchData();
     } catch (err) {
       console.error("Toggle error:", err);
     }
@@ -194,8 +174,21 @@ export function AdminProductMappings() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="py-12">
+        <LoadingSpinner size="lg" message="데이터 로딩 중..." fullScreen />
+      </div>
+    );
+  }
+
+  if (error && !mappings.length) {
+    return (
+      <div className="py-12">
+        <ErrorMessage
+          title="데이터를 불러올 수 없습니다"
+          message={error}
+          onRetry={fetchData}
+          variant="card"
+        />
       </div>
     );
   }
