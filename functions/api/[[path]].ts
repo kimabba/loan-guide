@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { handle } from "hono/cloudflare-pages";
 
 // Gemini SDK
@@ -7,6 +6,22 @@ import { GoogleGenAI } from "@google/genai";
 
 // Supabase
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
+// Security Middleware
+import {
+  corsMiddleware,
+  securityHeadersMiddleware,
+  rateLimitMiddleware,
+  chatRateLimitMiddleware,
+  authRateLimitMiddleware,
+  auditLogMiddleware,
+  sanitizeError,
+  isBlockedURL,
+  validateUUID,
+  addAuditLog,
+  getAuditLogs,
+  resetAuthRateLimit,
+} from "../security/middleware";
 
 // 로컬 데이터
 import loanGuides from "../loan_guides.json";
@@ -211,25 +226,8 @@ export interface Env {
 }
 
 // ============================================
-// Security & Rate Limiting
+// Security & Input Validation
 // ============================================
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-}
-
-const rateLimitStore = new Map<string, RateLimitEntry>();
-
-function cleanupExpiredEntries() {
-  const now = Date.now();
-  if (rateLimitStore.size > 100) {
-    for (const [key, entry] of rateLimitStore.entries()) {
-      if (entry.resetTime < now) {
-        rateLimitStore.delete(key);
-      }
-    }
-  }
-}
 
 function sanitizeString(input: string): string {
   if (typeof input !== "string") return "";
@@ -292,42 +290,85 @@ function validateReportType(type: unknown): ValidationResult {
 // ============================================
 const app = new Hono<{ Bindings: Env }>().basePath("/api");
 
-// CORS
-app.use(
-  "*",
-  cors({
-    origin: ["https://loan-guide.pages.dev", "http://localhost:5173"],
-    credentials: true,
-  })
-);
+// Security Middleware Stack (순서 중요!)
+// 1. CORS - Preflight 요청 처리
+app.use("*", corsMiddleware());
 
-// Rate Limiting Middleware
-app.use("*", async (c, next) => {
-  cleanupExpiredEntries();
-  const key =
-    c.req.header("cf-connecting-ip") ||
-    c.req.header("x-forwarded-for")?.split(",")[0] ||
-    "anonymous";
-  const now = Date.now();
-  const windowMs = 60 * 1000;
-  const max = 100;
+// 2. Security Headers - HSTS, CSP, X-Frame-Options 등
+app.use("*", securityHeadersMiddleware());
 
-  let entry = rateLimitStore.get(key);
-  if (!entry || entry.resetTime < now) {
-    entry = { count: 0, resetTime: now + windowMs };
-    rateLimitStore.set(key, entry);
+// 3. General Rate Limiting - 모든 요청에 적용
+app.use("*", rateLimitMiddleware());
+
+// 4. Audit Logging - 민감한 작업 로깅
+app.use("*", auditLogMiddleware());
+
+// 5. Chat-specific rate limiting (더 엄격)
+app.use("/chat", chatRateLimitMiddleware());
+app.use("/chat/*", chatRateLimitMiddleware());
+
+// 6. Auth-specific rate limiting (Bruteforce 방어)
+app.use("/auth/*", authRateLimitMiddleware());
+
+// ============================================
+// Admin Authentication Helper
+// ============================================
+async function verifyAdminAuth(c: any): Promise<{ isAdmin: boolean; userId?: string; error?: string }> {
+  const authHeader = c.req.header("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return { isAdmin: false, error: "Missing or invalid authorization header" };
   }
-  entry.count++;
 
-  c.header("X-RateLimit-Limit", max.toString());
-  c.header("X-RateLimit-Remaining", Math.max(0, max - entry.count).toString());
-  c.header("X-RateLimit-Reset", Math.ceil(entry.resetTime / 1000).toString());
+  const token = authHeader.substring(7);
+  const supabase = getSupabase(c.env);
 
-  if (entry.count > max) {
-    return c.json({ error: "Too many requests. Please try again later." }, 429);
+  if (!supabase) {
+    // Supabase 미설정 시 개발 환경에서는 허용
+    if (c.env.ENVIRONMENT === "development") {
+      return { isAdmin: true, userId: "dev-admin" };
+    }
+    return { isAdmin: false, error: "Authentication service unavailable" };
   }
+
+  try {
+    // JWT 토큰 검증
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return { isAdmin: false, error: "Invalid or expired token" };
+    }
+
+    // user_profiles 테이블에서 role 확인
+    const { data: profile, error: profileError } = await supabase
+      .from("user_profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return { isAdmin: false, error: "User profile not found" };
+    }
+
+    if (profile.role !== "admin") {
+      return { isAdmin: false, error: "Admin access required" };
+    }
+
+    return { isAdmin: true, userId: user.id };
+  } catch (err) {
+    console.error("Auth verification error:", err);
+    return { isAdmin: false, error: "Authentication failed" };
+  }
+}
+
+// Admin auth middleware for protected routes
+async function requireAdmin(c: any, next: () => Promise<void>) {
+  const auth = await verifyAdminAuth(c);
+  if (!auth.isAdmin) {
+    return c.json({ error: auth.error || "Unauthorized" }, 401);
+  }
+  c.set("adminUserId", auth.userId);
   await next();
-});
+}
 
 // ============================================
 // Health Routes
@@ -1117,39 +1158,7 @@ function getSuggestions(message: string): string[] {
   return suggestions;
 }
 
-app.get("/chat/debug", async (c) => {
-  const apiKey = c.env?.GEMINI_API_KEY;
-  const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
-
-  const config = {
-    hasApiKey: !!apiKey,
-    apiKeyPrefix: apiKey?.slice(0, 10) + "...",
-    hasFileSearchStore: !!fileSearchStoreName,
-    fileSearchStore: fileSearchStoreName,
-  };
-
-  if (apiKey && fileSearchStoreName) {
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: "테스트",
-        config: {
-          tools: [{ fileSearch: { fileSearchStoreNames: [fileSearchStoreName] } }],
-        },
-      });
-      return c.json({
-        ...config,
-        geminiTest: "success",
-        response: response.text?.slice(0, 100),
-      });
-    } catch (error: any) {
-      return c.json({ ...config, geminiTest: "failed", error: error.message });
-    }
-  }
-
-  return c.json(config);
-});
+// Debug endpoint removed for security - was exposing API key prefix
 
 app.post("/chat", async (c) => {
   try {
@@ -1355,11 +1364,25 @@ app.post("/chat", async (c) => {
 // Chat Sessions & History Routes
 // ============================================
 
-// 세션 목록 조회
+// 세션 목록 조회 (인증된 사용자 본인의 세션만)
 app.get("/chat/sessions", async (c) => {
   const supabase = getSupabase(c.env);
   if (!supabase) {
     return c.json({ error: "Database not configured", total: 0, sessions: [] });
+  }
+
+  // 인증 확인 - 자신의 세션만 조회 가능
+  const authHeader = c.req.header("Authorization");
+  let userId: string | null = null;
+
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    const { data: { user } } = await supabase.auth.getUser(token);
+    userId = user?.id || null;
+  }
+
+  if (!userId) {
+    return c.json({ error: "Authentication required", total: 0, sessions: [] }, 401);
   }
 
   const limit = Math.min(parseInt(c.req.query("limit") || "20"), 50);
@@ -1367,6 +1390,7 @@ app.get("/chat/sessions", async (c) => {
   const { data: sessions, error } = await supabase
     .from('chat_sessions')
     .select('id, title, created_at, updated_at')
+    .eq('user_id', userId) // 본인 세션만 조회
     .order('updated_at', { ascending: false })
     .limit(limit);
 
@@ -1378,7 +1402,7 @@ app.get("/chat/sessions", async (c) => {
   return c.json({ total: sessions?.length || 0, sessions: sessions || [] });
 });
 
-// 특정 세션의 메시지 조회
+// 특정 세션의 메시지 조회 (세션 소유자만)
 app.get("/chat/sessions/:sessionId/messages", async (c) => {
   const sessionId = c.req.param("sessionId");
   if (!sessionId || !/^[0-9a-f-]{36}$/.test(sessionId)) {
@@ -1388,6 +1412,31 @@ app.get("/chat/sessions/:sessionId/messages", async (c) => {
   const supabase = getSupabase(c.env);
   if (!supabase) {
     return c.json({ error: "Database not configured", sessionId, total: 0, messages: [] });
+  }
+
+  // 인증 확인 - 자신의 세션만 조회 가능
+  const authHeader = c.req.header("Authorization");
+  let userId: string | null = null;
+
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    const { data: { user } } = await supabase.auth.getUser(token);
+    userId = user?.id || null;
+  }
+
+  if (!userId) {
+    return c.json({ error: "Authentication required" }, 401);
+  }
+
+  // 세션이 해당 사용자의 것인지 확인
+  const { data: session } = await supabase
+    .from('chat_sessions')
+    .select('user_id')
+    .eq('id', sessionId)
+    .single();
+
+  if (!session || session.user_id !== userId) {
+    return c.json({ error: "Session not found or access denied" }, 404);
   }
 
   const { data: messages, error } = await supabase
@@ -1869,8 +1918,12 @@ function recordSearch(query: string) {
   }
 }
 
+// ============================================
+// Protected Stats Routes (Admin Only)
+// ============================================
+
 // 통계 대시보드 데이터
-app.get("/stats/dashboard", (c) => {
+app.get("/stats/dashboard", requireAdmin, async (c) => {
   const today = getTodayKey();
   const todayStats = dailyStatsMap.get(today);
 
@@ -1940,7 +1993,7 @@ app.get("/stats/dashboard", (c) => {
 });
 
 // 토큰 사용량 상세
-app.get("/stats/tokens", (c) => {
+app.get("/stats/tokens", requireAdmin, async (c) => {
   const limit = Math.min(parseInt(c.req.query("limit") || "100"), 500);
   const offset = parseInt(c.req.query("offset") || "0");
   const requestType = c.req.query("type");
@@ -1964,7 +2017,7 @@ app.get("/stats/tokens", (c) => {
 });
 
 // 일별 통계
-app.get("/stats/daily", (c) => {
+app.get("/stats/daily", requireAdmin, async (c) => {
   const days = Math.min(parseInt(c.req.query("days") || "30"), 90);
   const stats: {
     date: string;
@@ -1999,7 +2052,7 @@ app.get("/stats/daily", (c) => {
 });
 
 // 상품 조회 통계
-app.get("/stats/guides", (c) => {
+app.get("/stats/guides", requireAdmin, async (c) => {
   const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
 
   const guideStats = Array.from(guideViewCounts.entries())
@@ -2023,7 +2076,7 @@ app.get("/stats/guides", (c) => {
 });
 
 // 검색어 통계
-app.get("/stats/searches", (c) => {
+app.get("/stats/searches", requireAdmin, async (c) => {
   const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
 
   const searches = [...searchQueries]
@@ -2036,7 +2089,7 @@ app.get("/stats/searches", (c) => {
   });
 });
 
-// 플랜 정보
+// 플랜 정보 (public - 요금제 정보는 공개)
 app.get("/stats/plans", (c) => {
   const plans = [
     {
@@ -2072,11 +2125,11 @@ app.get("/stats/plans", (c) => {
 });
 
 // ============================================
-// Admin API Endpoints
+// Protected Admin API Endpoints (Admin Only)
 // ============================================
 
 // 상품 분류 매핑 정보
-app.get("/admin/product-mappings", (c) => {
+app.get("/admin/product-mappings", requireAdmin, async (c) => {
   // 동의어 매핑 데이터
   const synonymMappings = [
     // 직업 구분
@@ -2208,7 +2261,7 @@ app.get("/admin/product-mappings", (c) => {
 // ============================================
 
 // GET: 모든 동의어 매핑 조회
-app.get("/admin/synonyms", async (c) => {
+app.get("/admin/synonyms", requireAdmin, async (c) => {
   const supabase = getSupabase(c.env);
 
   if (!supabase) {
@@ -2248,7 +2301,7 @@ app.get("/admin/synonyms", async (c) => {
 });
 
 // POST: 새 동의어 매핑 추가
-app.post("/admin/synonyms", async (c) => {
+app.post("/admin/synonyms", requireAdmin, async (c) => {
   const supabase = getSupabase(c.env);
 
   if (!supabase) {
@@ -2300,7 +2353,7 @@ app.post("/admin/synonyms", async (c) => {
 });
 
 // PUT: 동의어 매핑 수정
-app.put("/admin/synonyms/:id", async (c) => {
+app.put("/admin/synonyms/:id", requireAdmin, async (c) => {
   const supabase = getSupabase(c.env);
 
   if (!supabase) {
@@ -2360,7 +2413,7 @@ app.put("/admin/synonyms/:id", async (c) => {
 });
 
 // DELETE: 동의어 매핑 삭제
-app.delete("/admin/synonyms/:id", async (c) => {
+app.delete("/admin/synonyms/:id", requireAdmin, async (c) => {
   const supabase = getSupabase(c.env);
 
   if (!supabase) {
@@ -2395,10 +2448,40 @@ app.notFound((c) => {
   return c.json({ error: "Not Found" }, 404);
 });
 
-// Error Handler
+// Error Handler (에러 노출 차단)
 app.onError((err, c) => {
-  console.error(`Error: ${err.message}`);
-  return c.json({ error: "Internal Server Error" }, 500);
+  const isDev = c.env?.ENVIRONMENT === "development";
+
+  // 프로덕션에서는 상세 에러 로깅만 하고 사용자에게는 일반적인 메시지만 반환
+  console.error(`Error: ${err.message}`, isDev ? err.stack : "");
+
+  // Audit Log에 에러 기록
+  const clientIP = c.req.header("cf-connecting-ip") ||
+    c.req.header("x-forwarded-for")?.split(",")[0] ||
+    "anonymous";
+
+  addAuditLog({
+    timestamp: new Date().toISOString(),
+    action: "SERVER_ERROR",
+    ip: clientIP,
+    userAgent: c.req.header("User-Agent"),
+    path: c.req.path,
+    method: c.req.method,
+    details: isDev ? { message: err.message } : undefined,
+  });
+
+  // sanitizeError로 안전한 에러 메시지 반환
+  const safeError = sanitizeError(err, isDev);
+  return c.json({ error: safeError.message }, 500);
+});
+
+// ============================================
+// Admin Audit Log Endpoint
+// ============================================
+app.get("/admin/audit-logs", requireAdmin, async (c) => {
+  const limit = Math.min(parseInt(c.req.query("limit") || "100"), 500);
+  const logs = getAuditLogs(limit);
+  return c.json({ total: logs.length, logs });
 });
 
 // Export for Cloudflare Pages

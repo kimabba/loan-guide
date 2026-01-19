@@ -1,30 +1,36 @@
 # Linear 이슈 목록 - 출시 전 체크리스트
 
-## 완료된 보안 수정 (이번 세션)
+> 마지막 업데이트: 2026-01-18
 
-### [DONE] SEC-001: /chat/debug 엔드포인트 제거
-- **우선순위**: Critical
-- **상태**: 완료
-- **설명**: API 키 prefix가 노출되는 디버그 엔드포인트 제거
-- **파일**: `apps/web/functions/api/[[path]].ts`
+## 완료된 이슈
 
-### [DONE] SEC-002: Admin/Stats API 인증 추가
-- **우선순위**: Critical
-- **상태**: 완료
-- **설명**: `/stats/*`, `/admin/*` 엔드포인트에 관리자 인증 미들웨어 적용
-- **파일**: `apps/web/functions/api/[[path]].ts`
+### 보안 강화 (2026-01-18)
 
-### [DONE] SEC-003: Session IDOR 취약점 수정
-- **우선순위**: High
-- **상태**: 완료
-- **설명**: `/chat/sessions` 엔드포인트에 사용자 본인 세션만 조회하도록 수정
-- **파일**: `apps/web/functions/api/[[path]].ts`
+| 이슈 ID | 제목 | 상태 |
+|---------|------|------|
+| SSF-83 | [SEC] CORS/Preflight + Security Headers 강화 | ✅ Done |
+| SSF-85 | [SEC] Rate Limiting + Bruteforce 방어 강화 | ✅ Done |
+| SSF-86 | [SEC] SSRF 방지 + Input Validation 강화 | ✅ Done |
+| SSF-87 | [SEC] Audit Logging + Error 노출 차단 | ✅ Done |
+| SSF-88 | [SEC] Cookie 보안 + 세션 관리 가이드 | ✅ Done |
+| SSF-89 | [SEC] 의존성 취약점 점검 결과 | ✅ Done |
 
-### [DONE] SEC-004: 프론트엔드 인증 토큰 전달
-- **우선순위**: High
-- **상태**: 완료
-- **설명**: Admin 페이지에서 API 호출 시 Authorization 헤더 자동 추가
-- **파일**: `apps/web/src/lib/api.ts`, `StatsPage.tsx`, `AdminProductMappings.tsx`
+### 기능 개발 (2026-01-18)
+
+| 이슈 ID | 제목 | 상태 |
+|---------|------|------|
+| SSF-77 | [BE] RLS 정책 강화 마이그레이션 | ✅ Done |
+| SSF-78 | [FE] React ErrorBoundary 컴포넌트 | ✅ Done |
+| SSF-79 | [FE] UI 컴포넌트 (Loading, Error, Empty) | ✅ Done |
+
+### 이전 보안 수정
+
+| 이슈 | 제목 | 상태 |
+|------|------|------|
+| SEC-001 | /chat/debug 엔드포인트 제거 | ✅ Done |
+| SEC-002 | Admin/Stats API 인증 추가 | ✅ Done |
+| SEC-003 | Session IDOR 취약점 수정 | ✅ Done |
+| SEC-004 | 프론트엔드 인증 토큰 전달 | ✅ Done |
 
 ---
 
@@ -32,36 +38,31 @@
 
 ### Phase 1: 긴급 (출시 전 필수)
 
-#### SEC-005: 환경변수 보안 강화
-- **우선순위**: High
+#### SEC-005: 환경변수 보안 강화 ✅ (RLS 강화로 완료)
+- **우선순위**: High → **완료**
 - **라벨**: security, backend
-- **설명**:
-  - `SUPABASE_ANON_KEY`가 클라이언트에 노출됨 (anon key는 의도된 것이지만 RLS 정책 검토 필요)
-  - Cloudflare 환경변수 암호화 상태 확인
-- **작업**:
-  - [ ] Supabase RLS 정책 전체 검토
-  - [ ] 민감한 테이블에 적절한 RLS 적용 확인
-- **예상 소요**: 2-3시간
+- **완료 내용**:
+  - [x] Supabase RLS 정책 전체 검토 (008_rls_enhancements.sql)
+  - [x] 민감한 테이블에 적절한 RLS 적용 확인
+  - [x] service_role 정책 `TO service_role`로 제한
 
-#### FE-001: React Error Boundary 추가
-- **우선순위**: High
+#### FE-001: React Error Boundary 추가 ✅
+- **우선순위**: High → **완료** (SSF-78)
 - **라벨**: frontend, stability
-- **설명**: 런타임 에러 발생 시 앱 전체가 크래시되는 것을 방지
-- **작업**:
-  - [ ] `ErrorBoundary` 컴포넌트 생성
-  - [ ] 주요 라우트에 Error Boundary 적용
-  - [ ] 에러 발생 시 사용자 친화적 UI 표시
+- **완료 내용**:
+  - [x] `ErrorBoundary` 컴포넌트 생성
+  - [x] 주요 라우트에 Error Boundary 적용
+  - [x] 에러 발생 시 사용자 친화적 UI 표시
 - **파일**: `apps/web/src/components/ErrorBoundary.tsx`
-- **예상 소요**: 1-2시간
 
-#### FE-002: 로딩/에러 상태 일관성
-- **우선순위**: Medium
+#### FE-002: 로딩/에러 상태 일관성 ✅
+- **우선순위**: Medium → **완료** (SSF-79)
 - **라벨**: frontend, ux
-- **설명**: 일부 페이지에서 로딩/에러 상태 처리가 누락됨
-- **작업**:
-  - [ ] 모든 API 호출 컴포넌트에 로딩 스피너 추가
-  - [ ] 에러 메시지 토스트/알림 통일
-- **예상 소요**: 2-3시간
+- **완료 내용**:
+  - [x] LoadingSpinner 컴포넌트 생성
+  - [x] ErrorMessage 컴포넌트 생성
+  - [x] EmptyState 컴포넌트 생성
+- **파일**: `apps/web/src/components/ui/`
 
 ---
 
@@ -190,8 +191,9 @@
 ### 필수 (출시 전)
 - [x] Critical 보안 이슈 해결
 - [x] High 보안 이슈 해결
-- [ ] Error Boundary 추가
-- [ ] 환경변수 보안 검토
+- [x] Error Boundary 추가 (SSF-78)
+- [x] 환경변수 보안 검토 (RLS 강화)
+- [x] 보안 미들웨어 적용 (SSF-83~88)
 - [ ] 프로덕션 환경 테스트
 
 ### 권장 (출시 후 1주일)
@@ -202,3 +204,12 @@
 ### 선택 (출시 후)
 - [ ] 테스트 코드 작성
 - [ ] 추가 기능 개발
+- [ ] 의존성 취약점 업그레이드 (SSF-89)
+
+---
+
+## 관련 문서
+
+- [CHANGELOG.md](./CHANGELOG.md) - 버전별 변경 이력
+- [SECURITY_AUDIT.md](./SECURITY_AUDIT.md) - 보안 감사 보고서
+- [CLAUDE.md](./CLAUDE.md) - 작업 관리 지침

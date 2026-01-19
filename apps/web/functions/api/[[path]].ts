@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { handle } from "hono/cloudflare-pages";
 
 // Gemini SDK
@@ -7,6 +6,22 @@ import { GoogleGenAI } from "@google/genai";
 
 // Supabase
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
+// Security Middleware
+import {
+  corsMiddleware,
+  securityHeadersMiddleware,
+  rateLimitMiddleware,
+  chatRateLimitMiddleware,
+  authRateLimitMiddleware,
+  auditLogMiddleware,
+  sanitizeError,
+  isBlockedURL,
+  validateUUID,
+  addAuditLog,
+  getAuditLogs,
+  resetAuthRateLimit,
+} from "../security/middleware";
 
 // 로컬 데이터
 import loanGuides from "../loan_guides.json";
@@ -211,25 +226,8 @@ export interface Env {
 }
 
 // ============================================
-// Security & Rate Limiting
+// Security & Input Validation
 // ============================================
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-}
-
-const rateLimitStore = new Map<string, RateLimitEntry>();
-
-function cleanupExpiredEntries() {
-  const now = Date.now();
-  if (rateLimitStore.size > 100) {
-    for (const [key, entry] of rateLimitStore.entries()) {
-      if (entry.resetTime < now) {
-        rateLimitStore.delete(key);
-      }
-    }
-  }
-}
 
 function sanitizeString(input: string): string {
   if (typeof input !== "string") return "";
@@ -292,42 +290,25 @@ function validateReportType(type: unknown): ValidationResult {
 // ============================================
 const app = new Hono<{ Bindings: Env }>().basePath("/api");
 
-// CORS
-app.use(
-  "*",
-  cors({
-    origin: ["https://loan-guide.pages.dev", "http://localhost:5173"],
-    credentials: true,
-  })
-);
+// Security Middleware Stack (순서 중요!)
+// 1. CORS - Preflight 요청 처리
+app.use("*", corsMiddleware());
 
-// Rate Limiting Middleware
-app.use("*", async (c, next) => {
-  cleanupExpiredEntries();
-  const key =
-    c.req.header("cf-connecting-ip") ||
-    c.req.header("x-forwarded-for")?.split(",")[0] ||
-    "anonymous";
-  const now = Date.now();
-  const windowMs = 60 * 1000;
-  const max = 100;
+// 2. Security Headers - HSTS, CSP, X-Frame-Options 등
+app.use("*", securityHeadersMiddleware());
 
-  let entry = rateLimitStore.get(key);
-  if (!entry || entry.resetTime < now) {
-    entry = { count: 0, resetTime: now + windowMs };
-    rateLimitStore.set(key, entry);
-  }
-  entry.count++;
+// 3. General Rate Limiting - 모든 요청에 적용
+app.use("*", rateLimitMiddleware());
 
-  c.header("X-RateLimit-Limit", max.toString());
-  c.header("X-RateLimit-Remaining", Math.max(0, max - entry.count).toString());
-  c.header("X-RateLimit-Reset", Math.ceil(entry.resetTime / 1000).toString());
+// 4. Audit Logging - 민감한 작업 로깅
+app.use("*", auditLogMiddleware());
 
-  if (entry.count > max) {
-    return c.json({ error: "Too many requests. Please try again later." }, 429);
-  }
-  await next();
-});
+// 5. Chat-specific rate limiting (더 엄격)
+app.use("/chat", chatRateLimitMiddleware());
+app.use("/chat/*", chatRateLimitMiddleware());
+
+// 6. Auth-specific rate limiting (Bruteforce 방어)
+app.use("/auth/*", authRateLimitMiddleware());
 
 // ============================================
 // Admin Authentication Helper
@@ -2467,10 +2448,40 @@ app.notFound((c) => {
   return c.json({ error: "Not Found" }, 404);
 });
 
-// Error Handler
+// Error Handler (에러 노출 차단)
 app.onError((err, c) => {
-  console.error(`Error: ${err.message}`);
-  return c.json({ error: "Internal Server Error" }, 500);
+  const isDev = c.env?.ENVIRONMENT === "development";
+
+  // 프로덕션에서는 상세 에러 로깅만 하고 사용자에게는 일반적인 메시지만 반환
+  console.error(`Error: ${err.message}`, isDev ? err.stack : "");
+
+  // Audit Log에 에러 기록
+  const clientIP = c.req.header("cf-connecting-ip") ||
+    c.req.header("x-forwarded-for")?.split(",")[0] ||
+    "anonymous";
+
+  addAuditLog({
+    timestamp: new Date().toISOString(),
+    action: "SERVER_ERROR",
+    ip: clientIP,
+    userAgent: c.req.header("User-Agent"),
+    path: c.req.path,
+    method: c.req.method,
+    details: isDev ? { message: err.message } : undefined,
+  });
+
+  // sanitizeError로 안전한 에러 메시지 반환
+  const safeError = sanitizeError(err, isDev);
+  return c.json({ error: safeError.message }, 500);
+});
+
+// ============================================
+// Admin Audit Log Endpoint
+// ============================================
+app.get("/admin/audit-logs", requireAdmin, async (c) => {
+  const limit = Math.min(parseInt(c.req.query("limit") || "100"), 500);
+  const logs = getAuditLogs(limit);
+  return c.json({ total: logs.length, logs });
 });
 
 // Export for Cloudflare Pages
