@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { GuideModal } from "../components/GuideModal";
 import { api } from "../lib/api";
 
@@ -166,6 +166,7 @@ const AlertIcon = () => (
 
 export function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -462,6 +463,22 @@ export function ChatPage() {
                       >
                         <AlertIcon />
                       </button>
+                      {msg.guides && msg.guides.length > 0 && (
+                        <button
+                          onClick={() => {
+                            const firstGuide = msg.guides && msg.guides[0];
+                            const params = new URLSearchParams();
+                            params.set("type", "guide_fix");
+                            if (firstGuide?.item_cd) {
+                              params.set("guideId", firstGuide.item_cd);
+                            }
+                            navigate(`/report?${params.toString()}`);
+                          }}
+                          className="ml-2 text-[11px] text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+                        >
+                          수정/추가 의견 보내기
+                        </button>
+                      )}
                       {msg.quality && msg.quality.score < 0.7 && (
                         <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-600">
                           {msg.quality.issueType === "off_topic" && "대출 외 질문"}

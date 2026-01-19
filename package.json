@@ -14,7 +14,8 @@
     "deploy:pages": "bun run build:web && bun run --filter web pages:deploy",
     "pages:dev": "bun run build:web && bun run --filter web pages:dev",
     "lint": "bun run --filter '*' lint",
-    "clean": "rm -rf apps/*/dist apps/*/.wrangler packages/*/dist node_modules"
+    "clean": "rm -rf apps/*/dist apps/*/.wrangler packages/*/dist node_modules",
+    "tech:collect": "bun scripts/collect-tech-info.ts"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

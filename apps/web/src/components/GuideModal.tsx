@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 
 interface GuideModalProps {
   itemCd: string | null;
@@ -183,6 +184,14 @@ export function GuideModal({ itemCd, onClose }: GuideModalProps) {
 
           {guide && (
             <div className="space-y-3">
+              <div className="flex justify-end">
+                <Link
+                  to={`/report?type=guide_fix&guideId=${guide.item_cd}`}
+                  className="text-xs text-muted-foreground hover:text-primary underline underline-offset-2"
+                >
+                  이 가이드 내용 수정/추가 의견 보내기
+                </Link>
+              </div>
               {/* 메모 */}
               {guide.fi_memo && (
                 <div className="rounded-lg bg-primary/5 p-4">

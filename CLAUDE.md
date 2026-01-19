@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Korean loan guide chatbot - helps users find loan products from financial institutions (저축은행, 대부 등). Uses Gemini AI for intelligent chat with fallback keyword search.
+**론 파인더 (Loan Finder)** - Korean loan guide chatbot helping users find loan products from financial institutions (저축은행, 대부 등). Uses Gemini 2.5 Flash AI for intelligent chat with file search and fallback keyword matching.
 
 ## Commands
 
 ```bash
-# Development (starts Vite + Cloudflare Pages dev server)
+# Development (Vite + Cloudflare Pages dev server)
 bun run dev
 
 # Build for production
@@ -20,6 +20,9 @@ bun run lint
 
 # Deploy to Cloudflare Pages
 bun run deploy
+
+# Clean all build artifacts
+bun run clean
 ```
 
 ## Architecture
@@ -27,27 +30,35 @@ bun run deploy
 **Monorepo Structure**
 - `apps/web/` - Main application (React frontend + Cloudflare Functions API)
 - `packages/shared/` - Shared Supabase client
-- `guides/` - Loan guide content as markdown (organized by institution type: 저축은행, 대부)
+- `guides/` - Loan guide content as markdown (저축은행, 대부)
 
 **Frontend** (`apps/web/src/`)
 - React 18 + Vite + React Router + TailwindCSS
 - State management: Zustand stores in `lib/` (theme, auth, compare, favorites)
-- Pages: Home, Chat, Products, Stats, Reports, Announcements, Login
+- Version info in `version.ts` (APP_NAME, APP_VERSION, CHANGELOG)
 
 **Backend API** (`apps/web/functions/api/`)
 - Hono framework on Cloudflare Pages Functions
-- Single entry point: `[[path]].ts` handles all `/api/*` routes
-- Chat uses Gemini 2.5 Flash with file search, falls back to keyword matching
+- Single entry: `[[path]].ts` handles all `/api/*` routes
+- Chat: Gemini 2.5 Flash with file search → extract guides → response
 - Loan data: `functions/loan_guides.json` (163 products)
 
-**Key Data Flow**
-- Chat requests → Gemini API with file search → extract mentioned guides → response
-- Fallback: keyword-based search through loan_guides.json
-- Statistics tracked in-memory (token usage, guide views, search queries)
+**Key Systems**
+- **Tag Extractor** (`lib/tagExtractor.ts`): Extracts employment type, product type, and feature tags from loan products
+- **Condition Parser** (`lib/conditionParser.ts`): Parses user-pasted text to match loan conditions
+- **Compare Store** (`lib/compare.ts`): Manages product comparison (max 3)
+
+## Data Flow
+
+```
+User Query → Gemini API (file search) → Extract mentioned guides → Response
+         ↓ (fallback)
+    Keyword search through loan_guides.json
+```
 
 ## Environment Variables
 
-Set in Cloudflare Dashboard or via `wrangler pages secret put`:
+Set via Cloudflare Dashboard or `wrangler pages secret put`:
 - `GEMINI_API_KEY` - Google Gemini API key
 - `FILE_SEARCH_STORE_NAME` - Gemini file search store name
 - `SUPABASE_URL` / `SUPABASE_ANON_KEY` - Supabase credentials
@@ -57,6 +68,14 @@ Set in Cloudflare Dashboard or via `wrangler pages secret put`:
 - Build copies `apps/web/functions` to root `/functions` for Cloudflare Pages
 - `nodejs_compat` flag required for Gemini SDK
 - Smart placement enabled for Gemini API region routing
+
+## Key Patterns
+
+**Filter System**: Accordion-style filters with employment type (직군), product type, category, and company filters. Tags are extracted from product data using keyword matching.
+
+**Styling**: TailwindCSS with dark mode support. Primary color is purple (`primary`). Use `hover:bg-primary/10` for hover effects.
+
+**Korean Language**: All user-facing text is in Korean. Comments can be in Korean or English.
 
 ## 작업 관리 지침 (Linear Integration)
 

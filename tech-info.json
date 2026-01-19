@@ -1,0 +1,113 @@
+{
+  "generatedAt": "2026-01-19T08:52:47.923Z",
+  "rootPackage": {
+    "name": "loan-guide-chatbot",
+    "private": true,
+    "workspaces": [
+      "apps/*",
+      "packages/*"
+    ],
+    "scripts": {
+      "dev": "bun run pages:dev",
+      "dev:web": "bun run --filter web dev",
+      "build": "rm -rf node_modules package-lock.json && npm install && cd apps/web && npm run build && cd ../.. && rm -rf functions && cp -r apps/web/functions .",
+      "build:web": "cd apps/web && npm run build",
+      "deploy": "bun run deploy:pages",
+      "deploy:pages": "bun run build:web && bun run --filter web pages:deploy",
+      "pages:dev": "bun run build:web && bun run --filter web pages:dev",
+      "lint": "bun run --filter '*' lint",
+      "clean": "rm -rf apps/*/dist apps/*/.wrangler packages/*/dist node_modules",
+      "tech:collect": "bun scripts/collect-tech-info.ts"
+    },
+    "devDependencies": {
+      "typescript": "^5.3.3"
+    },
+    "dependencies": {
+      "@google/genai": "^1.35.0"
+    }
+  },
+  "workspaces": [
+    {
+      "path": "apps/web",
+      "package": {
+        "name": "web",
+        "version": "0.1.0",
+        "private": true,
+        "type": "module",
+        "scripts": {
+          "dev": "vite",
+          "build": "tsc -b && vite build",
+          "preview": "vite preview",
+          "lint": "tsc --noEmit",
+          "pages:dev": "wrangler pages dev dist --compatibility-date=2024-12-01 --compatibility-flags=nodejs_compat",
+          "pages:deploy": "wrangler pages deploy dist --project-name=loan-guide"
+        },
+        "dependencies": {
+          "@google/genai": "^1.35.0",
+          "@supabase/supabase-js": "^2.90.1",
+          "hono": "^4.3.0",
+          "react": "^18.3.1",
+          "react-dom": "^18.3.1",
+          "react-router-dom": "^6.22.0",
+          "zustand": "^4.5.0"
+        },
+        "devDependencies": {
+          "@cloudflare/workers-types": "^4.20241127.0",
+          "@types/react": "^18.3.1",
+          "@types/react-dom": "^18.3.0",
+          "@vitejs/plugin-react": "^4.2.1",
+          "autoprefixer": "^10.4.19",
+          "postcss": "^8.4.38",
+          "rollup": "^4.9.0",
+          "tailwindcss": "^3.4.3",
+          "typescript": "^5.3.3",
+          "vite": "^5.2.0",
+          "wrangler": "^3.0.0"
+        }
+      },
+      "tsconfig": {
+        "strict": true,
+        "jsx": "react-jsx",
+        "module": "ESNext",
+        "target": "ES2020",
+        "baseUrl": ".",
+        "paths": {
+          "@/*": [
+            "./src/*"
+          ]
+        }
+      },
+      "wrangler": {
+        "pages_build_output_dir": "dist",
+        "compatibility_date": "2024-12-01",
+        "compatibility_flags": [
+          "nodejs_compat"
+        ],
+        "hasEnvPreview": true,
+        "hasEnvProduction": true
+      }
+    },
+    {
+      "path": "packages/shared",
+      "package": {
+        "name": "shared",
+        "version": "0.1.0",
+        "private": true,
+        "main": "./src/index.ts",
+        "types": "./src/index.ts",
+        "scripts": {
+          "lint": "tsc --noEmit"
+        },
+        "devDependencies": {
+          "typescript": "^5.3.3"
+        }
+      },
+      "tsconfig": {
+        "strict": true,
+        "module": "ESNext",
+        "target": "ES2020"
+      },
+      "wrangler": null
+    }
+  ]
+}

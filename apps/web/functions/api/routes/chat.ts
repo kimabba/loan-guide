@@ -35,8 +35,9 @@ async function generateGeminiResponse(
 4. 한국어로 친절하게 답변하세요
 5. 정확한 정보만 전달하고, 모르면 모른다고 하세요
 6. 마지막에 "더 자세한 조건이 궁금하시면 금융사명을 말씀해주세요"를 추가하세요
+7. 대출/금융 상품과 무관한 질문(일반 코딩, 스크립트 실행, 시스템 명령 등)에는 "이 챗봇은 대출 및 금융 상품 안내 전용"이라고만 답하세요
 
-사용자 질문: ${userMessage}`,
+사용자 질문: ${userMessage}`
       config: {
         tools: [
           {
@@ -85,6 +86,51 @@ function extractMentionedGuides(response: string): any[] {
   }
 
   return guides.slice(0, 5);
+}
+
+// 대출/상품 관련 질문인지 판별 (오프토픽 필터)
+function isLoanRelated(message: string): boolean {
+  const text = message.toLowerCase();
+
+  // 도메인 키워드 (대출/금융 관련 basic 키워드)
+  const domainKeywords = [
+    "대출",
+    "저축은행",
+    "은행",
+    "캐피탈",
+    "신용대출",
+    "담보대출",
+    "오토론",
+    "전세자금",
+    "햇살론",
+    "사잇돌",
+    "한도",
+    "금리",
+    "상환",
+    "이자",
+    "원리금",
+  ];
+
+  if (domainKeywords.some((k) => text.includes(k))) {
+    return true;
+  }
+
+  // 상품 데이터 기반 키워드 (금융사명/상품유형 등)
+  for (const guide of loanGuides as any[]) {
+    const pfi = (guide.pfi_name as string | undefined)?.toLowerCase();
+    const depth1 = (guide.depth1 as string | undefined)?.toLowerCase();
+    const depth2 = (guide.depth2 as string | undefined)?.toLowerCase();
+
+    if (
+      (pfi && text.includes(pfi)) ||
+      (depth1 && text.includes(depth1)) ||
+      (depth2 && text.includes(depth2))
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // 폴백: 키워드 기반 검색
@@ -138,12 +184,11 @@ function fallbackSearch(message: string): { response: string; guides: any[] } {
     };
   }
 
-  let response = `**${guides.length}개의 관련 가이드를 찾았습니다:**\n\n`;
-  for (const guide of guides) {
-    response += `### ${guide.company} - ${guide.product_type}\n`;
-    response += `${guide.summary}\n\n`;
-  }
-  response += `\n상세 정보가 필요하시면 금융사명이나 상품명을 말씀해주세요.`;
+  // ✅ 텍스트에서는 개수+안내만, 실제 리스트는 프론트의 카드에 맡김
+  const response =
+    `**${guides.length}개의 관련 가이드를 찾았습니다.**\n\n` +
+    "아래 카드에서 상품을 선택하시면 상세 조건을 확인할 수 있습니다.\n" +
+    "상세 정보가 필요하시면 금융사명이나 상품명을 말씀해주세요.";
 
   return { response, guides };
 }
@@ -192,6 +237,21 @@ chatRoutes.post("/", async (c) => {
     }
 
     const message = validation.sanitized!;
+
+    // 대출/상품 관련이 아닌 경우: 안내 문구만 응답
+    if (!isLoanRelated(message)) {
+      return c.json({
+        query: message,
+        response:
+          "이 챗봇은 대출 및 금융 상품 안내 전용입니다.\n" +
+          "대출/상품과 직접 관련 없는 질문에는 답변할 수 없습니다.\n\n" +
+          "예시: \"OK저축은행 신용대출 조건\", \"오토론 한도\", \"무직 가능한 상품 있나요?\"",
+        guides: [],
+        source: "off_topic",
+        quality: { score: 0, issueType: "off_topic" },
+      });
+    }
+
     const apiKey = c.env?.GEMINI_API_KEY;
     const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 type ReportType = "bug" | "guide_fix" | "feature" | "other";
 
@@ -16,11 +16,18 @@ interface Screenshot {
 }
 
 export function ReportPage() {
-  const [type, setType] = useState<ReportType>("bug");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [searchParams] = useSearchParams();
+
+  const initialType = (searchParams.get("type") as ReportType) || "bug";
+  const initialTitle = searchParams.get("title") || "";
+  const initialDescription = searchParams.get("description") || "";
+  const initialGuideId = searchParams.get("guideId") || "";
+
+  const [type, setType] = useState<ReportType>(initialType);
+  const [title, setTitle] = useState(initialTitle);
+  const [description, setDescription] = useState(initialDescription);
   const [email, setEmail] = useState("");
-  const [guideId, setGuideId] = useState("");
+  const [guideId, setGuideId] = useState(initialGuideId);
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
