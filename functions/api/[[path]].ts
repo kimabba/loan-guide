@@ -44,22 +44,32 @@ const SYSTEM_INSTRUCTION = `
 
 ## 핵심 규칙
 1. **검색된 가이드 정보만 사용**: File Search에서 찾은 정보만 답변에 활용하세요.
-2. **확실하지 않으면 명시**: "해당 정보를 찾지 못했습니다"라고 솔직하게 답변하세요.
+2. **적극적으로 검색**: 사용자 질문에서 핵심 키워드를 추출하여 여러 방식으로 검색하세요.
 3. **대출 외 질문 거절**: "저는 대출 상담 전문이라 다른 주제는 도움드리기 어렵습니다"라고 응답하세요.
 
+## 검색 전략
+사용자 질문에 따라 다음 키워드로 검색하세요:
+- **무직자 대출**: "무직가능", "무직 포함", "무직론", "모든 직군 가능"
+- **프리랜서 대출**: "프리랜서", "자유직", "위촉계약"
+- **자영업자 대출**: "사업자", "자영업", "개인사업자"
+- **직장인 대출**: "4대보험", "직장인", "재직"
+- **담보대출**: "담보", "부동산", "전세", "자동차", "오토론"
+
 ## 응답 형식
-- 금융사명, 상품유형, 대상, 한도, 금리 순서로 구조화하세요.
-- 여러 상품 비교 시 표 형식을 사용하세요.
-- 마지막에 "더 자세한 조건이 궁금하시면 금융사명을 말씀해주세요"를 추가하세요.
+1. 검색된 상품을 금융사명, 상품유형, 대상, 한도, 금리 순서로 구조화하세요.
+2. 여러 상품이 있으면 최대 3개까지 비교 안내하세요.
+3. 반드시 구체적인 상품명과 조건을 포함하세요.
+4. 마지막에 "더 자세한 조건이 궁금하시면 금융사명을 말씀해주세요"를 추가하세요.
 
 ## 주의사항
 - 법적 조언 제공 금지
 - 특정 상품 추천이 아닌 정보 제공 목적임을 명시
 - 최신 정보 확인은 금융사 직접 문의 권장
+- "정보를 찾지 못했습니다"는 최후의 수단으로만 사용
 
 ## 대출 관련 키워드
 저축은행, 대부, 신용대출, 담보대출, 금리, 한도, 조건, 4대보험, 프리랜서, 자영업자, 직장인,
-무직자, 햇살론, 비상금대출, 전세대출, 주택담보대출, OK저축은행, SBI저축은행, 웰컴저축은행
+무직자, 무직가능, 햇살론, 비상금대출, 전세대출, 주택담보대출, OK저축은행, SBI저축은행, 웰컴저축은행, 다올저축은행
 `;
 
 // ============================================
@@ -389,6 +399,52 @@ app.get("/health", (c) => {
   });
 });
 
+// API 상태 확인 (Gemini 연결 테스트)
+app.get("/api-status", async (c) => {
+  const apiKey = c.env?.GEMINI_API_KEY;
+  const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
+
+  const status = {
+    timestamp: new Date().toISOString(),
+    gemini: {
+      configured: !!(apiKey && fileSearchStoreName),
+      status: "unknown" as "ok" | "error" | "unknown",
+      latency: 0,
+      error: null as string | null,
+    },
+    fallback: {
+      status: "ok",
+      guides_count: (loanGuides as any[]).length,
+    },
+  };
+
+  // Gemini API 간단 테스트 (빠른 응답 확인)
+  if (apiKey && fileSearchStoreName) {
+    const startTime = Date.now();
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash-001", // 빠른 모델로 테스트
+        contents: "test",
+        config: { maxOutputTokens: 10 },
+      });
+
+      status.gemini.status = response.text ? "ok" : "error";
+      status.gemini.latency = Date.now() - startTime;
+    } catch (error: any) {
+      status.gemini.status = "error";
+      status.gemini.latency = Date.now() - startTime;
+      status.gemini.error = error?.message?.includes("429")
+        ? "rate_limit_exceeded"
+        : error?.message?.includes("503")
+          ? "service_unavailable"
+          : error?.message || "unknown_error";
+    }
+  }
+
+  return c.json(status);
+});
+
 // ============================================
 // Guides Routes
 // ============================================
@@ -500,6 +556,105 @@ interface GeminiResult {
   groundingMetadata?: any;
 }
 
+// 지연 함수
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// 재시도 가능한 에러인지 확인
+function isRetryableError(error: any): boolean {
+  const retryableCodes = [503, 429, 500];
+  const code = error?.code || error?.status || error?.httpStatus;
+  return retryableCodes.includes(code) ||
+         error?.message?.includes("overloaded") ||
+         error?.message?.includes("UNAVAILABLE") ||
+         error?.message?.includes("rate limit");
+}
+
+// 쿼리 확장: 검색 품질 향상을 위해 관련 키워드 추가
+function expandQuery(userMessage: string): string {
+  const expansions: { pattern: RegExp; keywords: string }[] = [
+    { pattern: /무직/i, keywords: "(무직가능, 무직 포함, 무직론, 모든 직군 가능 상품 검색)" },
+    { pattern: /프리랜서/i, keywords: "(프리랜서, 자유직, 위촉계약, 소득확인 가능한 상품 검색)" },
+    { pattern: /자영업/i, keywords: "(사업자, 자영업자, 개인사업자 상품 검색)" },
+    { pattern: /담보/i, keywords: "(담보대출, 부동산담보, 주택담보 상품 검색)" },
+    { pattern: /오토론|자동차/i, keywords: "(오토론, 자동차담보, 차량담보 상품 검색)" },
+    { pattern: /전세/i, keywords: "(전세대출, 전세자금, 전세담보 상품 검색)" },
+  ];
+
+  let expandedQuery = userMessage;
+  for (const { pattern, keywords } of expansions) {
+    if (pattern.test(userMessage)) {
+      expandedQuery = `${userMessage}\n\n[검색 힌트: ${keywords}]`;
+      break;
+    }
+  }
+  return expandedQuery;
+}
+
+// 단일 모델로 요청 시도 (재시도 로직 포함)
+async function tryGeminiModel(
+  ai: GoogleGenAI,
+  model: string,
+  userMessage: string,
+  fileSearchStoreName: string,
+  maxRetries: number = 2
+): Promise<GeminiResult | null> {
+  const baseDelay = 1000;
+  const expandedMessage = expandQuery(userMessage);
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: expandedMessage,
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          tools: [
+            {
+              fileSearch: {
+                fileSearchStoreNames: [fileSearchStoreName],
+              },
+            },
+          ],
+        },
+      });
+
+      const responseText = response.text || "";
+      const guides = extractMentionedGuides(responseText);
+
+      const usageMetadata = (response as any).usageMetadata;
+      const usage = usageMetadata
+        ? {
+            inputTokens: usageMetadata.promptTokenCount || 0,
+            outputTokens: usageMetadata.candidatesTokenCount || 0,
+            totalTokens: usageMetadata.totalTokenCount || 0,
+          }
+        : undefined;
+
+      const groundingMetadata = (response as any).candidates?.[0]?.groundingMetadata;
+
+      return { response: responseText, guides, usage, groundingMetadata };
+    } catch (error: any) {
+      const isLastAttempt = attempt === maxRetries - 1;
+
+      console.error(`Gemini ${model} error (attempt ${attempt + 1}/${maxRetries}):`, {
+        message: error?.message,
+        code: error?.code,
+      });
+
+      if (!isRetryableError(error) || isLastAttempt) {
+        return null; // 이 모델 실패, 다음 모델로
+      }
+
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`Retrying ${model} in ${delay}ms...`);
+      await sleep(delay);
+    }
+  }
+  return null;
+}
+
 async function generateGeminiResponse(
   apiKey: string,
   userMessage: string,
@@ -507,43 +662,20 @@ async function generateGeminiResponse(
 ): Promise<GeminiResult> {
   const ai = new GoogleGenAI({ apiKey });
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: userMessage,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        tools: [
-          {
-            fileSearch: {
-              fileSearchStoreNames: [fileSearchStoreName],
-            },
-          },
-        ],
-      },
-    });
+  // 모델 우선순위: gemini-2.5-flash → gemini-2.0-flash-001
+  const models = ["gemini-2.5-flash", "gemini-2.0-flash-001"];
 
-    const responseText = response.text || "";
-    const guides = extractMentionedGuides(responseText);
-
-    // 토큰 사용량 추출 (Gemini API 응답에서)
-    const usageMetadata = (response as any).usageMetadata;
-    const usage = usageMetadata
-      ? {
-          inputTokens: usageMetadata.promptTokenCount || 0,
-          outputTokens: usageMetadata.candidatesTokenCount || 0,
-          totalTokens: usageMetadata.totalTokenCount || 0,
-        }
-      : undefined;
-
-    // Grounding metadata 추출
-    const groundingMetadata = (response as any).candidates?.[0]?.groundingMetadata;
-
-    return { response: responseText, guides, usage, groundingMetadata };
-  } catch (error: any) {
-    console.error("Gemini generation error:", error);
-    throw error;
+  for (const model of models) {
+    const result = await tryGeminiModel(ai, model, userMessage, fileSearchStoreName);
+    if (result) {
+      console.log(`Success with model: ${model}`);
+      return result;
+    }
+    console.log(`Model ${model} failed, trying next...`);
   }
+
+  // 모든 모델 실패
+  throw new Error("All Gemini models failed after retries");
 }
 
 /**

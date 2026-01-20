@@ -399,6 +399,52 @@ app.get("/health", (c) => {
   });
 });
 
+// API 상태 확인 (Gemini 연결 테스트)
+app.get("/api-status", async (c) => {
+  const apiKey = c.env?.GEMINI_API_KEY;
+  const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
+
+  const status = {
+    timestamp: new Date().toISOString(),
+    gemini: {
+      configured: !!(apiKey && fileSearchStoreName),
+      status: "unknown" as "ok" | "error" | "unknown",
+      latency: 0,
+      error: null as string | null,
+    },
+    fallback: {
+      status: "ok",
+      guides_count: (loanGuides as any[]).length,
+    },
+  };
+
+  // Gemini API 간단 테스트 (빠른 응답 확인)
+  if (apiKey && fileSearchStoreName) {
+    const startTime = Date.now();
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash-001", // 빠른 모델로 테스트
+        contents: "test",
+        config: { maxOutputTokens: 10 },
+      });
+
+      status.gemini.status = response.text ? "ok" : "error";
+      status.gemini.latency = Date.now() - startTime;
+    } catch (error: any) {
+      status.gemini.status = "error";
+      status.gemini.latency = Date.now() - startTime;
+      status.gemini.error = error?.message?.includes("429")
+        ? "rate_limit_exceeded"
+        : error?.message?.includes("503")
+          ? "service_unavailable"
+          : error?.message || "unknown_error";
+    }
+  }
+
+  return c.json(status);
+});
+
 // ============================================
 // Guides Routes
 // ============================================

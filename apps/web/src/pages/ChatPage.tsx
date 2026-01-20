@@ -20,6 +20,20 @@ interface GuideResult {
   summary: string;
 }
 
+interface ApiStatus {
+  timestamp: string;
+  gemini: {
+    configured: boolean;
+    status: "ok" | "error" | "unknown";
+    latency: number;
+    error: string | null;
+  };
+  fallback: {
+    status: string;
+    guides_count: number;
+  };
+}
+
 // Icons as inline SVGs for minimal dependencies
 const SendIcon = () => (
   <svg
@@ -164,6 +178,31 @@ const AlertIcon = () => (
   </svg>
 );
 
+// API Status Icons
+const StatusOkIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+  </svg>
+);
+
+const StatusErrorIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+  </svg>
+);
+
+const StatusLoadingIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+    <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+  </svg>
+);
+
+const RefreshIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+  </svg>
+);
+
 export function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -173,9 +212,45 @@ export function ChatPage() {
   const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [feedbackSent, setFeedbackSent] = useState<Record<string, string>>({});
+  const [apiStatus, setApiStatus] = useState<ApiStatus | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const initialQueryProcessed = useRef(false);
+
+  // API 상태 확인 함수
+  const checkApiStatus = useCallback(async () => {
+    setStatusLoading(true);
+    try {
+      const response = await fetch("/api/api-status");
+      const data = await response.json() as ApiStatus;
+      setApiStatus(data);
+    } catch {
+      setApiStatus({
+        timestamp: new Date().toISOString(),
+        gemini: {
+          configured: false,
+          status: "error",
+          latency: 0,
+          error: "상태 확인 실패",
+        },
+        fallback: {
+          status: "unknown",
+          guides_count: 0,
+        },
+      });
+    } finally {
+      setStatusLoading(false);
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 API 상태 확인
+  useEffect(() => {
+    checkApiStatus();
+    // 5분마다 상태 확인
+    const interval = setInterval(checkApiStatus, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [checkApiStatus]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -523,6 +598,76 @@ export function ChatPage() {
       {/* Input Area */}
       <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3 sm:p-4">
         <div className="mx-auto max-w-3xl">
+          {/* API 상태 표시 */}
+          {apiStatus && apiStatus.gemini.status === "error" && (
+            <div className="mb-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 flex items-center gap-3">
+              <div className="text-yellow-500">
+                <StatusErrorIcon />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                  AI 서비스 일시 불안정
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {apiStatus.gemini.error || "Gemini API 연결에 문제가 있습니다."}
+                  {apiStatus.fallback.status === "ok" && " 키워드 검색은 정상 작동합니다."}
+                </p>
+              </div>
+              <button
+                onClick={checkApiStatus}
+                disabled={statusLoading}
+                className="p-2 rounded-md hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 transition-colors disabled:opacity-50"
+                title="상태 새로고침"
+              >
+                <RefreshIcon />
+              </button>
+            </div>
+          )}
+
+          {/* 상태 표시기 (간소화) */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              {statusLoading ? (
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <StatusLoadingIcon />
+                  <span className="text-[10px]">상태 확인 중...</span>
+                </div>
+              ) : apiStatus ? (
+                <button
+                  onClick={checkApiStatus}
+                  className={`flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-full transition-colors ${
+                    apiStatus.gemini.status === "ok"
+                      ? "bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20"
+                      : apiStatus.gemini.status === "error"
+                      ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20"
+                      : "bg-gray-500/10 text-gray-600 dark:text-gray-400 hover:bg-gray-500/20"
+                  }`}
+                  title="클릭하여 상태 새로고침"
+                >
+                  {apiStatus.gemini.status === "ok" ? (
+                    <StatusOkIcon />
+                  ) : apiStatus.gemini.status === "error" ? (
+                    <StatusErrorIcon />
+                  ) : (
+                    <StatusLoadingIcon />
+                  )}
+                  <span>
+                    {apiStatus.gemini.status === "ok"
+                      ? "AI 정상"
+                      : apiStatus.gemini.status === "error"
+                      ? "AI 불안정"
+                      : "상태 확인 중"}
+                  </span>
+                </button>
+              ) : null}
+            </div>
+            {apiStatus && (
+              <span className="text-[10px] text-muted-foreground/50">
+                {apiStatus.fallback.guides_count}개 상품 데이터
+              </span>
+            )}
+          </div>
+
           <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
               <input
@@ -531,9 +676,13 @@ export function ChatPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="대출 조건을 물어보세요..."
+                placeholder={
+                  apiStatus?.gemini.status === "error" && apiStatus?.fallback.status !== "ok"
+                    ? "서비스 점검 중입니다..."
+                    : "대출 조건을 물어보세요..."
+                }
                 className="linear-input w-full pr-4 text-base sm:pr-12"
-                disabled={loading}
+                disabled={loading || (apiStatus?.gemini.status === "error" && apiStatus?.fallback.status !== "ok")}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50 hidden sm:block">
                 ⏎ 전송
@@ -541,7 +690,7 @@ export function ChatPage() {
             </div>
             <button
               onClick={() => sendMessageWithText(input)}
-              disabled={loading || !input.trim()}
+              disabled={loading || !input.trim() || (apiStatus?.gemini.status === "error" && apiStatus?.fallback.status !== "ok")}
               className="linear-btn-primary h-[46px] px-4 sm:px-5 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <SendIcon />
