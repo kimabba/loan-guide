@@ -3,6 +3,15 @@ import { persist } from "zustand/middleware";
 import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 
+// 관리자 이메일 목록
+const ADMIN_EMAILS = ["demian.772@gmail.com"];
+
+// 관리자 여부 체크 함수
+export function isAdminEmail(email: string | undefined | null): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
 interface AuthState {
   user: User | null;
   session: Session | null;

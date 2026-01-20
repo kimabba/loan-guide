@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useThemeStore, applyTheme } from "../lib/theme";
-import { useAuthStore } from "../lib/auth";
-import { useEffect, useState, useRef } from "react";
+import { useAuthStore, isAdminEmail } from "../lib/auth";
+import { useEffect, useState, useMemo } from "react";
 
 // Icons
 const SunIcon = () => (
@@ -135,14 +135,26 @@ export function Header() {
     dark: <MoonIcon />,
   };
 
-  const navItems = [
-    { path: "/", label: "홈" },
-    { path: "/chat", label: "챗봇" },
-    { path: "/products", label: "상품목록" },
-    { path: "/report", label: "버그신고" },
-    { path: "/announcements", label: "공지" },
-    { path: "/admin", label: "관리자" },
-  ];
+  // 관리자 여부 확인
+  const isAdmin = isAdminEmail(user?.email);
+
+  // 네비게이션 항목 (관리자 메뉴는 조건부)
+  const navItems = useMemo(() => {
+    const items = [
+      { path: "/", label: "홈" },
+      { path: "/chat", label: "챗봇" },
+      { path: "/products", label: "상품목록" },
+      { path: "/report", label: "버그신고" },
+      { path: "/announcements", label: "공지" },
+    ];
+
+    // 관리자만 관리자 메뉴 표시
+    if (isAdmin) {
+      items.push({ path: "/admin", label: "관리자" });
+    }
+
+    return items;
+  }, [isAdmin]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">

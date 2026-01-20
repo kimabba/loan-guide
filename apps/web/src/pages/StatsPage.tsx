@@ -23,17 +23,22 @@ interface DashboardData {
   lastUpdated: string;
 }
 
-interface DailyStatsResponse {
-  days: number;
-  stats: {
-    date: string;
-    chatCount: number;
-    messageCount: number;
-    apiCallCount: number;
+// 공개 통계 요약 (인증 불필요)
+interface PublicStatsSummary {
+  timestamp: string;
+  overview: {
+    totalChats: number;
+    totalMessages: number;
     totalTokens: number;
-    totalCostUsd: number;
-    activeUsers: number;
-  }[];
+    totalCostKrw: number;
+    todayChats: number;
+    todayMessages: number;
+    guidesCount: number;
+  };
+  trends: {
+    last7Days: { date: string; chats: number; messages: number }[];
+  };
+  topSearches: { query: string; count: number }[];
 }
 
 
@@ -160,26 +165,9 @@ const emptyDashboard: DashboardData = {
   lastUpdated: new Date().toISOString(),
 };
 
-const emptyDailyStats: DailyStatsResponse = {
-  days: 30,
-  stats: Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (29 - i));
-    return {
-      date: date.toISOString().split("T")[0],
-      chatCount: 0,
-      messageCount: 0,
-      apiCallCount: 0,
-      totalTokens: 0,
-      totalCostUsd: 0,
-      activeUsers: 0,
-    };
-  }),
-};
 
 export function StatsPage({ isAdminView = false }: { isAdminView?: boolean }) {
   const [dashboard, setDashboard] = useState<DashboardData>(emptyDashboard);
-  const [dailyStats, setDailyStats] = useState<DailyStatsResponse>(emptyDailyStats);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "usage" | "products" | "plans">(
@@ -187,22 +175,39 @@ export function StatsPage({ isAdminView = false }: { isAdminView?: boolean }) {
   );
 
   useEffect(() => {
-    Promise.all([
-      api.authGet<DashboardData>("/api/stats/dashboard"),
-      api.authGet<DailyStatsResponse>("/api/stats/daily?days=30"),
-    ])
-      .then(([dashboardData, dailyData]) => {
-        setDashboard(dashboardData);
-        setDailyStats(dailyData);
+    // 공개 통계 API 사용 (인증 불필요)
+    api.get<PublicStatsSummary>("/api/stats/summary")
+      .then((summaryData) => {
+        // 공개 데이터를 기존 대시보드 형식으로 변환
+        setDashboard({
+          ...emptyDashboard,
+          overview: {
+            totalTokens: summaryData.overview.totalTokens,
+            totalCost: summaryData.overview.totalCostKrw / 1450,
+            totalCostKrw: summaryData.overview.totalCostKrw,
+            totalChats: summaryData.overview.totalChats,
+            totalApiCalls: summaryData.overview.totalMessages,
+            todayTokens: 0,
+            todayCost: 0,
+            todayChats: summaryData.overview.todayChats,
+            todayActiveUsers: 0,
+          },
+          trends: {
+            last7Days: summaryData.trends.last7Days.map((d) => ({
+              date: d.date,
+              tokens: 0,
+              cost: 0,
+              chats: d.chats,
+            })),
+          },
+          topSearches: summaryData.topSearches,
+          lastUpdated: summaryData.timestamp,
+        });
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to load stats:", err);
-        if (err.message?.includes("Authentication")) {
-          setError("관리자 로그인이 필요합니다.");
-        } else {
-          setError("통계 데이터를 불러올 수 없습니다. 아직 데이터가 없거나 API가 배포 중입니다.");
-        }
+        console.error("Failed to load public stats:", err);
+        setError("통계 데이터를 불러올 수 없습니다. 서버에 연결할 수 없거나 데이터가 없습니다.");
         setLoading(false);
       });
   }, []);
@@ -435,40 +440,31 @@ export function StatsPage({ isAdminView = false }: { isAdminView?: boolean }) {
         activeTab === "usage" && (
           <div className="space-y-6">
             <div className="rounded-xl border bg-card p-6">
-              <h2 className="text-lg font-semibold mb-4">일별 사용량 (최근 30일)</h2>
+              <h2 className="text-lg font-semibold mb-4">일별 사용량 (최근 7일)</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
                       <th className="py-3 px-4 text-left font-medium">날짜</th>
                       <th className="py-3 px-4 text-right font-medium">채팅</th>
-                      <th className="py-3 px-4 text-right font-medium">메시지</th>
-                      <th className="py-3 px-4 text-right font-medium">토큰</th>
-                      <th className="py-3 px-4 text-right font-medium">비용</th>
-                      <th className="py-3 px-4 text-right font-medium">활성 사용자</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dailyStats.stats
+                    {dashboard.trends.last7Days
                       .slice()
                       .reverse()
                       .map((day) => (
                         <tr key={day.date} className="border-b hover:bg-muted/50">
                           <td className="py-3 px-4">{day.date}</td>
-                          <td className="py-3 px-4 text-right">{day.chatCount}</td>
-                          <td className="py-3 px-4 text-right">{day.messageCount}</td>
-                          <td className="py-3 px-4 text-right">
-                            {formatNumber(day.totalTokens)}
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            {formatCurrency(Math.round(day.totalCostUsd * 1450))}
-                          </td>
-                          <td className="py-3 px-4 text-right">{day.activeUsers}</td>
+                          <td className="py-3 px-4 text-right">{day.chats}</td>
                         </tr>
                       ))}
                   </tbody>
                 </table>
               </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                상세 통계는 관리자 로그인 후 확인할 수 있습니다.
+              </p>
             </div>
           </div>
         )

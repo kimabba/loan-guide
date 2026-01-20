@@ -2051,6 +2051,63 @@ function recordSearch(query: string) {
 }
 
 // ============================================
+// Public Stats Summary (No Auth Required)
+// ============================================
+
+// 공개 통계 요약 (인증 불필요 - 관리자 페이지용)
+app.get("/stats/summary", async (c) => {
+  const today = getTodayKey();
+  const todayStats = dailyStatsMap.get(today);
+
+  // 전체 통계 계산
+  let totalChats = 0;
+  let totalMessages = 0;
+  let totalTokens = 0;
+  let totalCostUsd = 0;
+
+  for (const stats of dailyStatsMap.values()) {
+    totalChats += stats.chatCount;
+    totalMessages += stats.messageCount;
+    totalTokens += stats.totalInputTokens + stats.totalOutputTokens;
+    totalCostUsd += stats.totalCostUsd;
+  }
+
+  // 최근 7일 데이터
+  const last7Days: { date: string; chats: number; messages: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateKey = date.toISOString().split("T")[0];
+    const stats = dailyStatsMap.get(dateKey);
+    last7Days.push({
+      date: dateKey,
+      chats: stats?.chatCount || 0,
+      messages: stats?.messageCount || 0,
+    });
+  }
+
+  return c.json({
+    timestamp: new Date().toISOString(),
+    overview: {
+      totalChats,
+      totalMessages,
+      totalTokens,
+      totalCostKrw: Math.round(totalCostUsd * 1450),
+      todayChats: todayStats?.chatCount || 0,
+      todayMessages: todayStats?.messageCount || 0,
+      guidesCount: (loanGuides as any[]).length,
+    },
+    trends: {
+      last7Days,
+    },
+    topSearches: [...searchQueries]
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+      .map((s) => ({ query: s.query, count: s.count })),
+  });
+});
+
+// ============================================
 // Protected Stats Routes (Admin Only)
 // ============================================
 

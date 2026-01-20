@@ -5,17 +5,51 @@ import { AdminAnnouncements } from "../components/admin/AdminAnnouncements";
 import { AdminChatHistory } from "../components/admin/AdminChatHistory";
 import { AdminProductMappings } from "../components/admin/AdminProductMappings";
 import { StatsPage } from "./StatsPage";
+import { useAuthStore, isAdminEmail } from "../lib/auth";
 
 type AdminTab = "stats" | "history" | "announcements" | "mappings";
 
 export function AdminPage() {
     const [activeTab, setActiveTab] = useState<AdminTab>("stats");
+    const { user, loading } = useAuthStore();
 
-    // TODO: Add proper admin auth check here. For now, we assume access.
-    const isAdmin = true;
+    // 로딩 중이면 로딩 표시
+    if (loading) {
+        return (
+            <div className="flex min-h-[calc(100vh-56px)] items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    // 로그인하지 않았거나 관리자가 아닌 경우
+    const isAdmin = isAdminEmail(user?.email);
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
 
     if (!isAdmin) {
-        return <Navigate to="/login" replace />;
+        return (
+            <div className="flex min-h-[calc(100vh-56px)] items-center justify-center px-4">
+                <div className="text-center space-y-4">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600 dark:text-red-400">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                    </div>
+                    <h1 className="text-xl font-semibold">접근 권한이 없습니다</h1>
+                    <p className="text-muted-foreground text-sm">
+                        관리자 페이지에 접근할 수 있는 권한이 없습니다.
+                    </p>
+                    <Link to="/" className="inline-block linear-btn-primary mt-4">
+                        홈으로 돌아가기
+                    </Link>
+                </div>
+            </div>
+        );
     }
 
     const menuItems: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
