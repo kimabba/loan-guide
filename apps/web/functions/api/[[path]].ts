@@ -500,6 +500,83 @@ interface GeminiResult {
   groundingMetadata?: any;
 }
 
+// 지연 함수
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// 재시도 가능한 에러인지 확인
+function isRetryableError(error: any): boolean {
+  const retryableCodes = [503, 429, 500];
+  const code = error?.code || error?.status || error?.httpStatus;
+  return retryableCodes.includes(code) ||
+         error?.message?.includes("overloaded") ||
+         error?.message?.includes("UNAVAILABLE") ||
+         error?.message?.includes("rate limit");
+}
+
+// 단일 모델로 요청 시도 (재시도 로직 포함)
+async function tryGeminiModel(
+  ai: GoogleGenAI,
+  model: string,
+  userMessage: string,
+  fileSearchStoreName: string,
+  maxRetries: number = 2
+): Promise<GeminiResult | null> {
+  const baseDelay = 1000;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: userMessage,
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          tools: [
+            {
+              fileSearch: {
+                fileSearchStoreNames: [fileSearchStoreName],
+              },
+            },
+          ],
+        },
+      });
+
+      const responseText = response.text || "";
+      const guides = extractMentionedGuides(responseText);
+
+      const usageMetadata = (response as any).usageMetadata;
+      const usage = usageMetadata
+        ? {
+            inputTokens: usageMetadata.promptTokenCount || 0,
+            outputTokens: usageMetadata.candidatesTokenCount || 0,
+            totalTokens: usageMetadata.totalTokenCount || 0,
+          }
+        : undefined;
+
+      const groundingMetadata = (response as any).candidates?.[0]?.groundingMetadata;
+
+      return { response: responseText, guides, usage, groundingMetadata };
+    } catch (error: any) {
+      const isLastAttempt = attempt === maxRetries - 1;
+
+      console.error(`Gemini ${model} error (attempt ${attempt + 1}/${maxRetries}):`, {
+        message: error?.message,
+        code: error?.code,
+      });
+
+      if (!isRetryableError(error) || isLastAttempt) {
+        return null; // 이 모델 실패, 다음 모델로
+      }
+
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`Retrying ${model} in ${delay}ms...`);
+      await sleep(delay);
+    }
+  }
+  return null;
+}
+
 async function generateGeminiResponse(
   apiKey: string,
   userMessage: string,
@@ -507,43 +584,20 @@ async function generateGeminiResponse(
 ): Promise<GeminiResult> {
   const ai = new GoogleGenAI({ apiKey });
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: userMessage,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        tools: [
-          {
-            fileSearch: {
-              fileSearchStoreNames: [fileSearchStoreName],
-            },
-          },
-        ],
-      },
-    });
+  // 모델 우선순위: gemini-2.5-flash → gemini-2.0-flash-001
+  const models = ["gemini-2.5-flash", "gemini-2.0-flash-001"];
 
-    const responseText = response.text || "";
-    const guides = extractMentionedGuides(responseText);
-
-    // 토큰 사용량 추출 (Gemini API 응답에서)
-    const usageMetadata = (response as any).usageMetadata;
-    const usage = usageMetadata
-      ? {
-          inputTokens: usageMetadata.promptTokenCount || 0,
-          outputTokens: usageMetadata.candidatesTokenCount || 0,
-          totalTokens: usageMetadata.totalTokenCount || 0,
-        }
-      : undefined;
-
-    // Grounding metadata 추출
-    const groundingMetadata = (response as any).candidates?.[0]?.groundingMetadata;
-
-    return { response: responseText, guides, usage, groundingMetadata };
-  } catch (error: any) {
-    console.error("Gemini generation error:", error);
-    throw error;
+  for (const model of models) {
+    const result = await tryGeminiModel(ai, model, userMessage, fileSearchStoreName);
+    if (result) {
+      console.log(`Success with model: ${model}`);
+      return result;
+    }
+    console.log(`Model ${model} failed, trying next...`);
   }
+
+  // 모든 모델 실패
+  throw new Error("All Gemini models failed after retries");
 }
 
 /**

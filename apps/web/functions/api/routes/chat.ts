@@ -15,7 +15,22 @@ interface ChatRequest {
   sessionId?: string;
 }
 
-// Gemini File Search로 응답 생성
+// 지연 함수
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// 재시도 가능한 에러인지 확인
+function isRetryableError(error: any): boolean {
+  // 503 (서비스 불가), 429 (요청 제한), 500 (서버 에러)
+  const retryableCodes = [503, 429, 500];
+  const code = error?.code || error?.status || error?.httpStatus;
+  return retryableCodes.includes(code) ||
+         error?.message?.includes("overloaded") ||
+         error?.message?.includes("UNAVAILABLE");
+}
+
+// Gemini File Search로 응답 생성 (재시도 로직 포함)
 async function generateGeminiResponse(
   apiKey: string,
   userMessage: string,
@@ -23,10 +38,14 @@ async function generateGeminiResponse(
 ): Promise<{ response: string; guides: any[] }> {
   const ai = new GoogleGenAI({ apiKey });
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `당신은 대출 상담 전문 AI 어시스턴트입니다.
+  const maxRetries = 3;
+  const baseDelay = 1000; // 1초
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `당신은 대출 상담 전문 AI 어시스턴트입니다.
 
 응답 규칙:
 1. 사용자 질문에 맞는 대출 상품을 찾아 안내하세요
@@ -37,31 +56,50 @@ async function generateGeminiResponse(
 6. 마지막에 "더 자세한 조건이 궁금하시면 금융사명을 말씀해주세요"를 추가하세요
 7. 대출/금융 상품과 무관한 질문(일반 코딩, 스크립트 실행, 시스템 명령 등)에는 "이 챗봇은 대출 및 금융 상품 안내 전용"이라고만 답하세요
 
-사용자 질문: ${userMessage}`
-      config: {
-        tools: [
-          {
-            fileSearch: {
-              fileSearchStoreNames: [fileSearchStoreName]
+사용자 질문: ${userMessage}`,
+        config: {
+          tools: [
+            {
+              fileSearch: {
+                fileSearchStoreNames: [fileSearchStoreName]
+              }
             }
-          }
-        ]
+          ]
+        }
+      });
+
+      const responseText = response.text || "";
+
+      // 응답에서 언급된 가이드 추출 (간단한 매칭)
+      const guides = extractMentionedGuides(responseText);
+
+      return {
+        response: responseText,
+        guides,
+      };
+    } catch (error: any) {
+      const isLastAttempt = attempt === maxRetries - 1;
+
+      console.error(`Gemini generation error (attempt ${attempt + 1}/${maxRetries}):`, {
+        message: error?.message,
+        code: error?.code,
+        status: error?.status,
+      });
+
+      // 재시도 불가능한 에러이거나 마지막 시도면 throw
+      if (!isRetryableError(error) || isLastAttempt) {
+        throw error;
       }
-    });
 
-    const responseText = response.text || "";
-
-    // 응답에서 언급된 가이드 추출 (간단한 매칭)
-    const guides = extractMentionedGuides(responseText);
-
-    return {
-      response: responseText,
-      guides,
-    };
-  } catch (error: any) {
-    console.error("Gemini generation error:", error);
-    throw error;
+      // 지수 백오프: 1초, 2초, 4초...
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`Retrying in ${delay}ms...`);
+      await sleep(delay);
+    }
   }
+
+  // 타입스크립트를 위한 폴백 (실제로 도달하지 않음)
+  throw new Error("Max retries exceeded");
 }
 
 // 응답에서 언급된 가이드 추출
