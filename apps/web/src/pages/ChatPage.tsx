@@ -326,7 +326,7 @@ export function ChatPage() {
     if (feedbackSent[messageId]) return;
 
     try {
-      await api.post("/api/chat/feedback", { messageId, feedback });
+      await api.chatPost("/api/chat/feedback", { messageId, feedback });
       setFeedbackSent((prev) => ({ ...prev, [messageId]: feedback }));
     } catch (error) {
       console.error("피드백 제출 실패:", error);
