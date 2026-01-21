@@ -24,6 +24,9 @@ interface AuthState {
   signOut: () => Promise<void>;
 }
 
+// Auth 상태 변경 리스너 (전역으로 한 번만 설정)
+let authListenerSetup = false;
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -37,6 +40,19 @@ export const useAuthStore = create<AuthState>()(
       setLoading: (loading) => set({ loading }),
 
       initialize: async () => {
+        // 리스너는 한 번만 설정
+        if (!authListenerSetup) {
+          authListenerSetup = true;
+          supabase.auth.onAuthStateChange((_event, session) => {
+            console.log("Auth state changed:", _event, session?.user?.email);
+            set({
+              session,
+              user: session?.user ?? null,
+              loading: false,
+            });
+          });
+        }
+
         if (get().initialized) return;
 
         try {
@@ -47,14 +63,6 @@ export const useAuthStore = create<AuthState>()(
             user: session?.user ?? null,
             loading: false,
             initialized: true,
-          });
-
-          // Auth 상태 변경 리스너
-          supabase.auth.onAuthStateChange((_event, session) => {
-            set({
-              session,
-              user: session?.user ?? null,
-            });
           });
         } catch (error) {
           console.error("Auth initialization error:", error);
