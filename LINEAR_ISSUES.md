@@ -186,6 +186,61 @@
 
 ---
 
+---
+
+## 🚀 신규 기능: AI 리포트 (2026-01-21 추가)
+
+### 개요
+고객 정보 기반 맞춤 대출 상품 추천 및 절감액 분석 리포트 생성 기능
+- 상세 설계: [FEATURE_AI_REPORT.md](docs/FEATURE_AI_REPORT.md)
+
+### Phase 1: 기초 (우선순위 P0) - 1주
+| 이슈 ID | 제목 | 상태 | 예상시간 |
+|---------|------|------|---------|
+| AIREPORT-01 | 리포트 DB 스키마 설계 및 마이그레이션 | Backlog | 2h |
+| AIREPORT-02 | 리포트 생성 API (POST /api/ai-report/generate) | Backlog | 4h |
+| AIREPORT-03 | 절감액 계산 엔진 | Backlog | 3h |
+
+### Phase 2: UI & 폼 (우선순위 P0) - 1주
+| 이슈 ID | 제목 | 상태 | 예상시간 |
+|---------|------|------|---------|
+| AIREPORT-04 | 리포트 입력 폼 (ReportForm - 다단계) | Backlog | 4h |
+| AIREPORT-05 | 리포트 미리보기 (ReportPreview) | Backlog | 5h |
+| AIREPORT-06 | 리포트 페이지 & 라우팅 | Backlog | 2h |
+
+### Phase 3: PDF/이미지 생성 (우선순위 P1) - 1주
+| 이슈 ID | 제목 | 상태 | 예상시간 |
+|---------|------|------|---------|
+| AIREPORT-07 | 리포트 PDF 생성 (html2canvas + jsPDF) | Backlog | 3h |
+| AIREPORT-08 | 리포트 이미지 생성 (PNG/JPG) | Backlog | 2h |
+| AIREPORT-09 | 파일 저장 (Supabase Storage) | Backlog | 2h |
+
+### Phase 4: 공유 & 전송 (우선순위 P1) - 1주
+| 이슈 ID | 제목 | 상태 | 예상시간 |
+|---------|------|------|---------|
+| AIREPORT-10 | 이메일 전송 기능 (SendGrid/Resend) | Backlog | 3h |
+| AIREPORT-11 | 공유 링크 & 토큰 관리 | Backlog | 2h |
+| AIREPORT-12 | 공유 모달 UI (ReportShare) | Backlog | 3h |
+
+### Phase 5: 분석 & 최적화 (우선순위 P2) - 1주
+| 이슈 ID | 제목 | 상태 | 예상시간 |
+|---------|------|------|---------|
+| AIREPORT-13 | 리포트 조회 분석 및 통계 | Backlog | 3h |
+| AIREPORT-14 | 추천 상품 정렬 개선 (ML) | Backlog | 4h |
+
+### 주요 기능 체크리스트
+- [ ] 고객 정보 폼 (5단계)
+- [ ] AI 상품 추천 (Gemini 통합)
+- [ ] 절감액 시뮬레이션
+- [ ] PDF 다운로드
+- [ ] 이미지 다운로드 (SNS 공유용)
+- [ ] 이메일 전송
+- [ ] 공개 링크 공유 (토큰 기반)
+- [ ] QR 코드 생성
+- [ ] 관리자 분석 대시보드
+
+---
+
 ## 출시 체크리스트
 
 ### 필수 (출시 전)
@@ -194,16 +249,19 @@
 - [x] Error Boundary 추가 (SSF-78)
 - [x] 환경변수 보안 검토 (RLS 강화)
 - [x] 보안 미들웨어 적용 (SSF-83~88)
+- [x] Google OAuth 인증 (완료)
+- [x] 채팅 히스토리 & 통계 연동 (완료)
 - [ ] 프로덕션 환경 테스트
 
 ### 권장 (출시 후 1주일)
+- [ ] AI 리포트 Phase 1-2 완료
 - [ ] 접근성 기본 개선
 - [ ] SEO 메타 태그
 - [ ] 성능 모니터링 설정
 
 ### 선택 (출시 후)
+- [ ] AI 리포트 Phase 3-5 완료
 - [ ] 테스트 코드 작성
-- [ ] 추가 기능 개발
 - [ ] 의존성 취약점 업그레이드 (SSF-89)
 
 ---
