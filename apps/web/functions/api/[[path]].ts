@@ -2056,7 +2056,83 @@ function recordSearch(query: string) {
 
 // 공개 통계 요약 (인증 불필요 - 관리자 페이지용)
 app.get("/stats/summary", async (c) => {
-  const today = getTodayKey();
+  const supabase = getSupabase(c.env);
+  const today = new Date().toISOString().split("T")[0];
+  
+  // Supabase에서 조회
+  if (supabase) {
+    try {
+      // 모든 메시지 조회
+      const { data: allMessages } = await supabase
+        .from('chat_messages')
+        .select('created_at, role');
+
+      // 오늘 메시지 조회
+      const { data: todayMessages } = await supabase
+        .from('chat_messages')
+        .select('created_at, role')
+        .gte('created_at', `${today}T00:00:00`)
+        .lt('created_at', `${today}T23:59:59`);
+
+      // 최근 7일 데이터
+      const last7Days: { date: string; chats: number; messages: number }[] = [];
+      const statsByDate: Record<string, { chats: number; messages: number }> = {};
+
+      allMessages?.forEach(msg => {
+        const date = new Date(msg.created_at).toISOString().split('T')[0];
+        if (!statsByDate[date]) {
+          statsByDate[date] = { chats: 0, messages: 0 };
+        }
+        statsByDate[date].messages += 1;
+        if (msg.role === 'user') {
+          statsByDate[date].chats += 1;
+        }
+      });
+
+      // 최근 7일만 포함
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split("T")[0];
+        const dayStat = statsByDate[dateKey];
+        last7Days.push({
+          date: dateKey,
+          chats: dayStat?.chats || 0,
+          messages: dayStat?.messages || 0,
+        });
+      }
+
+      // 오늘 통계
+      let todayChatsCount = 0;
+      let todayMessagesCount = 0;
+      todayMessagesCount = todayMessages ? todayMessages.length : 0;
+      todayChatsCount = todayMessages ? todayMessages.filter(m => m.role === 'user').length : 0;
+
+      return c.json({
+        timestamp: new Date().toISOString(),
+        overview: {
+          totalChats: allMessages?.filter(m => m.role === 'user').length || 0,
+          totalMessages: allMessages?.length || 0,
+          totalTokens: 0,
+          totalCostKrw: 0,
+          todayChats: todayChatsCount,
+          todayMessages: todayMessagesCount,
+          guidesCount: (loanGuides as any[]).length,
+        },
+        trends: {
+          last7Days,
+        },
+        topSearches: [...searchQueries]
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10)
+          .map((s) => ({ query: s.query, count: s.count })),
+      });
+    } catch (error) {
+      console.error("Stats summary query error:", error);
+    }
+  }
+
+  // Fallback: 메모리 기반
   const todayStats = dailyStatsMap.get(today);
 
   // 전체 통계 계산
@@ -2208,6 +2284,7 @@ app.get("/stats/tokens", requireAdmin, async (c) => {
 // 일별 통계
 app.get("/stats/daily", requireAdmin, async (c) => {
   const days = Math.min(parseInt(c.req.query("days") || "30"), 90);
+  const supabase = getSupabase(c.env);
   const stats: {
     date: string;
     chatCount: number;
@@ -2218,23 +2295,72 @@ app.get("/stats/daily", requireAdmin, async (c) => {
     activeUsers: number;
   }[] = [];
 
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateKey = date.toISOString().split("T")[0];
-    const dayStats = dailyStatsMap.get(dateKey);
+  // Supabase에서 데이터 조회
+  if (supabase) {
+    try {
+      const fromDate = new Date();
+      fromDate.setDate(fromDate.getDate() - days);
+      
+      // chat_messages로부터 일별 통계 조회
+      const { data: messages } = await supabase
+        .from('chat_messages')
+        .select('created_at, role')
+        .gte('created_at', fromDate.toISOString());
 
-    stats.push({
-      date: dateKey,
-      chatCount: dayStats?.chatCount || 0,
-      messageCount: dayStats?.messageCount || 0,
-      apiCallCount: dayStats?.apiCallCount || 0,
-      totalTokens: dayStats
-        ? dayStats.totalInputTokens + dayStats.totalOutputTokens
-        : 0,
-      totalCostUsd: dayStats?.totalCostUsd || 0,
-      activeUsers: dayStats?.activeUsers.size || 0,
-    });
+      // 날짜별로 그룹핑
+      const statsByDate: Record<string, { chats: number; messages: number }> = {};
+      
+      messages?.forEach(msg => {
+        const date = new Date(msg.created_at).toISOString().split('T')[0];
+        if (!statsByDate[date]) {
+          statsByDate[date] = { chats: 0, messages: 0 };
+        }
+        statsByDate[date].messages += 1;
+        if (msg.role === 'user') {
+          statsByDate[date].chats += 1;
+        }
+      });
+
+      // 날짜 범위 채우기
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split("T")[0];
+        const dayStat = statsByDate[dateKey];
+
+        stats.push({
+          date: dateKey,
+          chatCount: dayStat?.chats || 0,
+          messageCount: dayStat?.messages || 0,
+          apiCallCount: dayStat?.messages || 0,
+          totalTokens: 0, // 토큰 데이터가 없으면 0
+          totalCostUsd: 0,
+          activeUsers: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Stats daily query error:", error);
+    }
+  } else {
+    // Fallback: 메모리 기반
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split("T")[0];
+      const dayStats = dailyStatsMap.get(dateKey);
+
+      stats.push({
+        date: dateKey,
+        chatCount: dayStats?.chatCount || 0,
+        messageCount: dayStats?.messageCount || 0,
+        apiCallCount: dayStats?.apiCallCount || 0,
+        totalTokens: dayStats
+          ? dayStats.totalInputTokens + dayStats.totalOutputTokens
+          : 0,
+        totalCostUsd: dayStats?.totalCostUsd || 0,
+        activeUsers: dayStats?.activeUsers.size || 0,
+      });
+    }
   }
 
   return c.json({ days, stats });
