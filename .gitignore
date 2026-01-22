@@ -30,3 +30,6 @@ coverage/
 # Misc
 .cache/
 *.tsbuildinfo
+
+# Auto Claude data directory
+.auto-claude/
