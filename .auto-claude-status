@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "001-api",
+  "state": "building",
+  "subtasks": {
+    "completed": 2,
+    "total": 24,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Configuration Verification",
+    "id": null,
+    "total": 3
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 3,
+    "started_at": "2026-01-22T10:28:55.680049"
+  },
+  "last_update": "2026-01-22T10:32:28.830279"
+}

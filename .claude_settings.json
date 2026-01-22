@@ -1,0 +1,39 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(./**)",
+      "Write(./**)",
+      "Edit(./**)",
+      "Glob(./**)",
+      "Grep(./**)",
+      "Read(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/**)",
+      "Write(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/**)",
+      "Edit(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/**)",
+      "Glob(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/**)",
+      "Grep(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/**)",
+      "Read(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/.auto-claude/specs/001-api/**)",
+      "Write(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/.auto-claude/specs/001-api/**)",
+      "Edit(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/worktrees/tasks/001-api/.auto-claude/specs/001-api/**)",
+      "Read(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/**)",
+      "Write(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/**)",
+      "Edit(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/**)",
+      "Glob(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/**)",
+      "Grep(/Users/ssfak/Documents/01-github/loan-guide/.auto-claude/**)",
+      "Bash(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "mcp__context7__resolve-library-id(*)",
+      "mcp__context7__get-library-docs(*)",
+      "mcp__graphiti-memory__search_nodes(*)",
+      "mcp__graphiti-memory__search_facts(*)",
+      "mcp__graphiti-memory__add_episode(*)",
+      "mcp__graphiti-memory__get_episodes(*)",
+      "mcp__graphiti-memory__get_entity_edge(*)"
+    ]
+  }
+}
