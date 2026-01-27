@@ -298,7 +298,9 @@ function validateReportType(type: unknown): ValidationResult {
 // ============================================
 // Hono App
 // ============================================
-const app = new Hono<{ Bindings: Env }>().basePath("/api");
+// Note: Cloudflare Pages Functions already routes /api/* to this file
+// So we don't need basePath("/api") - that would create /api/api/* paths
+const app = new Hono<{ Bindings: Env }>();
 
 // Security Middleware Stack (순서 중요!)
 // 1. CORS - Preflight 요청 처리
