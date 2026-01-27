@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/ssfak/Documents/01-github/loan-guide log --oneline)",
+      "Bash(git -C /Users/ssfak/Documents/01-github/loan-guide remote:*)",
+      "Bash(tree:*)",
+      "Bash(wrangler pages deploy:*)",
+      "Bash(wrangler pages project create:*)",
+      "Bash(wrangler secret:*)",
+      "Bash(git -C /Users/ssfak/Documents/01-github/loan-guide log --oneline -10)",
+      "Bash(bun dev:web:*)",
+      "Bash(bun pages:dev)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "mcp__chrome-devtools__click",
+      "Bash(for i in 1 2 3 4 5)",
+      "Bash(do)",
+      "Bash(done)"
+    ]
+  }
+}

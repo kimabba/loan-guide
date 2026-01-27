@@ -222,7 +222,7 @@ export function ChatPage() {
   const checkApiStatus = useCallback(async () => {
     setStatusLoading(true);
     try {
-      const response = await fetch("/api/api-status");
+      const response = await fetch("/api/status");
       const data = await response.json() as ApiStatus;
       setApiStatus(data);
     } catch {

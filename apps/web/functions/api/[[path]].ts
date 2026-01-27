@@ -298,9 +298,7 @@ function validateReportType(type: unknown): ValidationResult {
 // ============================================
 // Hono App
 // ============================================
-// Note: Cloudflare Pages Functions already routes /api/* to this file
-// So we don't need basePath("/api") - that would create /api/api/* paths
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env }>().basePath("/api");
 
 // Security Middleware Stack (순서 중요!)
 // 1. CORS - Preflight 요청 처리
@@ -402,7 +400,7 @@ app.get("/health", (c) => {
 });
 
 // API 상태 확인 (Gemini 연결 테스트)
-app.get("/api-status", async (c) => {
+app.get("/status", async (c) => {
   const apiKey = c.env?.GEMINI_API_KEY;
   const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
 
