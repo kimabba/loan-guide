@@ -7,11 +7,13 @@ dist/
 build/
 .wrangler/
 
-# Environment files
+# Environment files (NEVER commit API keys!)
 .env
+.env.*
 .env.local
 .env.*.local
 .dev.vars
+*.vars
 
 # IDE
 .idea/
