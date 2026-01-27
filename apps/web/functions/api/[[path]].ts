@@ -399,48 +399,27 @@ app.get("/health", (c) => {
   });
 });
 
-// API 상태 확인 (Gemini 연결 테스트)
-app.get("/status", async (c) => {
+// API 상태 확인 (설정 여부만 확인 - 실제 API 호출 없음)
+// 실제 API 상태는 채팅 요청 시 에러로 감지됨 (하이브리드 방식)
+app.get("/status", (c) => {
   const apiKey = c.env?.GEMINI_API_KEY;
   const fileSearchStoreName = c.env?.FILE_SEARCH_STORE_NAME;
+  const isConfigured = !!(apiKey && fileSearchStoreName);
 
   const status = {
     timestamp: new Date().toISOString(),
     gemini: {
-      configured: !!(apiKey && fileSearchStoreName),
-      status: "unknown" as "ok" | "error" | "unknown",
+      configured: isConfigured,
+      // 설정되어 있으면 "ok"로 가정, 실제 에러는 채팅 시 감지
+      status: isConfigured ? "ok" : "error",
       latency: 0,
-      error: null as string | null,
+      error: isConfigured ? null : "not_configured",
     },
     fallback: {
       status: "ok",
       guides_count: (loanGuides as any[]).length,
     },
   };
-
-  // Gemini API 간단 테스트 (빠른 응답 확인)
-  if (apiKey && fileSearchStoreName) {
-    const startTime = Date.now();
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-001", // 빠른 모델로 테스트
-        contents: "test",
-        config: { maxOutputTokens: 10 },
-      });
-
-      status.gemini.status = response.text ? "ok" : "error";
-      status.gemini.latency = Date.now() - startTime;
-    } catch (error: any) {
-      status.gemini.status = "error";
-      status.gemini.latency = Date.now() - startTime;
-      status.gemini.error = error?.message?.includes("429")
-        ? "rate_limit_exceeded"
-        : error?.message?.includes("503")
-          ? "service_unavailable"
-          : error?.message || "unknown_error";
-    }
-  }
 
   return c.json(status);
 });

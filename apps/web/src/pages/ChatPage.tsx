@@ -304,13 +304,38 @@ export function ChatPage() {
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
-      } catch {
+      } catch (error: any) {
+        // 에러 타입에 따라 메시지 및 상태 업데이트
+        let errorMessage = "오류가 발생했습니다. 다시 시도해주세요.";
+        let isRateLimitError = false;
+
+        // API 에러 메시지 확인
+        const errorStr = error?.message || error?.toString() || "";
+        if (errorStr.includes("429") || errorStr.includes("rate") || errorStr.includes("Too many")) {
+          errorMessage = "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
+          isRateLimitError = true;
+        } else if (errorStr.includes("503") || errorStr.includes("unavailable")) {
+          errorMessage = "AI 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요.";
+        }
+
+        // 채팅 에러 시 apiStatus 업데이트 (하이브리드 방식)
+        if (isRateLimitError || errorStr.includes("503")) {
+          setApiStatus((prev) => prev ? {
+            ...prev,
+            gemini: {
+              ...prev.gemini,
+              status: "error",
+              error: isRateLimitError ? "rate_limit_exceeded" : "service_unavailable",
+            },
+          } : null);
+        }
+
         setMessages((prev) => [
           ...prev,
           {
             id: (Date.now() + 1).toString(),
             role: "assistant",
-            content: "오류가 발생했습니다. 다시 시도해주세요.",
+            content: errorMessage,
             timestamp: new Date(),
           },
         ]);
