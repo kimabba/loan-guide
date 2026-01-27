@@ -89,6 +89,74 @@ interface QualityAnalysis {
 }
 
 /**
+ * Off-topic 메시지 사전 필터링
+ * Fallback 검색 전에 대출과 무관한 질문을 차단
+ */
+function isOffTopicMessage(message: string): boolean {
+  const lowerMessage = message.toLowerCase();
+
+  // 대출 관련 키워드 (있으면 on-topic)
+  const loanKeywords = [
+    '대출', '금리', '한도', '저축은행', '대부', '신용', '담보',
+    '4대', '프리랜서', '자영업', '직장인', '무직', '햇살론', '비상금',
+    '전세', '주택담보', '상환', '이자', '승인', '심사', '서류', '소득',
+    '신용등급', '연체', '보증', '카드론', '마이너스', '채무', '부채',
+    '원금', '월납입', '사잇돌', '오토론', '자동차', '사업자',
+    // 금융사명
+    'ok', 'sbi', '웰컴', '페퍼', '친애', 'jt', '한국투자', '예가람',
+    '다올', '애큐온', 'bnk', 'ibk', '키움', '케이뱅크', '카카오',
+  ];
+
+  // 명확한 off-topic 키워드 (있으면 off-topic)
+  const offTopicKeywords = [
+    '날씨', '주가', '주식', '코인', '비트코인', '암호화폐',
+    '레시피', '요리', '맛집', '영화', '드라마', '게임',
+    '코드', '프로그래밍', '파이썬', '자바스크립트', '개발',
+    '번역', '영어', '중국어', '일본어',
+    '운세', '별자리', '타로', 'mbti',
+    '다이어트', '운동', '헬스',
+    '여행', '호텔', '항공',
+  ];
+
+  // 명확한 off-topic 패턴
+  const offTopicPatterns = [
+    /오늘.*(날씨|기온)/,
+    /(주가|주식).*(전망|추천|분석)/,
+    /코드.*(작성|짜|만들어)/,
+    /번역.*(해|줘)/,
+    /(레시피|요리법|만드는\s*법)/,
+    /(영화|드라마).*(추천|리뷰)/,
+  ];
+
+  // 1. 대출 관련 키워드가 있으면 on-topic
+  const hasLoanKeyword = loanKeywords.some(k => lowerMessage.includes(k));
+  if (hasLoanKeyword) {
+    return false; // on-topic
+  }
+
+  // 2. 명확한 off-topic 키워드가 있으면 off-topic
+  const hasOffTopicKeyword = offTopicKeywords.some(k => lowerMessage.includes(k));
+  if (hasOffTopicKeyword) {
+    return true; // off-topic
+  }
+
+  // 3. off-topic 패턴 매칭
+  const matchesOffTopicPattern = offTopicPatterns.some(p => p.test(lowerMessage));
+  if (matchesOffTopicPattern) {
+    return true; // off-topic
+  }
+
+  // 4. 매우 짧은 메시지 (5자 미만)이면서 대출 키워드 없으면 off-topic 가능성
+  if (message.trim().length < 5 && !hasLoanKeyword) {
+    return true;
+  }
+
+  return false; // 기본값: on-topic으로 처리
+}
+
+const OFF_TOPIC_RESPONSE = "저는 대출 상담 전문이라 다른 주제는 도움드리기 어렵습니다. 대출 관련 질문을 해주시면 상세히 안내해 드리겠습니다.";
+
+/**
  * 개선된 응답 품질 분석 (Grounding 메타데이터 적극 활용)
  */
 function analyzeResponseQuality(
@@ -1489,6 +1557,19 @@ app.post("/chat", async (c) => {
           stack: error?.stack?.slice(0, 500),
         });
       }
+    }
+
+    // Off-topic 사전 필터링 (Fallback 전)
+    if (isOffTopicMessage(message)) {
+      responseData = {
+        query: message,
+        response: OFF_TOPIC_RESPONSE,
+        guides: [],
+        source: "filter",
+        sessionId: activeSessionId,
+        quality: { score: 0.3, issueType: 'off_topic' }
+      };
+      return c.json(responseData);
     }
 
     // Fallback: 키워드 검색 (토큰 사용 없음)
