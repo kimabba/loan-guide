@@ -964,10 +964,18 @@ async function fallbackSearch(message: string, supabase: SupabaseClient | null):
         // TF-IDF 점수
         let termScore = tf * idf * weight;
 
-        // 필드별 가중치 부여
-        if (guide.pfi_name?.toLowerCase().includes(word)) {
-          termScore *= 3; // 금융사명 매칭 → 3배
+        // 필드별 가중치 부여 (금융사명 우선)
+        const pfiName = guide.pfi_name?.toLowerCase() || "";
+
+        // 금융사명 정확 매칭 (가장 높은 가중치)
+        if (pfiName === word || word === pfiName) {
+          termScore *= 15; // 정확 매칭 → 15배
         }
+        // 금융사명이 키워드를 포함하거나 키워드가 금융사명을 포함
+        else if (pfiName.includes(word) || word.includes(pfiName)) {
+          termScore *= 8; // 금융사명 부분 매칭 → 8배
+        }
+
         if (guide.depth2?.toLowerCase().includes(word)) {
           termScore *= 2.5; // 상품유형 매칭 → 2.5배
         }
