@@ -663,15 +663,48 @@ async function generateGeminiResponse(
 }
 
 /**
+ * 응답에서 직업유형 키워드 추출
+ */
+function extractJobTypeFromResponse(response: string): string[] {
+  const jobTypes: string[] = [];
+  const text = response.toLowerCase();
+
+  // 직업유형 키워드 매핑 (우선순위 순)
+  const jobTypeKeywords = [
+    { keywords: ['4대보험 미가입', '미가입 직장인', '4대미가입'], type: '미가입' },
+    { keywords: ['프리랜서', '3.3%', '소득공제 프리랜서'], type: '프리랜서' },
+    { keywords: ['개인사업자', '자영업'], type: '개인사업자' },
+    { keywords: ['4대보험 가입', '4대가입'], type: '4대가입' },
+    { keywords: ['무직론', '무직자'], type: '무직론' },
+    { keywords: ['주부론', '전업주부'], type: '주부론' },
+    { keywords: ['연금수령'], type: '연금수령' },
+    { keywords: ['햇살론'], type: '햇살론' },
+    { keywords: ['사잇돌'], type: '사잇돌' },
+    { keywords: ['오토론'], type: '오토론' },
+  ];
+
+  for (const { keywords, type } of jobTypeKeywords) {
+    if (keywords.some(kw => text.includes(kw))) {
+      jobTypes.push(type);
+    }
+  }
+
+  return jobTypes;
+}
+
+/**
  * 응답에서 언급된 가이드 추출 (개선된 버전)
+ * - 금융사명 + 직업유형 함께 매칭
  * - 단어 경계 기반 매칭으로 오탐 방지
- * - 중복 제거를 위해 Set 사용
  * - depth3 상세 조건 포함
  */
 function extractMentionedGuides(response: string): any[] {
   const guides: any[] = [];
-  const mentionedCompanies = new Set<string>();
+  const addedKeys = new Set<string>(); // 금융사+상품유형 조합으로 중복 체크
   const normalizedResponse = response.toLowerCase();
+
+  // 응답에서 직업유형 추출
+  const mentionedJobTypes = extractJobTypeFromResponse(response);
 
   // 금융사명을 길이 순으로 정렬 (긴 이름 우선 매칭)
   const sortedGuides = [...(loanGuides as any[])].sort(
@@ -683,12 +716,15 @@ function extractMentionedGuides(response: string): any[] {
 
     const companyName = guide.pfi_name;
     const normalizedName = companyName.toLowerCase();
+    const depth2 = guide.depth2 || '';
 
-    // 이미 추가된 금융사는 스킵
-    if (mentionedCompanies.has(companyName)) continue;
+    // 금융사+상품유형 조합 키
+    const guideKey = `${companyName}-${depth2}`;
+
+    // 이미 추가된 조합은 스킵
+    if (addedKeys.has(guideKey)) continue;
 
     // 단어 경계 기반 매칭 (한글 지원)
-    // 한글은 \b가 작동하지 않으므로 앞뒤로 공백/구두점/문자열 경계 확인
     const escapedName = normalizedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const pattern = new RegExp(
       `(?:^|[\\s,.!?()\\[\\]{}:;'"~·…])${escapedName}(?:[\\s,.!?()\\[\\]{}:;'"~·…]|$)`,
@@ -696,25 +732,38 @@ function extractMentionedGuides(response: string): any[] {
     );
 
     // 정규식 매칭 또는 정확한 포함 확인
-    const isMatched = pattern.test(normalizedResponse) ||
-                      normalizedResponse.includes(normalizedName);
+    const isCompanyMatched = pattern.test(normalizedResponse) ||
+                             normalizedResponse.includes(normalizedName);
 
-    if (isMatched) {
-      mentionedCompanies.add(companyName);
+    if (!isCompanyMatched) continue;
 
-      // depth3에서 주요 조건 추출
-      const conditions = extractKeyConditions(guide.depth3);
-
-      guides.push({
-        item_cd: guide.item_cd,
-        company: guide.pfi_name,
-        category: guide.depth1,
-        product_type: guide.depth2,
-        relevance: calculateRelevance(response, guide),
-        summary: guide.fi_memo?.slice(0, 200) || "",
-        conditions, // 상세 조건 추가
-      });
+    // 직업유형 매칭 점수 계산
+    let jobTypeScore = 0;
+    for (const jobType of mentionedJobTypes) {
+      if (depth2.includes(jobType)) {
+        jobTypeScore += 10; // 직업유형 일치 시 높은 점수
+      }
     }
+
+    // 직업유형이 명시된 경우, 해당 유형만 추가
+    if (mentionedJobTypes.length > 0 && jobTypeScore === 0) {
+      continue; // 직업유형이 일치하지 않으면 스킵
+    }
+
+    addedKeys.add(guideKey);
+
+    // depth3에서 주요 조건 추출
+    const conditions = extractKeyConditions(guide.depth3);
+
+    guides.push({
+      item_cd: guide.item_cd,
+      company: guide.pfi_name,
+      category: guide.depth1,
+      product_type: guide.depth2,
+      relevance: calculateRelevance(response, guide) + jobTypeScore,
+      summary: guide.fi_memo?.slice(0, 200) || "",
+      conditions,
+    });
   }
 
   // 관련성 점수로 정렬 후 상위 5개 반환
